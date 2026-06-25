@@ -1,0 +1,48 @@
+{
+  "user_13800138000": [
+    {
+      "order_id": "ORD-20260625-001",
+      "store": "茶颜悦色-光谷店",
+      "items": ["幽兰拿铁x1", "声声乌龙x2"],
+      "total": 50,
+      "status": "已完成",
+      "create_time": "2026-06-25 14:30:00",
+      "delivery_time": "2026-06-25 15:10:00",
+      "address": "武汉大学信息学部宿舍"
+    },
+    {
+      "order_id": "ORD-20260626-002",
+      "store": "喜茶-光谷天地店",
+      "items": ["多肉葡萄x1", "芝芝莓莓x1"],
+      "total": 61,
+      "status": "配送中",
+      "create_time": "2026-06-26 10:00:00",
+      "delivery_time": null,
+      "address": "武汉大学工学部食堂"
+    }
+  ],
+  "user_13900139000": [
+    {
+      "order_id": "ORD-20260624-003",
+      "store": "奈雪的茶-武大店",
+      "items": ["霸气芝士草莓x2"],
+      "total": 56,
+      "status": "已完成",
+      "create_time": "2026-06-24 16:00:00",
+      "delivery_time": "2026-06-24 16:45:00",
+      "address": "武汉大学文理学部图书馆"
+    }
+  ],
+  "user_13700137000": [
+    {
+      "order_id": "ORD-20260626-004",
+      "store": "蜜雪冰城-街道口店",
+      "items": ["珍珠奶茶x3", "柠檬水x2"],
+      "total": 32,
+      "status": "待配送",
+      "create_time": "2026-06-26 11:30:00",
+      "delivery_time": null,
+      "address": "武汉大学医学部教学楼"
+    }
+  ]
+}

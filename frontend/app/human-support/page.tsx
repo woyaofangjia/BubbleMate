@@ -44,10 +44,17 @@ export default function HumanSupport() {
         fetch('/api/human-in-loop/stats')
       ]);
       
-      if (intervRes.ok) setInterventions(await intervRes.json());
-      if (statsRes.ok) setStats(await statsRes.ok);
+      if (intervRes.ok) {
+        const data = await intervRes.json();
+        setInterventions(data);
+      }
+      if (statsRes.ok) {
+        const statsData = await statsRes.json();
+        setStats(statsData);
+      }
     } catch (error) {
       console.error('获取数据失败:', error);
+      // 保持默认空数据，不使用mock
     }
   };
 

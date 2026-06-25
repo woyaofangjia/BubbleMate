@@ -1,0 +1,209 @@
+[
+  {
+    "id": "TC-001",
+    "user_query": "糯米少的可怜，正常是啥分量我很清楚",
+    "ground_truth": {
+      "intent": "complaint_quantity",
+      "tool_calls": ["query_order", "log_complaint"],
+      "requires_clarification": false,
+      "expected_action": "查询该订单历史记录，确认分量标准，安抚并补偿"
+    },
+    "difficulty": "easy",
+    "category": "份量问题"
+  },
+  {
+    "id": "TC-002",
+    "user_query": "点了大杯，送来只有半杯，冰块占了一大半",
+    "ground_truth": {
+      "intent": "complaint_quantity",
+      "tool_calls": ["query_order", "log_complaint"],
+      "requires_clarification": false
+    },
+    "difficulty": "easy",
+    "category": "份量问题"
+  },
+  {
+    "id": "TC-007",
+    "user_query": "就是太甜了，喝了一口就扔了",
+    "ground_truth": {
+      "intent": "complaint_taste",
+      "tool_calls": ["query_menu", "log_complaint"],
+      "requires_clarification": false
+    },
+    "difficulty": "easy",
+    "category": "口感问题"
+  },
+  {
+    "id": "TC-013",
+    "user_query": "电话打不通，打了十几次都没人接",
+    "ground_truth": {
+      "intent": "complaint_service",
+      "tool_calls": ["log_complaint"],
+      "requires_clarification": false
+    },
+    "difficulty": "easy",
+    "category": "服务问题"
+  },
+  {
+    "id": "TC-017",
+    "user_query": "糖浆劣质，少少糖巨甜，联系商家还不理我",
+    "ground_truth": {
+      "intent": "complaint_taste_service",
+      "tool_calls": ["query_order", "log_complaint"],
+      "requires_clarification": false
+    },
+    "difficulty": "medium",
+    "category": "口感+服务"
+  },
+  {
+    "id": "TC-029",
+    "user_query": "就是那个，又少又难喝，你们懂的",
+    "ground_truth": {
+      "intent": "complaint_vague",
+      "tool_calls": ["log_complaint"],
+      "requires_clarification": true,
+      "expected_action": "反问澄清：您指的是哪款饮品？具体什么问题？"
+    },
+    "difficulty": "hard",
+    "category": "指代不明"
+  },
+  {
+    "id": "TC-030",
+    "user_query": "退款",
+    "ground_truth": {
+      "intent": "query_refund",
+      "tool_calls": ["query_order"],
+      "requires_clarification": true,
+      "expected_action": "反问：请提供订单号或手机号以便查询"
+    },
+    "difficulty": "hard",
+    "category": "信息缺失"
+  },
+  {
+    "id": "TC-031",
+    "user_query": "上次那个，跟这次不一样，你们是不是换配方了",
+    "ground_truth": {
+      "intent": "complaint_compare_history",
+      "tool_calls": ["query_order", "query_menu"],
+      "requires_clarification": true
+    },
+    "difficulty": "hard",
+    "category": "指代+对比"
+  },
+  {
+    "id": "TC-034",
+    "user_query": "呵呵，就这？",
+    "ground_truth": {
+      "intent": "complaint_sarcasm",
+      "tool_calls": [],
+      "requires_clarification": true,
+      "expected_action": "识别讽刺语气，真诚道歉并主动询问具体不满"
+    },
+    "difficulty": "hard",
+    "category": "讽刺语气"
+  },
+  {
+    "id": "TC-039",
+    "user_query": "今天有什么推荐的吗",
+    "ground_truth": {
+      "intent": "query_recommend",
+      "tool_calls": ["query_menu"],
+      "requires_clarification": false
+    },
+    "difficulty": "easy",
+    "category": "正向咨询"
+  },
+  {
+    "id": "TC-101",
+    "user_query": "光谷附近有门店吗",
+    "ground_truth": {
+      "intent": "query_location",
+      "tool_calls": ["query_stores"],
+      "requires_clarification": true,
+      "expected_action": "调用门店查询工具，返回光谷附近门店列表"
+    },
+    "difficulty": "easy",
+    "category": "门店查询"
+  },
+  {
+    "id": "TC-102",
+    "user_query": "最近的一家店在哪里",
+    "ground_truth": {
+      "intent": "query_location",
+      "tool_calls": ["query_stores"],
+      "requires_clarification": true
+    },
+    "difficulty": "easy",
+    "category": "门店查询"
+  },
+  {
+    "id": "TC-103",
+    "user_query": "附近有门店吗",
+    "ground_truth": {
+      "intent": "query_location",
+      "tool_calls": ["query_stores"],
+      "requires_clarification": true,
+      "expected_action": "反问：请问您在哪个位置/商圈？"
+    },
+    "difficulty": "easy",
+    "category": "门店查询"
+  },
+  {
+    "id": "TC-104",
+    "user_query": "有什么推荐的吗",
+    "ground_truth": {
+      "intent": "query_recommend",
+      "tool_calls": ["query_menu"],
+      "requires_clarification": false
+    },
+    "difficulty": "easy",
+    "category": "菜单查询"
+  },
+  {
+    "id": "TC-105",
+    "user_query": "菜单看看",
+    "ground_truth": {
+      "intent": "query_menu",
+      "tool_calls": ["query_menu"],
+      "requires_clarification": false
+    },
+    "difficulty": "easy",
+    "category": "菜单查询"
+  },
+  {
+    "id": "TC-106",
+    "user_query": "我的订单什么时候能送到",
+    "ground_truth": {
+      "intent": "query_order",
+      "tool_calls": ["query_order"],
+      "requires_clarification": true,
+      "expected_action": "反问：请提供您的手机号以便查询订单"
+    },
+    "difficulty": "easy",
+    "category": "订单查询"
+  },
+  {
+    "id": "TC-045",
+    "user_query": "",
+    "ground_truth": {
+      "intent": "unknown",
+      "tool_calls": [],
+      "requires_clarification": true,
+      "expected_action": "识别为无效输入，引导用户重新描述"
+    },
+    "difficulty": "hard",
+    "category": "空输入"
+  },
+  {
+    "id": "TC-048",
+    "user_query": "你是真人还是机器人",
+    "ground_truth": {
+      "intent": "general",
+      "tool_calls": [],
+      "requires_clarification": false,
+      "expected_action": "坦诚自己是AI助手，但能解决真实问题"
+    },
+    "difficulty": "easy",
+    "category": "元对话"
+  }
+]

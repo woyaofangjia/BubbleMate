@@ -11,16 +11,21 @@ import os
 
 # 导入Agent组件
 from backend.agent.intent_recognizer import IntentRecognizer
+from backend.agent.intent_recognizer_v2 import IntentRecognizerV2
 from backend.agent.react_agent import ReActAgent, create_tools
+from backend.agent.react_agent_v2 import ReActAgentV2
 from backend.agent.memory_manager import MemoryManager
+from backend.agent.memory_manager_v2 import MemoryManagerV2
+from backend.agent.human_in_loop import hil_manager, HumanIntervention, InterventionType
 from backend.tools.tool_registry import tool_registry, register_all_tools
+from backend.tools.bubble_tools import TOOL_REGISTRY as BUBBLE_TOOLS
 from backend.core.config import config
 
 # 创建FastAPI应用
 app = FastAPI(
     title="BubbleMate API",
     description="智能奶茶店客服Agent API",
-    version="0.1.0"
+    version="0.2.0"
 )
 
 # CORS配置
@@ -32,14 +37,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 初始化组件
-intent_recognizer = IntentRecognizer(config.get_data_path(""))
-tools = create_tools()
-memory_manager = MemoryManager(window_size=config.MAX_MEMORY_WINDOW, use_redis=False)
-agent = ReActAgent(tools, intent_recognizer, memory_manager)
+# 初始化组件（使用增强版）
+intent_recognizer = IntentRecognizerV2(config.get_data_path(""))
+memory_manager = MemoryManagerV2(window_size=config.MAX_MEMORY_WINDOW, use_redis=False)
 
-# 注册MCP工具
-register_all_tools()
+# 注册新工具
+bubble_tools = {}
+for tool_name, tool_config in BUBBLE_TOOLS.items():
+    bubble_tools[tool_name] = tool_config["handler"]
+
+# 创建Agent（使用新工具）
+agent = ReActAgentV2(bubble_tools, intent_recognizer, memory_manager)
 
 # API模型
 class ChatRequest(BaseModel):
@@ -104,7 +112,15 @@ async def chat(request: ChatRequest):
 @app.get("/tools")
 async def list_tools():
     """列出可用工具"""
-    return {"tools": tool_registry.list_tools()}
+    tools_list = []
+    for name, tool_config in BUBBLE_TOOLS.items():
+        tools_list.append({
+            "name": name,
+            "description": tool_config["description"],
+            "parameters": tool_config["parameters"],
+            "type": "真实API" if name == "query_stores" else "Mock"
+        })
+    return {"tools": tools_list, "count": len(tools_list)}
 
 @app.post("/tools/call")
 async def call_tool(request: ToolCallRequest):
@@ -203,6 +219,101 @@ async def get_menu(category: Optional[str] = None):
         return {"category": category, "items": menu.get(category, [])}
     
     return {"menu": menu}
+
+# Human-in-the-Loop API端点
+@app.get("/human-in-loop/pending")
+async def get_pending_interventions():
+    """获取待处理的人工介入列表"""
+    return hil_manager.get_pending_interventions()
+
+@app.get("/eval/report")
+async def get_eval_report():
+    """获取评测报告"""
+    report_path = os.path.join(os.path.dirname(__file__), "../../data/eval_report.json")
+    
+    if not os.path.exists(report_path):
+        # 返回提示信息
+        return {
+            "timestamp": "未生成",
+            "test_cases_count": 0,
+            "level1_component": {
+                "intent_accuracy": 0,
+                "tool_accuracy": 0,
+                "clarification_rate": 0,
+                "avg_latency_ms": 0
+            },
+            "level2_end_to_end": {
+                "solved_rate": 0,
+                "partial_rate": 0,
+                "failure_rate": 0
+            },
+            "level3_adversarial": {
+                "adversarial_pass_rate": 0,
+                "category_breakdown": {}
+            },
+            "overall_pass_rate": 0,
+            "bad_cases": [],
+            "message": "请运行评测脚本: python scripts/bubble_eval_runner.py"
+        }
+    
+    with open(report_path, "r", encoding="utf-8") as f:
+        report = json.load(f)
+    
+    return report
+
+@app.post("/eval/run")
+async def run_eval():
+    """运行评测（触发脚本）"""
+    # 简化版：返回提示
+    return {
+        "message": "请在终端运行: python scripts/bubble_eval_runner.py",
+        "command": "python scripts/bubble_eval_runner.py"
+    }
+
+@app.post("/human-in-loop/{intervention_id}/resolve")
+async def resolve_intervention(intervention_id: str, request: Dict[str, Any]):
+    """解决人工介入请求"""
+    resolution = request.get("resolution", "")
+    agent_id = request.get("agent_id", "unknown")
+    
+    success = hil_manager.resolve_intervention(intervention_id, resolution, agent_id)
+    
+    if success:
+        return {"success": True, "message": f"介入请求 {intervention_id} 已解决"}
+    else:
+        raise HTTPException(status_code=404, detail="介入请求不存在")
+
+@app.get("/human-in-loop/evaluate")
+async def evaluate_hil(
+    session_id: str,
+    user_message: str,
+    agent_response: str = ""
+):
+    """评估是否需要人工介入"""
+    # 获取意图
+    intent = intent_recognizer.recognize(user_message)
+    
+    # 获取工具调用历史（简化版）
+    tool_results = [{"success": True}]
+    
+    # 获取会话历史
+    session_history = memory_manager.get_context(session_id) or []
+    
+    # 评估
+    result = hil_manager.evaluate(
+        session_id=session_id,
+        intent_result={
+            "name": intent.name,
+            "confidence": intent.confidence,
+            "text": user_message
+        },
+        tool_results=tool_results,
+        session_history=session_history,
+        user_message=user_message,
+        agent_response=agent_response
+    )
+    
+    return result
 
 # 启动事件
 @app.on_event("startup")

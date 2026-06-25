@@ -1,0 +1,30 @@
+{
+  "茶颜悦色-光谷店": [
+    {"name": "幽兰拿铁", "price": 18, "category": "奶茶", "description": "红茶底+鲜奶+碧根果碎", "available": true, "sales": 1000},
+    {"name": "声声乌龙", "price": 16, "category": "果茶", "description": "乌龙茶+桂花+奶油顶", "available": true, "sales": 800},
+    {"name": "抹茶菩提", "price": 20, "category": "奶茶", "description": "抹茶+鲜奶+椰果", "available": false, "sales": 500},
+    {"name": "烟火易冷", "price": 15, "category": "果茶", "description": "乌龙茶+桂花蜜", "available": true, "sales": 600},
+    {"name": "筝筝纸鸢", "price": 17, "category": "奶茶", "description": "红茶+鲜奶+燕麦", "available": true, "sales": 450}
+  ],
+  "喜茶-光谷天地店": [
+    {"name": "多肉葡萄", "price": 29, "category": "果茶", "description": "葡萄果肉+芝士奶盖", "available": true, "sales": 1200},
+    {"name": "芝芝莓莓", "price": 32, "category": "果茶", "description": "草莓+芝士奶盖", "available": true, "sales": 900},
+    {"name": "纯绿妍茶", "price": 15, "category": "纯茶", "description": "茉莉绿茶", "available": true, "sales": 300},
+    {"name": "波波奶茶", "price": 19, "category": "奶茶", "description": "黑糖珍珠+鲜奶", "available": true, "sales": 700},
+    {"name": "满杯红柚", "price": 25, "category": "果茶", "description": "红柚果肉+绿茶", "available": false, "sales": 400}
+  ],
+  "奈雪的茶-武大店": [
+    {"name": "霸气芝士草莓", "price": 28, "category": "果茶", "description": "草莓+芝士奶盖", "available": true, "sales": 950},
+    {"name": "霸气橙子", "price": 26, "category": "果茶", "description": "鲜橙+绿茶", "available": true, "sales": 600},
+    {"name": "杨枝甘露", "price": 18, "category": "奶茶", "description": "芒果+椰奶+西柚", "available": true, "sales": 850},
+    {"name": "霸气玉油柑", "price": 32, "category": "果茶", "description": "油柑+芝士", "available": true, "sales": 350},
+    {"name": "草莓魔法棒", "price": 35, "category": "软欧包", "description": "草莓奶油面包", "available": true, "sales": 200}
+  ],
+  "蜜雪冰城-街道口店": [
+    {"name": "珍珠奶茶", "price": 8, "category": "奶茶", "description": "经典珍珠奶茶", "available": true, "sales": 2000},
+    {"name": "柠檬水", "price": 4, "category": "果茶", "description": "冰鲜柠檬水", "available": true, "sales": 1500},
+    {"name": "草莓摇摇奶昔", "price": 7, "category": "奶昔", "description": "草莓奶昔", "available": true, "sales": 800},
+    {"name": "摩卡冰淇淋", "price": 9, "category": "冰淇淋", "description": "摩卡咖啡冰淇淋", "available": true, "sales": 500},
+    {"name": "芋圆奶茶", "price": 10, "category": "奶茶", "description": "芋圆+奶茶", "available": false, "sales": 400}
+  ]
+}

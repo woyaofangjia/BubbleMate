@@ -90,13 +90,19 @@ class IntentRecognizerV2:
             
             # 查询类意图 - 增强版
             "query_recommend": [
-                re.compile(r"(推荐|招牌|热门|特色|新品).*?(饮品|奶茶|茶|喝什么)", re.I),
-                re.compile(r"(有什么|哪些).*?(好喝|推荐|招牌)", re.I),
-                re.compile(r"(帮我|给我).*?(推荐|选)", re.I),
+                # 推荐查询 - 大幅扩充
+                re.compile(r"(推荐|招牌|热门|特色|新品|必点)", re.I),
+                re.compile(r"(有什么|有哪些).*?(好喝|推荐|招牌|热门)", re.I),
+                re.compile(r"(帮我|给我).*?(推荐|选|挑)", re.I),
+                re.compile(r"(喝什么|点什么|买什么)", re.I),
+                re.compile(r"(什么).*?(好喝|好吃)", re.I),
             ],
             "query_menu": [
-                re.compile(r"(菜单|饮品|有什么).*?(列出|看看|查询|都有)", re.I),
-                re.compile(r"(有什么).*?(喝的|饮品)", re.I),
+                # 菜单查询 - 扩充
+                re.compile(r"(菜单|饮品|饮料).*?(列出|看看|查询|都有)", re.I),
+                re.compile(r"(有什么).*?(喝的|饮品|饮料)", re.I),
+                re.compile(r"(看看).*?(菜单|饮品)", re.I),
+                re.compile(r"(价格|多少钱).*?(列表|表)", re.I),
             ],
             "query_order": [
                 re.compile(r"(订单|单号).*?(查询|状态|进度|到哪了)", re.I),
@@ -112,8 +118,14 @@ class IntentRecognizerV2:
                 re.compile(r"(营业时间|开门|关门|营业|几点开门)", re.I),
             ],
             "query_location": [
-                re.compile(r"(门店|地址|位置|附近).*?(查询|在哪|有没有)", re.I),
-                re.compile(r"(附近).*?(店|门店)", re.I),
+                # 门店/位置查询 - 大幅扩充关键词池
+                re.compile(r"(门店|店铺|店|地址|位置)", re.I),
+                re.compile(r"(附近|周边|最近).*?(有|店|门店|奶茶)", re.I),
+                re.compile(r"(哪里|在哪|怎么走|在哪边).*?(有|买|喝)", re.I),
+                re.compile(r"(门店|店).*?(在哪|在哪边|位置|地址)", re.I),
+                re.compile(r"(离|距).*?(多远|近|远)", re.I),
+                re.compile(r"(附近有门店吗)", re.I),
+                re.compile(r"(最近的一家店)", re.I),
             ],
             "query_sugar": [
                 re.compile(r"(糖度|无糖|少糖|正常糖|糖).*?(选择|选项|有)", re.I),

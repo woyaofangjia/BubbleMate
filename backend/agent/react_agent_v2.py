@@ -38,22 +38,40 @@ class ReActAgentV2:
 2. 处理顾客投诉（口感、份量、服务、配送等）
 3. 提供饮品推荐和点单建议
 
-你可以使用的工具：
-- query_order: 查询订单状态（需要订单号）
-- query_shop: 查询门店信息（支持位置关键词）
-- query_menu: 查询菜单/饮品信息（支持分类查询）
-- handle_complaint: 处理投诉（需要投诉类型）
+你可以使用以下工具（根据意图自动选择）：
+
+📍 query_stores（门店查询）：
+   - 当用户问：附近门店、最近门店、门店位置、地址、哪里有奶茶店时调用
+   - 输入：位置名称（如"光谷广场"、"武汉大学"）
+   - 如果用户没说位置，先反问："请问您在哪个位置/商圈？"
+
+📋 query_menu（菜单查询）：
+   - 当用户问：有什么饮品、推荐、菜单、价格、某饮品有没有时调用
+   - 输入：门店名称（可选）、关键词（可选）
+   - 不指定门店时返回所有门店的热门推荐
+
+📦 query_order（订单查询）：
+   - 当用户问：订单状态、订单进度、什么时候送到时调用
+   - 输入：用户手机号、订单号（可选）
+   - 如果用户没说手机号，先反问："请提供您的手机号以便查询"
+
+📊 check_stock（库存查询）：
+   - 当用户问：某饮品有没有货、库存时调用
+   - 输入：饮品名称
+
+🛠️ log_complaint（投诉处理）：
+   - 当用户投诉时调用
+   - 输入：投诉内容、投诉类型（口味/服务/配送）
 
 回复原则：
-- 语气友好、专业
-- 遇到投诉先安抚，再提供解决方案
-- 工具调用失败时，引导用户提供更多信息
+- 先识别意图，再决定是否需要调用工具
+- 工具参数不全时，主动反问用户补充
+- 语气友好、专业，回复简洁明了
 - 不确定时，承认并建议人工客服介入
-- 回复要简洁明了，避免冗长
 
 回复格式：
-【思考】分析用户意图和上下文
-【行动】选择工具或直接回复
+【思考】分析用户意图（意图类别）+ 是否需要调用工具 + 参数是否完整
+【行动】调用工具（如需要）或直接回复
 【回复】最终回复内容
 """
     
@@ -107,34 +125,99 @@ class ReActAgentV2:
     
     def _handle_query(self, user_input: str, intent) -> str:
         """处理查询（增强版）"""
-        # 映射意图到工具
+        # 映射意图到工具（使用新工具）
         tool_mapping = {
             "query_order": "query_order",
-            "query_location": "query_shop",
-            "query_menu": "query_menu",
-            "query_recommend": "query_menu",
-            "query_price": "query_menu",
+            "query_location": "query_stores",  # 门店查询（高德API）
+            "query_menu": "query_menu",         # 菜单查询（本地JSON）
+            "query_recommend": "query_menu",    # 推荐→菜单查询
+            "query_price": "query_menu",        # 价格→菜单查询
         }
         
         tool_name = tool_mapping.get(intent.name)
         
         if tool_name and tool_name in self.tools:
-            # 调用工具
-            tool_result = self.tools[tool_name](user_input)
-            
-            # 检查是否需要反问（参数缺失）
-            if "需要提供" in tool_result or "请提供" in tool_result:
-                return f"""【思考】用户意图: {intent.name}, 需要更多参数
+            try:
+                # 根据意图提取参数
+                args = self._extract_args_for_tool(user_input, intent.name, tool_name)
+                
+                # 调用工具
+                tool_result = self.tools[tool_name](**args)
+                
+                # 检查是否需要反问（参数缺失）
+                if isinstance(tool_result, dict):
+                    if not tool_result.get("success") and tool_result.get("type") == "ask_user":
+                        return f"""【思考】用户意图: {intent.name}, 置信度: {intent.confidence:.2f}, 工具参数缺失
 【行动】引导用户补充信息
-【回复】{tool_result}"""
-            
-            return f"""【思考】用户意图: {intent.name}, 需要查询信息
+【回复】{tool_result.get("response", "请提供更多信息")}"""
+                    
+                    # 成功调用
+                    return f"""【思考】用户意图: {intent.name}, 置信度: {intent.confidence:.2f}, 需要查询信息
+【行动】调用工具: {tool_name}({args})
+【工具结果】成功: {tool_result.get('success')}
+【回复】{tool_result.get("response", str(tool_result))}"""
+                else:
+                    # 字符串结果
+                    return f"""【思考】用户意图: {intent.name}, 置信度: {intent.confidence:.2f}
 【行动】调用工具: {tool_name}
-【工具结果】{tool_result}
-【回复】{self._format_query_response(intent.name, tool_result)}"""
+【回复】{tool_result}"""
+            except Exception as e:
+                return f"""【思考】工具调用异常: {str(e)}
+【行动】降级处理，直接回复
+【回复】抱歉，系统暂时无法查询，请稍后再试或联系人工客服。"""
         else:
-            # 直接回复
+            # 无工具，直接回复
             return self._get_direct_query_response(intent)
+    
+    def _extract_args_for_tool(self, user_input: str, intent_name: str, tool_name: str) -> dict:
+        """根据意图提取工具参数"""
+        args = {}
+        
+        if tool_name == "query_stores":
+            # 提取位置关键词
+            location_keywords = ["光谷", "武汉大学", "街道口", "汉口", "武昌", "汉阳", "银泰", "武大"]
+            for kw in location_keywords:
+                if kw in user_input:
+                    args["location"] = kw
+                    break
+            
+            # 如果没提取到位置，返回空结果触发反问
+            if not args.get("location"):
+                # 尝试从用户输入提取更通用的位置
+                import re
+                match = re.search(r"(在|附近|周边).*?(?|有|的)(.+?)(店|门店|奶茶)", user_input)
+                if match:
+                    args["location"] = match.group(3)
+                else:
+                    args["location"] = None  # 会触发反问
+        
+        elif tool_name == "query_menu":
+            # 提取门店名或关键词
+            store_keywords = ["茶颜悦色", "喜茶", "奈雪", "蜜雪冰城"]
+            for kw in store_keywords:
+                if kw in user_input:
+                    args["store_name"] = kw
+                    break
+            
+            # 提取饮品关键词
+            drink_keywords = ["拿铁", "奶茶", "果茶", "葡萄", "草莓", "幽兰", "声声", "杨枝甘露"]
+            for kw in drink_keywords:
+                if kw in user_input:
+                    args["keyword"] = kw
+                    break
+        
+        elif tool_name == "query_order":
+            # 提取手机号或订单号
+            import re
+            phone_match = re.search(r"(\d{11})", user_input)
+            if phone_match:
+                args["user_id"] = phone_match.group(1)
+            
+            order_match = re.search(r"(ORD-\d+)", user_input)
+            if order_match:
+                args["order_id"] = order_match.group(1)
+        
+        return args
     
     def _handle_order(self, user_input: str, intent) -> str:
         """处理订单（增强版）"""
