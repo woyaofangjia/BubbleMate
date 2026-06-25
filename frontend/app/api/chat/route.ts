@@ -1,4 +1,4 @@
-import type { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * Next.js API Route - 代理到后端FastAPI
