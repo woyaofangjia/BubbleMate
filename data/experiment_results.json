@@ -1,0 +1,310 @@
+{
+  "intent_accuracy": {
+    "experiment": "intent_accuracy",
+    "total": 20,
+    "correct": 18,
+    "accuracy": 90.0,
+    "details": [
+      {
+        "input": "太甜了，喝不下去",
+        "expected": "complaint_taste",
+        "actual": "complaint_taste",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "冰块太多，饮料都没了",
+        "expected": "complaint_quantity",
+        "actual": "complaint_quantity",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "你们有什么招牌推荐？",
+        "expected": "query_recommend",
+        "actual": "query_recommend",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "订单12345什么时候能送到？",
+        "expected": "query_order",
+        "actual": "query_order",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "附近有门店吗？",
+        "expected": "query_location",
+        "actual": "query_location",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "可以退款吗？",
+        "expected": "query_refund",
+        "actual": "query_refund",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "门店营业时间？",
+        "expected": "query_opentime",
+        "actual": "query_opentime",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "配送超时一小时",
+        "expected": "complaint_delivery",
+        "actual": "complaint_delivery",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "服务太差了",
+        "expected": "complaint_service",
+        "actual": "complaint_service",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "这么贵还这么难喝",
+        "expected": "complaint_taste",
+        "actual": "complaint_taste",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "珍珠奶茶多少钱？",
+        "expected": "query_price",
+        "actual": "complaint_quantity",
+        "confidence": 0.85,
+        "correct": false
+      },
+      {
+        "input": "可以做热的吗？",
+        "expected": "query_temp",
+        "actual": "query_temp",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "甜度有几种选择？",
+        "expected": "query_sugar",
+        "actual": "query_sugar",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "有外卖吗？",
+        "expected": "query_delivery",
+        "actual": "query_delivery",
+        "confidence": 0.7,
+        "correct": true
+      },
+      {
+        "input": "今天有什么优惠？",
+        "expected": "query_promo",
+        "actual": "query_menu",
+        "confidence": 0.53,
+        "correct": false
+      },
+      {
+        "input": "上次的投诉处理好了吗？",
+        "expected": "query_complaint_status",
+        "actual": "query_complaint_status",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "我要下单",
+        "expected": "place_order",
+        "actual": "place_order",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "会员卡怎么办？",
+        "expected": "query_member",
+        "actual": "query_member",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "能开发票吗？",
+        "expected": "query_invoice",
+        "actual": "query_invoice",
+        "confidence": 0.7,
+        "correct": true
+      },
+      {
+        "input": "不好喝，要求退款",
+        "expected": "complaint_taste",
+        "actual": "complaint_taste",
+        "confidence": 0.85,
+        "correct": true
+      }
+    ]
+  },
+  "tool_fallback": {
+    "experiment": "tool_fallback",
+    "total": 9,
+    "correct": 9,
+    "success_rate": 100.0,
+    "details": [
+      {
+        "name": "参数缺失-订单查询",
+        "tool": "query_order_status",
+        "expected": "ask_user",
+        "actual": "ask_user",
+        "response": "我需要更多信息才能帮您查询：\n  - order_id: 订单编号\n\n请提供这些信息。",
+        "correct": true
+      },
+      {
+        "name": "正常调用-订单查询",
+        "tool": "query_order_status",
+        "expected": "success",
+        "actual": "success",
+        "response": "{\n  \"status\": \"配送中\",\n  \"drink\": \"芝芝莓莓\",\n  \"eta\": \"",
+        "correct": true
+      },
+      {
+        "name": "订单不存在",
+        "tool": "query_order_status",
+        "expected": "business_error",
+        "actual": "business_error",
+        "response": "抱歉，订单不存在。请检查订单号是否正确，或者您可以尝试：\n  - 换个关键词搜索\n  - 联系人工客",
+        "correct": true
+      },
+      {
+        "name": "参数缺失-库存查询",
+        "tool": "check_inventory",
+        "expected": "ask_user",
+        "actual": "ask_user",
+        "response": "我需要更多信息才能帮您查询：\n  - store_id: 门店名称或ID\n\n请提供这些信息。",
+        "correct": true
+      },
+      {
+        "name": "正常调用-库存查询",
+        "tool": "check_inventory",
+        "expected": "success",
+        "actual": "success",
+        "response": "{\n  \"store\": \"武汉大学\",\n  \"inventory\": {\n    \"珍珠\": \"充",
+        "correct": true
+      },
+      {
+        "name": "未找到门店",
+        "tool": "query_shop_info",
+        "expected": "business_error",
+        "actual": "business_error",
+        "response": "查询结果: {'error': '未找到匹配的门店', 'hint': '尝试换个关键词，如：武大、",
+        "correct": true
+      },
+      {
+        "name": "正常门店查询",
+        "tool": "query_shop_info",
+        "expected": "success",
+        "actual": "success",
+        "response": "{\n  \"shops\": [\n    {\n      \"name\": \"茶百道(武汉大学正门店)\",",
+        "correct": true
+      },
+      {
+        "name": "参数缺失-投诉",
+        "tool": "handle_complaint",
+        "expected": "ask_user",
+        "actual": "ask_user",
+        "response": "我需要更多信息才能帮您查询：\n  - complaint_type: 投诉类型: taste/qua",
+        "correct": true
+      },
+      {
+        "name": "正常投诉",
+        "tool": "handle_complaint",
+        "expected": "success",
+        "actual": "success",
+        "response": "{\n  \"status\": \"已受理\",\n  \"complaint_id\": \"CP-001\",\n ",
+        "correct": true
+      }
+    ]
+  },
+  "memory_window": {
+    "experiment": "memory_window",
+    "results": [
+      {
+        "window_size": 3,
+        "message_count": 4,
+        "has_summary": true,
+        "remembers_drink": true,
+        "remembers_sugar": true,
+        "response_time_ms": 0.2,
+        "context_length": 193
+      },
+      {
+        "window_size": 5,
+        "message_count": 6,
+        "has_summary": true,
+        "remembers_drink": true,
+        "remembers_sugar": true,
+        "response_time_ms": 0.0,
+        "context_length": 260
+      },
+      {
+        "window_size": 10,
+        "message_count": 6,
+        "has_summary": false,
+        "remembers_drink": true,
+        "remembers_sugar": true,
+        "response_time_ms": 0.0,
+        "context_length": 230
+      }
+    ]
+  },
+  "end_to_end": {
+    "experiment": "end_to_end",
+    "avg_relevance": 83.34,
+    "intent_accuracy": 100.0,
+    "avg_response_time_ms": 0.10342597961425781,
+    "details": [
+      {
+        "input": "你们有什么推荐？",
+        "intent": "query_recommend",
+        "intent_correct": true,
+        "relevance": 100.0,
+        "response_time_ms": 0.0,
+        "reply_preview": "招牌推荐：\n1. 芝芝莓莓 - ¥20 - 鲜草莓芝士奶盖\n2. 杨枝甘露 - ¥18 - 椰奶芒果西柚\n3. 茉莉绿茶"
+      },
+      {
+        "input": "太甜了，喝不下去",
+        "intent": "complaint_taste",
+        "intent_correct": true,
+        "relevance": 66.7,
+        "response_time_ms": 0.0,
+        "reply_preview": "您好，非常抱歉饮品口感不符合您的预期。我们核实后会为您重新制作或办理退款，预计24小时内处理完成。"
+      },
+      {
+        "input": "订单12345什么时候能送到？",
+        "intent": "query_order",
+        "intent_correct": true,
+        "relevance": 100.0,
+        "response_time_ms": 0.0,
+        "reply_preview": "订单12345状态：配送中，饮品-芝芝莓莓，15分钟，门店-武汉大学梅园店"
+      },
+      {
+        "input": "附近有门店吗？",
+        "intent": "query_location",
+        "intent_correct": true,
+        "relevance": 50.0,
+        "response_time_ms": 0.4,
+        "reply_preview": "附近门店：\n- 蜜雪冰城(街道口店): 珞南街道珞狮南路147号未来城购物公园,街道口地铁N出口门口,阜华大厦A座旁边\n"
+      },
+      {
+        "input": "甜度有几种选择？",
+        "intent": "query_sugar",
+        "intent_correct": true,
+        "relevance": 100.0,
+        "response_time_ms": 0.0,
+        "reply_preview": "我们提供5档糖度：标准糖、七分糖、五分糖、三分糖、无糖。建议首次选择五分糖。"
+      }
+    ]
+  }
+}

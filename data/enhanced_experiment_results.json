@@ -1,0 +1,390 @@
+{
+  "intent_accuracy": {
+    "experiment": "intent_accuracy",
+    "total": 20,
+    "correct": 18,
+    "accuracy": 90.0,
+    "bad_cases": [
+      {
+        "input": "珍珠奶茶多少钱？",
+        "expected": "query_price",
+        "actual": "complaint_quantity",
+        "confidence": 0.85
+      },
+      {
+        "input": "今天有什么优惠？",
+        "expected": "query_promo",
+        "actual": "query_menu",
+        "confidence": 0.53
+      }
+    ],
+    "details": [
+      {
+        "input": "太甜了，喝不下去",
+        "expected": "complaint_taste",
+        "actual": "complaint_taste",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "冰块太多，饮料都没了",
+        "expected": "complaint_quantity",
+        "actual": "complaint_quantity",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "你们有什么招牌推荐？",
+        "expected": "query_recommend",
+        "actual": "query_recommend",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "订单12345什么时候能送到？",
+        "expected": "query_order",
+        "actual": "query_order",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "附近有门店吗？",
+        "expected": "query_location",
+        "actual": "query_location",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "可以退款吗？",
+        "expected": "query_refund",
+        "actual": "query_refund",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "门店营业时间？",
+        "expected": "query_opentime",
+        "actual": "query_opentime",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "配送超时一小时",
+        "expected": "complaint_delivery",
+        "actual": "complaint_delivery",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "服务太差了",
+        "expected": "complaint_service",
+        "actual": "complaint_service",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "这么贵还这么难喝",
+        "expected": "complaint_taste",
+        "actual": "complaint_taste",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "珍珠奶茶多少钱？",
+        "expected": "query_price",
+        "actual": "complaint_quantity",
+        "confidence": 0.85,
+        "correct": false
+      },
+      {
+        "input": "可以做热的吗？",
+        "expected": "query_temp",
+        "actual": "query_temp",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "甜度有几种选择？",
+        "expected": "query_sugar",
+        "actual": "query_sugar",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "有外卖吗？",
+        "expected": "query_delivery",
+        "actual": "query_delivery",
+        "confidence": 0.7,
+        "correct": true
+      },
+      {
+        "input": "今天有什么优惠？",
+        "expected": "query_promo",
+        "actual": "query_menu",
+        "confidence": 0.53,
+        "correct": false
+      },
+      {
+        "input": "上次的投诉处理好了吗？",
+        "expected": "query_complaint_status",
+        "actual": "query_complaint_status",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "我要下单",
+        "expected": "place_order",
+        "actual": "place_order",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "会员卡怎么办？",
+        "expected": "query_member",
+        "actual": "query_member",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "能开发票吗？",
+        "expected": "query_invoice",
+        "actual": "query_invoice",
+        "confidence": 0.7,
+        "correct": true
+      },
+      {
+        "input": "不好喝，要求退款",
+        "expected": "complaint_taste",
+        "actual": "complaint_taste",
+        "confidence": 0.85,
+        "correct": true
+      }
+    ]
+  },
+  "baseline_comparison": {
+    "baseline_accuracy": 90.0,
+    "agent_accuracy": 100.0,
+    "improvement": 10.0,
+    "baseline_results": [
+      {
+        "input": "太甜了，喝不下去",
+        "expected": "complaint_taste",
+        "baseline_pred": "complaint_taste",
+        "correct": true
+      },
+      {
+        "input": "冰块太多，饮料都没了",
+        "expected": "complaint_quantity",
+        "baseline_pred": "complaint_quantity",
+        "correct": true
+      },
+      {
+        "input": "你们有什么招牌推荐？",
+        "expected": "query_recommend",
+        "baseline_pred": "query_recommend",
+        "correct": true
+      },
+      {
+        "input": "订单12345什么时候能送到？",
+        "expected": "query_order",
+        "baseline_pred": "query_order",
+        "correct": true
+      },
+      {
+        "input": "附近有门店吗？",
+        "expected": "query_location",
+        "baseline_pred": "query_location",
+        "correct": true
+      },
+      {
+        "input": "可以退款吗？",
+        "expected": "query_refund",
+        "baseline_pred": "query_refund",
+        "correct": true
+      },
+      {
+        "input": "门店营业时间？",
+        "expected": "query_opentime",
+        "baseline_pred": "query_location",
+        "correct": false
+      },
+      {
+        "input": "配送超时一小时",
+        "expected": "complaint_delivery",
+        "baseline_pred": "complaint_delivery",
+        "correct": true
+      },
+      {
+        "input": "服务太差了",
+        "expected": "complaint_service",
+        "baseline_pred": "complaint_service",
+        "correct": true
+      },
+      {
+        "input": "这么贵还这么难喝",
+        "expected": "complaint_taste",
+        "baseline_pred": "complaint_taste",
+        "correct": true
+      }
+    ],
+    "agent_results": [
+      {
+        "input": "太甜了，喝不下去",
+        "expected": "complaint_taste",
+        "agent_pred": "complaint_taste",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "冰块太多，饮料都没了",
+        "expected": "complaint_quantity",
+        "agent_pred": "complaint_quantity",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "你们有什么招牌推荐？",
+        "expected": "query_recommend",
+        "agent_pred": "query_recommend",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "订单12345什么时候能送到？",
+        "expected": "query_order",
+        "agent_pred": "query_order",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "附近有门店吗？",
+        "expected": "query_location",
+        "agent_pred": "query_location",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "可以退款吗？",
+        "expected": "query_refund",
+        "agent_pred": "query_refund",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "门店营业时间？",
+        "expected": "query_opentime",
+        "agent_pred": "query_opentime",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "配送超时一小时",
+        "expected": "complaint_delivery",
+        "agent_pred": "complaint_delivery",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "服务太差了",
+        "expected": "complaint_service",
+        "agent_pred": "complaint_service",
+        "confidence": 0.85,
+        "correct": true
+      },
+      {
+        "input": "这么贵还这么难喝",
+        "expected": "complaint_taste",
+        "agent_pred": "complaint_taste",
+        "confidence": 0.85,
+        "correct": true
+      }
+    ]
+  },
+  "tool_fallback": {
+    "success_rate": 100.0,
+    "details": [
+      {
+        "name": "参数缺失-订单",
+        "expected": "ask_user",
+        "actual": "ask_user",
+        "correct": true
+      },
+      {
+        "name": "正常-订单",
+        "expected": "success",
+        "actual": "success",
+        "correct": true
+      },
+      {
+        "name": "订单不存在",
+        "expected": "business_error",
+        "actual": "business_error",
+        "correct": true
+      },
+      {
+        "name": "参数缺失-库存",
+        "expected": "ask_user",
+        "actual": "ask_user",
+        "correct": true
+      },
+      {
+        "name": "正常-库存",
+        "expected": "success",
+        "actual": "success",
+        "correct": true
+      },
+      {
+        "name": "门店不存在",
+        "expected": "business_error",
+        "actual": "business_error",
+        "correct": true
+      },
+      {
+        "name": "正常-门店",
+        "expected": "success",
+        "actual": "success",
+        "correct": true
+      },
+      {
+        "name": "参数缺失-投诉",
+        "expected": "ask_user",
+        "actual": "ask_user",
+        "correct": true
+      },
+      {
+        "name": "正常-投诉",
+        "expected": "success",
+        "actual": "success",
+        "correct": true
+      }
+    ]
+  },
+  "memory_window": {
+    "memory_results": [
+      {
+        "window_size": 3,
+        "message_count": 4,
+        "has_summary": true,
+        "remembers_drink": true,
+        "remembers_sugar": true,
+        "time_ms": 0.2
+      },
+      {
+        "window_size": 5,
+        "message_count": 6,
+        "has_summary": true,
+        "remembers_drink": true,
+        "remembers_sugar": true,
+        "time_ms": 0.0
+      },
+      {
+        "window_size": 10,
+        "message_count": 6,
+        "has_summary": false,
+        "remembers_drink": true,
+        "remembers_sugar": true,
+        "time_ms": 0.0
+      }
+    ]
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "timestamp": "2026-06-25 23:56:36",
+  "global_stats": {
+    "total_sessions": 1,
+    "total_messages": 10,
+    "total_tool_calls": 10,
+    "tool_failure_rate": 20.0,
+    "user_correction_rate": 20.0,
+    "avg_response_time_ms": 50.0,
+    "avg_intent_confidence": 0.81,
+    "recent_correction_rate": 20.0,
+    "recent_tool_failure_rate": 20.0,
+    "active_sessions": 1
+  },
+  "time_series": [],
+  "top_sessions": [
+    {
+      "session_id": "test_session",
+      "start_time": 1782402996.7741075,
+      "message_count": 10,
+      "tool_calls": 10,
+      "tool_failures": 2,
+      "user_corrections": 2,
+      "intent_confidence_sum": 8.13,
+      "intent_count": 10,
+      "avg_response_time": 0.049999999999999996,
+      "response_time_sum": 0.49999999999999994
+    }
+  ]
+}
