@@ -151,7 +151,7 @@ export default function ExperimentReport() {
           />
           <MetricCard
             title="Bad Case数"
-            value={results.intent_accuracy.bad_cases.length}
+            value={String(results.intent_accuracy.bad_cases.length)}
             subtitle="已做根因分析"
             color="orange"
           />
@@ -310,7 +310,7 @@ export default function ExperimentReport() {
 
 function MetricCard({ title, value, subtitle, color }: {
   title: string;
-  value: string;
+  value: string | number;
   subtitle: string;
   color: 'green' | 'blue' | 'purple' | 'orange';
 }) {
