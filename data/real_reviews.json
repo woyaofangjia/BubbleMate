@@ -1,0 +1,107 @@
+[
+  {
+    "id": 1,
+    "content": "糯米少的可怜，这款每年都喝，正常是啥分量我很清楚。点的别的分店都没这么少",
+    "category": "份量问题",
+    "keywords": ["糯米", "分量少", "分店对比"],
+    "intent": "complaint_quantity"
+  },
+  {
+    "id": 2,
+    "content": "就是太甜了",
+    "category": "口感问题",
+    "keywords": ["太甜", "糖度"],
+    "intent": "complaint_taste"
+  },
+  {
+    "id": 3,
+    "content": "点的少少甜还是很甜，口感一点都不好，很难喝",
+    "category": "口感问题",
+    "keywords": ["少少甜", "还是很甜", "口感不好", "难喝"],
+    "intent": "complaint_taste"
+  },
+  {
+    "id": 4,
+    "content": "\"食材质量差\"\"份量不足\"\"包装粗糙\"非常差，不会再买了，店家出餐慢，电话打不通。服务非常差。",
+    "category": "综合投诉",
+    "keywords": ["食材质量差", "份量不足", "包装粗糙", "出餐慢", "电话打不通", "服务差"],
+    "intent": "complaint_service"
+  },
+  {
+    "id": 5,
+    "content": "#商家服务不佳 #价格没优势 #收到有撒漏 #配送差 #味道不好 #分量太小",
+    "category": "综合投诉",
+    "keywords": ["服务不佳", "价格", "撒漏", "配送差", "味道不好", "分量小"],
+    "intent": "complaint_general"
+  },
+  {
+    "id": 6,
+    "content": "我点个冰沙，给我个细吸管，怎么喝？",
+    "category": "配件问题",
+    "keywords": ["冰沙", "细吸管", "配件错误"],
+    "intent": "complaint_accessory"
+  },
+  {
+    "id": 7,
+    "content": "\"糖浆劣质\"#清爽芭乐提(红芭乐)#难喝，少少糖巨巨巨甜，联系商家不予理会",
+    "category": "口感+服务",
+    "keywords": ["糖浆劣质", "芭乐提", "难喝", "巨甜", "商家不理"],
+    "intent": "complaint_taste_service"
+  },
+  {
+    "id": 8,
+    "content": "葡萄太太太酸了",
+    "category": "口感问题",
+    "keywords": ["葡萄", "太酸"],
+    "intent": "complaint_taste"
+  },
+  {
+    "id": 9,
+    "content": "全是冰块 管子都通不到下面",
+    "category": "份量+配件",
+    "keywords": ["全是冰块", "管子"],
+    "intent": "complaint_quantity_accessory"
+  },
+  {
+    "id": 10,
+    "content": "#味道不好 不好喝 不好喝，像掺了水，好难喝",
+    "category": "口感问题",
+    "keywords": ["不好喝", "掺水", "难喝"],
+    "intent": "complaint_taste"
+  },
+  {
+    "id": 11,
+    "content": "#芝芝抹茶#超级无敌巨苦，喝起来像喝药一样，我天呐。没吃过苦，想喝药的可以来喝一下，好难喝啊，卖这么贵，还这么难喝",
+    "category": "口感+价格",
+    "keywords": ["芝芝抹茶", "巨苦", "喝药", "贵", "难喝"],
+    "intent": "complaint_taste_price"
+  },
+  {
+    "id": 12,
+    "content": "点餐快一小时显示超时了。打电话问都还没做。。。没有任何超时赔付吗",
+    "category": "配送问题",
+    "keywords": ["超时", "还没做", "赔付"],
+    "intent": "complaint_delivery"
+  },
+  {
+    "id": 13,
+    "content": "#味道不好 说了要冰，是不给",
+    "category": "服务问题",
+    "keywords": ["要冰", "不给"],
+    "intent": "complaint_service"
+  },
+  {
+    "id": 14,
+    "content": "#味道不好 #价格没优势 好敷衍的味道，名字看着花里胡哨，实际上不如糖水",
+    "category": "口感+价格",
+    "keywords": ["敷衍", "花里胡哨", "不如糖水", "价格"],
+    "intent": "complaint_taste_price"
+  },
+  {
+    "id": 15,
+    "content": "#榴莲翡翠冰茶#很涩，并且感觉像没放柠檬，很不好喝，点了你们家这个饮品很多次，这次和平时喝的很不一样",
+    "category": "口感问题",
+    "keywords": ["榴莲翡翠冰茶", "很涩", "没放柠檬", "不好喝", "和平时不一样"],
+    "intent": "complaint_taste"
+  }
+]

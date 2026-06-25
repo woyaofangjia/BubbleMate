@@ -1,0 +1,242 @@
+[
+  {
+    "text": "糯米少的可怜，这款每年都喝，正常是啥分量我很清楚。点的别的分店都没这么少",
+    "intent": "complaint_quantity",
+    "category": "份量问题",
+    "type": "real"
+  },
+  {
+    "text": "就是太甜了",
+    "intent": "complaint_taste",
+    "category": "口感问题",
+    "type": "real"
+  },
+  {
+    "text": "点的少少甜还是很甜，口感一点都不好，很难喝",
+    "intent": "complaint_taste",
+    "category": "口感问题",
+    "type": "real"
+  },
+  {
+    "text": "\"食材质量差\"\"份量不足\"\"包装粗糙\"非常差，不会再买了，店家出餐慢，电话打不通。服务非常差。",
+    "intent": "complaint_service",
+    "category": "综合投诉",
+    "type": "real"
+  },
+  {
+    "text": "#商家服务不佳 #价格没优势 #收到有撒漏 #配送差 #味道不好 #分量太小",
+    "intent": "complaint_general",
+    "category": "综合投诉",
+    "type": "real"
+  },
+  {
+    "text": "我点个冰沙，给我个细吸管，怎么喝？",
+    "intent": "complaint_accessory",
+    "category": "配件问题",
+    "type": "real"
+  },
+  {
+    "text": "\"糖浆劣质\"#清爽芭乐提(红芭乐)#难喝，少少糖巨巨巨甜，联系商家不予理会",
+    "intent": "complaint_taste_service",
+    "category": "口感+服务",
+    "type": "real"
+  },
+  {
+    "text": "葡萄太太太酸了",
+    "intent": "complaint_taste",
+    "category": "口感问题",
+    "type": "real"
+  },
+  {
+    "text": "全是冰块 管子都通不到下面",
+    "intent": "complaint_quantity_accessory",
+    "category": "份量+配件",
+    "type": "real"
+  },
+  {
+    "text": "#味道不好 不好喝 不好喝，像掺了水，好难喝",
+    "intent": "complaint_taste",
+    "category": "口感问题",
+    "type": "real"
+  },
+  {
+    "text": "#芝芝抹茶#超级无敌巨苦，喝起来像喝药一样，我天呐。没吃过苦，想喝药的可以来喝一下，好难喝啊，卖这么贵，还这么难喝",
+    "intent": "complaint_taste_price",
+    "category": "口感+价格",
+    "type": "real"
+  },
+  {
+    "text": "点餐快一小时显示超时了。打电话问都还没做。。。没有任何超时赔付吗",
+    "intent": "complaint_delivery",
+    "category": "配送问题",
+    "type": "real"
+  },
+  {
+    "text": "#味道不好 说了要冰，是不给",
+    "intent": "complaint_service",
+    "category": "服务问题",
+    "type": "real"
+  },
+  {
+    "text": "#味道不好 #价格没优势 好敷衍的味道，名字看着花里胡哨，实际上不如糖水",
+    "intent": "complaint_taste_price",
+    "category": "口感+价格",
+    "type": "real"
+  },
+  {
+    "text": "#榴莲翡翠冰茶#很涩，并且感觉像没放柠檬，很不好喝，点了你们家这个饮品很多次，这次和平时喝的很不一样",
+    "intent": "complaint_taste",
+    "category": "口感问题",
+    "type": "real"
+  },
+  {
+    "text": "太甜了，喝不下去",
+    "intent": "complaint_taste",
+    "category": "taste",
+    "type": "simulated"
+  },
+  {
+    "text": "味道很奇怪，不像之前喝的",
+    "intent": "complaint_taste",
+    "category": "taste",
+    "type": "simulated"
+  },
+  {
+    "text": "酸得没法喝",
+    "intent": "complaint_taste",
+    "category": "taste",
+    "type": "simulated"
+  },
+  {
+    "text": "口感涩涩的",
+    "intent": "complaint_taste",
+    "category": "taste",
+    "type": "simulated"
+  },
+  {
+    "text": "喝起来像兑了水",
+    "intent": "complaint_taste",
+    "category": "taste",
+    "type": "simulated"
+  },
+  {
+    "text": "糖度标注不准，明明点了少糖还是很甜",
+    "intent": "complaint_taste",
+    "category": "taste",
+    "type": "simulated"
+  },
+  {
+    "text": "冰块太多，饮料都没了",
+    "intent": "complaint_quantity",
+    "category": "quantity",
+    "type": "simulated"
+  },
+  {
+    "text": "份量比别家少",
+    "intent": "complaint_quantity",
+    "category": "quantity",
+    "type": "simulated"
+  },
+  {
+    "text": "糯米才几粒",
+    "intent": "complaint_quantity",
+    "category": "quantity",
+    "type": "simulated"
+  },
+  {
+    "text": "杯子只有一半满",
+    "intent": "complaint_quantity",
+    "category": "quantity",
+    "type": "simulated"
+  },
+  {
+    "text": "比平时少了一大半",
+    "intent": "complaint_quantity",
+    "category": "quantity",
+    "type": "simulated"
+  },
+  {
+    "text": "打电话没人接",
+    "intent": "complaint_service",
+    "category": "service",
+    "type": "simulated"
+  },
+  {
+    "text": "店员态度不好",
+    "intent": "complaint_service",
+    "category": "service",
+    "type": "simulated"
+  },
+  {
+    "text": "没按备注做",
+    "intent": "complaint_service",
+    "category": "service",
+    "type": "simulated"
+  },
+  {
+    "text": "等了很久没人理",
+    "intent": "complaint_service",
+    "category": "service",
+    "type": "simulated"
+  },
+  {
+    "text": "说好的加冰没给",
+    "intent": "complaint_service",
+    "category": "service",
+    "type": "simulated"
+  },
+  {
+    "text": "配送超时一小时",
+    "intent": "complaint_delivery",
+    "category": "delivery",
+    "type": "simulated"
+  },
+  {
+    "text": "还没开始做就显示超时",
+    "intent": "complaint_delivery",
+    "category": "delivery",
+    "type": "simulated"
+  },
+  {
+    "text": "送来的饮料撒了一半",
+    "intent": "complaint_delivery",
+    "category": "delivery",
+    "type": "simulated"
+  },
+  {
+    "text": "骑手找不到地址",
+    "intent": "complaint_delivery",
+    "category": "delivery",
+    "type": "simulated"
+  },
+  {
+    "text": "预计时间不准",
+    "intent": "complaint_delivery",
+    "category": "delivery",
+    "type": "simulated"
+  },
+  {
+    "text": "这么贵还这么难喝",
+    "intent": "complaint_price",
+    "category": "price",
+    "type": "simulated"
+  },
+  {
+    "text": "性价比太低",
+    "intent": "complaint_price",
+    "category": "price",
+    "type": "simulated"
+  },
+  {
+    "text": "价格涨了质量没涨",
+    "intent": "complaint_price",
+    "category": "price",
+    "type": "simulated"
+  },
+  {
+    "text": "比别家贵一倍",
+    "intent": "complaint_price",
+    "category": "price",
+    "type": "simulated"
+  }
+]
