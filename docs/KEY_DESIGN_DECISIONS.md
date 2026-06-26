@@ -325,4 +325,4 @@ BubbleMate_Test_Set (200条)
 | `scripts/generate_training_data.py` | 生成200条训练集 |
 | `scripts/generate_test_data.py` | 生成200条分层测试集 |
 
-> **面试官话术**："我的项目不是'调API的Demo'，而是'系统架构设计'。每个决策都有实验数据支撑，每个取舍都有明确的trade-off分析。"
+> 项目不是'调API的Demo'，而是'系统架构设计'。每个决策都有实验数据支撑，每个取舍都有明确的trade-off分析。

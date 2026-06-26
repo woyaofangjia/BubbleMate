@@ -1,10 +1,19 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import ChatInterface from '@/components/ChatInterface';
-import ThoughtChainPanel from '@/components/ThoughtChainPanel';
-import ToolVisualization from '@/components/ToolVisualization';
 import Header from '@/components/Header';
+
+const ThoughtChainPanel = dynamic(
+  () => import('@/components/ThoughtChainPanel'),
+  { ssr: false, loading: () => <div className="bg-gray-800 rounded-lg h-48 animate-pulse" /> }
+);
+
+const ToolVisualization = dynamic(
+  () => import('@/components/ToolVisualization'),
+  { ssr: false, loading: () => <div className="bg-gray-800 rounded-lg h-48 animate-pulse" /> }
+);
 
 export default function Home() {
   const [messages, setMessages] = useState<Array<{

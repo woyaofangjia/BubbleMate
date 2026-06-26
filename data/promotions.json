@@ -1,0 +1,86 @@
+{
+  "active": [
+    {
+      "id": "PROMO-001",
+      "name": "新客立减8元",
+      "type": "新人专享",
+      "description": "新用户首单立减8元，无门槛使用",
+      "discount": 8,
+      "condition": "新用户首单",
+      "valid_period": "长期有效",
+      "store_scope": "全部门店"
+    },
+    {
+      "id": "PROMO-002",
+      "name": "第二杯半价",
+      "type": "满减活动",
+      "description": "购买两杯及以上饮品，第二杯享受半价优惠（低价杯半价）",
+      "discount": "50%",
+      "condition": "购买2杯及以上",
+      "valid_period": "工作日 10:00-22:00",
+      "store_scope": "全部门店"
+    },
+    {
+      "id": "PROMO-003",
+      "name": "满25减5",
+      "type": "满减活动",
+      "description": "单笔订单实付满25元立减5元",
+      "discount": 5,
+      "condition": "单笔满25元",
+      "valid_period": "2026.06.01-2026.06.30",
+      "store_scope": "全部门店"
+    },
+    {
+      "id": "PROMO-004",
+      "name": "周三会员日8.8折",
+      "type": "会员专享",
+      "description": "每周三会员下单享8.8折优惠，积分翻倍",
+      "discount": "88折",
+      "condition": "会员身份 + 周三",
+      "valid_period": "每周三",
+      "store_scope": "全部门店"
+    },
+    {
+      "id": "PROMO-005",
+      "name": "下午茶套餐立减10元",
+      "type": "套餐优惠",
+      "description": "指定饮品+软欧包套餐立减10元",
+      "discount": 10,
+      "condition": "购买指定套餐",
+      "valid_period": "每天 14:00-17:00",
+      "store_scope": "奈雪的茶门店"
+    },
+    {
+      "id": "PROMO-006",
+      "name": "邀请好友得20元券",
+      "type": "邀请有礼",
+      "description": "邀请好友注册，双方各得20元无门槛券",
+      "discount": 20,
+      "condition": "邀请新用户注册成功",
+      "valid_period": "长期有效",
+      "store_scope": "全部门店"
+    },
+    {
+      "id": "PROMO-007",
+      "name": "生日月双倍积分",
+      "type": "会员专享",
+      "description": "会员生日当月消费享双倍积分",
+      "discount": "积分x2",
+      "condition": "会员生日当月",
+      "valid_period": "生日当月",
+      "store_scope": "全部门店"
+    }
+  ],
+  "upcoming": [
+    {
+      "id": "PROMO-008",
+      "name": "618全场买一送一",
+      "type": "大促活动",
+      "description": "6月18日当天全场饮品买一送一",
+      "discount": "买一送一",
+      "condition": "6月18日当天",
+      "valid_period": "2026.06.18",
+      "store_scope": "全部门店"
+    }
+  ]
+}

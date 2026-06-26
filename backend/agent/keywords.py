@@ -46,6 +46,8 @@ INTENT_KEYWORDS = {
     "query_complaint_status": ["投诉", "处理"],
     "query_member": ["会员", "会员卡"],
     "query_invoice": ["发票", "开票"],
+    "query_customize": ["加料", "配料", "珍珠", "椰果", "仙草", "芋圆", "定制", "加料选项"],
+    "query_history": ["历史订单", "之前的订单", "买过", "订单记录", "消费记录"],
     "place_order": ["点", "买", "下单"],
 }
 
@@ -71,6 +73,8 @@ CATEGORY_MAP = {
     "query_complaint_status": "投诉状态",
     "query_member": "会员查询",
     "query_invoice": "发票查询",
+    "query_customize": "加料定制",
+    "query_history": "历史订单",
     "place_order": "下单",
     "order_create": "创建订单",
     "order_modify": "修改订单",

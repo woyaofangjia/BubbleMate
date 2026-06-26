@@ -463,6 +463,136 @@ TOOL_REGISTRY = {
     }
 }
 
+def query_promotions() -> Dict:
+    promotions_path = os.path.join(os.path.dirname(__file__), "../../data/promotions.json")
+    if not os.path.exists(promotions_path):
+        return {"success": False, "error": "优惠活动数据不可用", "response": "抱歉，活动信息暂时查询不到。"}
+    with open(promotions_path, "r", encoding="utf-8") as f:
+        promo_data = json.load(f)
+    active = promo_data.get("active", [])
+    names = [p['name'] for p in active[:3]]
+    return {
+        "success": True,
+        "data": active,
+        "count": len(active),
+        "response": f"当前有{len(active)}个活动正在进行：{', '.join(names)}等。"
+    }
+
+
+def query_customize(item_name: str) -> Dict:
+    all_toppings = [
+        {"name": "珍珠", "price": 3, "category": "Q弹系列"},
+        {"name": "椰果", "price": 3, "category": "Q弹系列"},
+        {"name": "仙草冻", "price": 4, "category": "Q弹系列"},
+        {"name": "芋圆", "price": 4, "category": "Q弹系列"},
+        {"name": "西米", "price": 3, "category": "Q弹系列"},
+        {"name": "红豆", "price": 3, "category": "加料系列"},
+        {"name": "燕麦", "price": 3, "category": "加料系列"},
+        {"name": "布丁", "price": 4, "category": "加料系列"},
+        {"name": "芝士奶盖", "price": 6, "category": "顶料系列"},
+        {"name": "奶油顶", "price": 5, "category": "顶料系列"},
+        {"name": "碧根果碎", "price": 3, "category": "顶料系列"}
+    ]
+    sugar_options = ["标准糖", "七分糖", "五分糖", "三分糖", "无糖"]
+    temp_options = ["正常冰", "少冰", "去冰", "温热", "热饮"]
+    return {
+        "success": True,
+        "item": item_name,
+        "toppings": all_toppings,
+        "sugar_options": sugar_options,
+        "temp_options": temp_options,
+        "response": f"{item_name}支持{len(all_toppings)}种加料和5档糖度温度选择。"
+    }
+
+
+def query_history(user_id: str, limit: int = 3) -> Dict:
+    orders_path = os.path.join(os.path.dirname(__file__), "../../data/orders_mock.json")
+    if not os.path.exists(orders_path):
+        return {"success": False, "error": "订单系统不可用", "response": "抱歉，历史订单暂时查询不到。"}
+    with open(orders_path, "r", encoding="utf-8") as f:
+        orders_data = json.load(f)
+    user_orders = orders_data.get(f"user_{user_id}", [])
+    if not user_orders:
+        return {"success": False, "error": f"用户 {user_id} 无历史订单", "response": "抱歉，未找到您的历史订单。"}
+    recent = user_orders[:limit]
+    return {
+        "success": True,
+        "data": recent,
+        "count": len(recent),
+        "total": len(user_orders),
+        "response": f"为您找到最近{len(recent)}条历史订单。"
+    }
+
+
+def query_recommend(preference: str = None, season: str = None) -> Dict:
+    menu_path = os.path.join(os.path.dirname(__file__), "../../data/menu_data.json")
+    with open(menu_path, "r", encoding="utf-8") as f:
+        menu_data = json.load(f)
+    all_items = []
+    for store, items in menu_data.items():
+        for item in items:
+            if item["available"]:
+                item["store"] = store
+                all_items.append(item)
+    if preference:
+        pref_lower = preference.lower()
+        if "甜" in pref_lower or "奶茶" in pref_lower:
+            filtered = [i for i in all_items if i["category"] == "奶茶"]
+        elif "酸" in pref_lower or "果茶" in pref_lower or "清爽" in pref_lower:
+            filtered = [i for i in all_items if i["category"] == "果茶"]
+        elif "纯茶" in pref_lower or "茶" in pref_lower:
+            filtered = [i for i in all_items if i["category"] == "纯茶"]
+        else:
+            filtered = all_items
+    else:
+        filtered = all_items
+    filtered.sort(key=lambda x: x["sales"], reverse=True)
+    top3 = filtered[:3]
+    return {
+        "success": True,
+        "data": top3,
+        "count": len(top3),
+        "preference": preference or "热门推荐",
+        "response": f"根据{'您的偏好：'+preference if preference else '热门销量'}，为您推荐：{', '.join([i['name'] for i in top3])}。"
+    }
+
+
+TOOL_REGISTRY["query_promotions"] = {
+    "name": "query_promotions",
+    "description": "查询当前优惠活动",
+    "handler": query_promotions,
+    "parameters": {}
+}
+
+TOOL_REGISTRY["query_customize"] = {
+    "name": "query_customize",
+    "description": "查询饮品加料和定制选项",
+    "handler": query_customize,
+    "parameters": {
+        "item_name": {"type": "string", "required": True, "description": "饮品名称"}
+    }
+}
+
+TOOL_REGISTRY["query_history"] = {
+    "name": "query_history",
+    "description": "查询用户历史订单",
+    "handler": query_history,
+    "parameters": {
+        "user_id": {"type": "string", "required": True, "description": "用户手机号"},
+        "limit": {"type": "integer", "required": False, "description": "返回数量"}
+    }
+}
+
+TOOL_REGISTRY["query_recommend"] = {
+    "name": "query_recommend",
+    "description": "智能推荐饮品",
+    "handler": query_recommend,
+    "parameters": {
+        "preference": {"type": "string", "required": False, "description": "口味偏好（甜/酸/果茶/奶茶）"},
+        "season": {"type": "string", "required": False, "description": "季节"}
+    }
+}
+
 def get_tool_registry():
     """获取工具注册表"""
     return TOOL_REGISTRY

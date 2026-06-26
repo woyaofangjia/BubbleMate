@@ -138,6 +138,18 @@ class IntentRecognizerV2:
             "query_invoice": [
                 re.compile(r"(发票|开票).*?(能|可以|怎么)", re.I),
             ],
+            "query_customize": [
+                re.compile(r"(加料|配料|料|珍珠|椰果|仙草|芋圆).*?(可以|能加|有哪些|有什么)", re.I),
+                re.compile(r"(可以加|能加|加个|加一份).*?(珍珠|椰果|仙草|芋圆|布丁)", re.I),
+                re.compile(r"(定制|甜度|温度|糖度|冰度).*?(选择|选项|调整)", re.I),
+                re.compile(r"(有什么.*?(料|加料|配料))", re.I),
+            ],
+            "query_history": [
+                re.compile(r"(历史订单|之前.*?(订单|买过)|以前.*?(点|买))", re.I),
+                re.compile(r"(我之前|我以前|我上次).*?(点|买|喝|下单)", re.I),
+                re.compile(r"(订单记录|购买记录|消费记录)", re.I),
+                re.compile(r"(最近.*?(订单|买过|点过))", re.I),
+            ],
             
             # 点单类意图
             "place_order": [
@@ -203,6 +215,9 @@ class IntentRecognizerV2:
 - query_recommend: 推荐查询
 - query_order: 订单查询
 - query_refund: 退款查询
+- query_promo: 优惠活动查询
+- query_customize: 加料定制查询
+- query_history: 历史订单查询
 - complaint_taste: 口感投诉
 - complaint_quantity: 份量投诉
 - complaint_service: 服务投诉
