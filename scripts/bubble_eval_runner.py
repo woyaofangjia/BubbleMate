@@ -10,6 +10,12 @@ import time
 from typing import Dict, List, Any
 from dataclasses import dataclass, asdict
 from datetime import datetime
+from pathlib import Path
+from dotenv import load_dotenv
+
+# 加载环境变量
+env_path = Path(__file__).parent.parent / ".env"
+load_dotenv(env_path)
 
 # 添加项目根目录到sys.path
 import pathlib

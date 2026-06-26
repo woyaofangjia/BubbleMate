@@ -1,6 +1,6 @@
 """
 BubbleMate Agent - 增强版意图识别系统
-优化规则模式 + 增强关键词匹配 + 多维度特征提取
+优化规则模式 + 增强关键词匹配 + LLM兜底识别
 """
 
 import re
@@ -19,12 +19,23 @@ class Intent:
     source: str
 
 class IntentRecognizerV2:
-    """增强版意图识别器"""
+    """增强版意图识别器 - 规则 + LLM混合策略"""
     
-    def __init__(self, data_dir: str):
+    def __init__(self, data_dir: str, use_llm: bool = True):
         self.data_dir = data_dir
+        self.use_llm = use_llm
         self.rule_patterns = self._build_rule_patterns()
         self.training_data = self._load_training_data()
+        
+        # LLM兜底识别器（可选）
+        if use_llm:
+            try:
+                from backend.core.zhipu_client import call_llm
+                self.llm_client = call_llm
+            except Exception as e:
+                print(f"LLM初始化失败，使用纯规则模式: {e}")
+                self.use_llm = False
+                self.llm_client = None
         
         # 意图类别映射
         self.category_map = {
@@ -180,7 +191,7 @@ class IntentRecognizerV2:
         return []
     
     def recognize(self, text: str) -> Intent:
-        """识别意图（增强版）"""
+        """识别意图（规则 + LLM混合策略）"""
         # 1. 规则匹配（最高优先级）
         intent = self._rule_match(text)
         if intent and intent.confidence > 0.8:
@@ -191,12 +202,18 @@ class IntentRecognizerV2:
         if intent and intent.confidence > 0.5:
             return intent
         
-        # 3. 训练数据匹配
+        # 3. LLM兜底识别（针对疑难样本）
+        if self.use_llm and self.llm_client:
+            intent = self._llm_recognize(text)
+            if intent and intent.confidence > 0.4:
+                return intent
+        
+        # 4. 训练数据匹配
         intent = self._training_data_match(text)
         if intent and intent.confidence > 0.4:
             return intent
         
-        # 4. 默认通用意图
+        # 5. 默认通用意图
         return Intent(
             name="general",
             confidence=0.2,
@@ -204,6 +221,43 @@ class IntentRecognizerV2:
             keywords=[],
             source="default"
         )
+    
+    def _llm_recognize(self, text: str) -> Optional[Intent]:
+        """使用LLM进行意图识别（针对疑难样本）"""
+        try:
+            prompt = f"""你是一个奶茶店客服意图识别器。用户说："{text}"
+
+请判断意图类别（从以下选择）：
+- query_location: 门店查询
+- query_menu: 菜单查询
+- query_recommend: 推荐查询
+- query_order: 订单查询
+- query_refund: 退款查询
+- complaint_taste: 口感投诉
+- complaint_quantity: 份量投诉
+- complaint_service: 服务投诉
+- complaint_delivery: 配送投诉
+- complaint_price: 价格投诉
+- general: 通用/无法识别
+
+直接输出类别名称，不要其他文字。"""
+
+            response = self.llm_client([{"role": "user", "content": prompt}], max_tokens=20, temperature=0.1)
+            
+            # 解析响应
+            if response and response.strip() in self.category_map:
+                return Intent(
+                    name=response.strip(),
+                    confidence=0.6,  # LLM置信度设为0.6
+                    category=self.category_map.get(response.strip(), "通用"),
+                    keywords=[],
+                    source="llm"
+                )
+            
+            return None
+        except Exception as e:
+            print(f"LLM意图识别失败: {e}")
+            return None
     
     def _rule_match(self, text: str) -> Optional[Intent]:
         """规则匹配（增强版）"""

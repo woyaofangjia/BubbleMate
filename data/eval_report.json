@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-06-26T01:14:34.644283",
+  "timestamp": "2026-06-26T10:50:50.759957",
   "test_cases_count": 18,
   "level1_component": {
     "intent_accuracy": 0.667,
@@ -11,7 +11,7 @@
     "clarification_rate": 0.667,
     "clarification_correct": 6,
     "clarification_cases": 9,
-    "avg_latency_ms": 0.11
+    "avg_latency_ms": 0.1
   },
   "level2_end_to_end": {
     "solved_rate": 0.556,
