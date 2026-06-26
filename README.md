@@ -14,22 +14,31 @@
 BubbleMate/
 ├── backend/                    # 后端服务
 │   ├── agent/
-│   │   ├── intent_recognizer.py    # 意图识别（规则+关键词）
-│   │   ├── react_agent.py          # ReAct Agent核心循环
-│   │   └── memory_manager.py       # 滑动窗口记忆管理
+│   │   ├── intent_recognizer_v2.py  # 意图识别（规则+关键词+LLM兜底）
+│   │   ├── react_agent_v2.py        # ReAct Agent核心循环
+│   │   ├── memory_manager_v2.py     # 滑动窗口记忆管理 + 用户偏好提取
+│   │   ├── tool_router.py           # 意图→工具路由 + 参数提取
+│   │   ├── keywords.py              # 统一关键词定义（共享配置）
+│   │   ├── human_in_loop.py         # 人工介入机制（置信度计算）
+│   │   └── __init__.py
 │   ├── tools/
-│   │   └── tool_registry.py        # MCP工具注册
+│   │   ├── bubble_tools.py          # MCP工具实现（5个工具）
+│   │   └── __init__.py
 │   ├── api/
-│   │   └── main.py                 # FastAPI入口
+│   │   └── main.py                  # FastAPI入口
 │   ├── core/
-│   │   └── config.py               # 配置管理
+│   │   ├── config.py                # 配置管理
+│   │   └── zhipu_client.py          # 智谱AI客户端
 │   └── requirements.txt
 │
 ├── frontend/                   # 前端界面
 │   ├── app/
 │   │   ├── page.tsx                # 主页面
 │   │   ├── layout.tsx              # 根布局
-│   │   └── api/                    # API路由代理
+│   │   ├── api/                    # API路由代理
+│   │   ├── experiment-report/      # 实验报告页面
+│   │   ├── eval-report/            # 评估报告页面
+│   │   └── human-support/          # 人工客服页面
 │   ├── components/
 │   │   ├── ChatInterface.tsx       # 聊天界面
 │   │   ├── ThoughtChainPanel.tsx   # 思考链展示 ⭐
@@ -43,18 +52,24 @@ BubbleMate/
 │   ├── bubble_tea_all.json         # 25家奶茶店信息
 │   ├── real_reviews.json           # 15条真实差评
 │   ├── intent_training_data.json   # 意图训练数据(40条)
-│   └── qa_pairs.json               # 问答对(21条)
+│   ├── qa_pairs.json               # 问答对(21条)
+│   ├── menu_data.json              # 菜单数据
+│   ├── orders_mock.json            # 订单模拟数据
+│   ├── test_cases.json             # 测试用例(18条)
+│   └── eval_report.json            # 评估报告
 │
 ├── scripts/                    # 工具脚本
 │   ├── crawler.py                  # 高德地图POI爬虫
 │   ├── crawler_mall.py             # 商场爬虫
 │   ├── merge_data.py               # 数据合并
 │   ├── analyze_reviews.py          # 差评分析
-│   └── test_agent.py               # Agent测试
+│   ├── test_agent.py               # Agent测试
+│   └── bubble_eval_runner.py       # 评估脚本
 │
 ├── docs/                       # 文档
 │   ├── 30天执行计划.md
-│   └── 技术架构设计.md
+│   ├── 技术架构设计.md
+│   └── KEY_DESIGN_DECISIONS.md
 │
 ├── start.bat                   # Windows启动脚本
 └── start.sh                    # Linux/Mac启动脚本
@@ -191,11 +206,14 @@ python scripts/test_agent.py
 python scripts/test_agent.py --interactive
 
 # 意图识别测试
-python backend/agent/intent_recognizer.py
+python backend/agent/intent_recognizer_v2.py
 
 # 工具测试
-python backend/tools/tool_registry.py
+python backend/tools/bubble_tools.py
 
 # 记忆管理测试
-python backend/agent/memory_manager.py
+python backend/agent/memory_manager_v2.py
+
+# 评估测试
+python scripts/bubble_eval_runner.py
 ```

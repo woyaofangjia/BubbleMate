@@ -1,17 +1,17 @@
 {
-  "timestamp": "2026-06-26T10:50:50.759957",
+  "timestamp": "2026-06-26T17:19:37.686646",
   "test_cases_count": 18,
   "level1_component": {
-    "intent_accuracy": 0.667,
-    "intent_correct": 12,
+    "intent_accuracy": 0.611,
+    "intent_correct": 11,
     "intent_total": 18,
-    "tool_accuracy": 0.722,
-    "tool_correct": 13,
+    "tool_accuracy": 0.778,
+    "tool_correct": 14,
     "tool_total": 18,
-    "clarification_rate": 0.667,
-    "clarification_correct": 6,
+    "clarification_rate": 0.333,
+    "clarification_correct": 3,
     "clarification_cases": 9,
-    "avg_latency_ms": 0.1
+    "avg_latency_ms": 305.21
   },
   "level2_end_to_end": {
     "solved_rate": 0.556,
@@ -48,19 +48,8 @@
       }
     }
   },
-  "overall_pass_rate": 0.333,
+  "overall_pass_rate": 0.389,
   "bad_cases": [
-    {
-      "case_id": "TC-001",
-      "category": "份量问题",
-      "difficulty": "easy",
-      "predicted_intent": "complaint_quantity",
-      "expected_intent": "complaint_quantity",
-      "intent_error": false,
-      "tool_error": false,
-      "clarification_error": true,
-      "response": "【思考】用户意图: complaint_quantity, 类别: 份量投诉\n【行动】匹配投诉处理模板\n【回复】您好，非常抱歉饮品份量不足。我们会核查门店制作标准，为您提供补偿。"
-    },
     {
       "case_id": "TC-002",
       "category": "份量问题",
@@ -81,40 +70,40 @@
       "intent_error": false,
       "tool_error": false,
       "clarification_error": true,
-      "response": "【思考】用户意图: query_location, 置信度: 0.85, 需要查询信息\n【行动】调用工具: query_stores({'location': '光谷'})\n【工具结果】成功: Fal..."
+      "response": "【思考】用户意图: query_location, 工具调用失败\n【行动】使用预设回复\n【回复】抱歉，无法找到'光谷'的位置。您可以换个关键词试试。"
     },
     {
-      "case_id": "TC-106",
-      "category": "订单查询",
+      "case_id": "TC-102",
+      "category": "门店查询",
       "difficulty": "easy",
-      "predicted_intent": "query_order",
-      "expected_intent": "query_order",
+      "predicted_intent": "query_location",
+      "expected_intent": "query_location",
       "intent_error": false,
       "tool_error": false,
       "clarification_error": true,
-      "response": "【思考】工具调用异常: query_order() missing 1 required positional argument: 'user_id'\n【行动】降级处理，直接回复\n【回复】抱歉，系统暂..."
+      "response": "【思考】用户意图: query_location, 工具调用失败\n【行动】使用预设回复\n【回复】抱歉，无法找到'哪里'的位置。您可以换个关键词试试。"
     },
     {
       "case_id": "TC-017",
       "category": "口感+服务",
       "difficulty": "medium",
-      "predicted_intent": "complaint_taste_service",
+      "predicted_intent": "complaint_service",
       "expected_intent": "complaint_taste_service",
-      "intent_error": false,
+      "intent_error": true,
       "tool_error": true,
-      "clarification_error": true,
-      "response": "【思考】用户意图: complaint_taste_service, 类别: 口感+服务\n【行动】匹配投诉处理模板\n【回复】非常抱歉给您带来不好的体验。请提供您的订单号，我们核实后会为您处理退款或补偿..."
+      "clarification_error": false,
+      "response": "【思考】用户意图: complaint_service, 类别: 服务投诉\n【行动】调用工具: log_complaint\n【工具结果】成功\n【回复】感谢您的反馈，我们会认真改进。如有需要可联系店长获..."
     },
     {
       "case_id": "TC-018",
       "category": "口感+价格",
       "difficulty": "medium",
-      "predicted_intent": "general",
+      "predicted_intent": "complaint_taste",
       "expected_intent": "complaint_taste_price",
       "intent_error": true,
-      "tool_error": true,
-      "clarification_error": true,
-      "response": "【思考】用户意图: general, 直接回复\n【行动】使用预设回复模板\n【回复】您好，我是BubbleMate奶茶店客服。请问有什么可以帮助您的？您可以咨询菜单推荐、订单状态、门店信息等问题。"
+      "tool_error": false,
+      "clarification_error": false,
+      "response": "【思考】用户意图: complaint_taste, 类别: 口感投诉\n【行动】调用工具: log_complaint\n【工具结果】成功\n【回复】感谢您的反馈，我们会认真改进。如有需要可联系店长获得补..."
     },
     {
       "case_id": "TC-029",
@@ -125,7 +114,7 @@
       "intent_error": true,
       "tool_error": false,
       "clarification_error": true,
-      "response": "【思考】用户意图: complaint_taste, 类别: 口感投诉\n【行动】匹配投诉处理模板\n【回复】您好，非常抱歉饮品口感不符合您的预期。我们核实后会为您重新制作或办理退款，预计24小时内处理完..."
+      "response": "【思考】用户意图: complaint_taste, 类别: 口感投诉\n【行动】调用工具: log_complaint\n【工具结果】成功\n【回复】感谢您的反馈，我们会认真改进。如有需要可联系店长获得补..."
     },
     {
       "case_id": "TC-030",
@@ -142,23 +131,23 @@
       "case_id": "TC-031",
       "category": "指代+对比",
       "difficulty": "hard",
-      "predicted_intent": "general",
+      "predicted_intent": "complaint_taste",
       "expected_intent": "complaint_compare_history",
       "intent_error": true,
       "tool_error": true,
-      "clarification_error": false,
-      "response": "【思考】用户意图: general, 直接回复\n【行动】使用预设回复模板\n【回复】您好，我是BubbleMate奶茶店客服。请问有什么可以帮助您的？您可以咨询菜单推荐、订单状态、门店信息等问题。"
+      "clarification_error": true,
+      "response": "【思考】用户意图: complaint_taste, 类别: 口感投诉\n【行动】调用工具: log_complaint\n【工具结果】成功\n【回复】感谢您的反馈，我们会认真改进。如有需要可联系店长获得补..."
     },
     {
       "case_id": "TC-034",
       "category": "讽刺语气",
       "difficulty": "hard",
-      "predicted_intent": "general",
+      "predicted_intent": "complaint_service",
       "expected_intent": "complaint_sarcasm",
       "intent_error": true,
       "tool_error": false,
-      "clarification_error": false,
-      "response": "【思考】用户意图: general, 直接回复\n【行动】使用预设回复模板\n【回复】您好，我是BubbleMate奶茶店客服。请问有什么可以帮助您的？您可以咨询菜单推荐、订单状态、门店信息等问题。"
+      "clarification_error": true,
+      "response": "【思考】用户意图: complaint_service, 类别: 服务投诉\n【行动】调用工具: log_complaint\n【工具结果】成功\n【回复】感谢您的反馈，我们会认真改进。如有需要可联系店长获..."
     },
     {
       "case_id": "TC-045",
@@ -168,8 +157,8 @@
       "expected_intent": "unknown",
       "intent_error": true,
       "tool_error": false,
-      "clarification_error": false,
-      "response": "【思考】用户意图: general, 直接回复\n【行动】使用预设回复模板\n【回复】您好，我是BubbleMate奶茶店客服。请问有什么可以帮助您的？您可以咨询菜单推荐、订单状态、门店信息等问题。"
+      "clarification_error": true,
+      "response": "【思考】用户意图: query_menu, 置信度: 0.60, 需要查询信息\n【行动】调用工具: query_menu({})\n【工具结果】成功\n【回复】当前有4家门店，以下是各店招牌推荐。"
     },
     {
       "case_id": "TC-048",

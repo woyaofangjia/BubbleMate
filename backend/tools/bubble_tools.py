@@ -114,8 +114,8 @@ def query_menu(store_name: str = None, keyword: str = None, category: str = None
         "response": f"{matched_store} 当前有{len(available_items)}款饮品可点。"
     }
     
-    if unavailable_items > 0:
-        result["response"] += f"（{unavailable_items}款暂时缺货）"
+    if len(unavailable_items) > 0:
+        result["response"] += f"（{len(unavailable_items)}款暂时缺货）"
     
     if keyword and len(available_items) == 0:
         result["response"] = f"{matched_store}暂时没有'{keyword}'相关饮品。您可以试试其他关键词。"
