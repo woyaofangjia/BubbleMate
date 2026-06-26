@@ -1,0 +1,4150 @@
+{
+  "dataset_name": "BubbleMate_Training_Set",
+  "total": 230,
+  "version": "1.0",
+  "generated_at": "2026-06-26",
+  "description": "BubbleMate奶茶店客服Agent训练数据集，覆盖15+意图类型",
+  "intent_distribution": {
+    "complaint_taste": 30,
+    "complaint_quantity": 25,
+    "complaint_service": 20,
+    "complaint_delivery": 15,
+    "complaint_price": 10,
+    "complaint_general": 15,
+    "complaint_hygiene": 5,
+    "complaint_accessory": 5,
+    "query_menu": 20,
+    "query_recommend": 15,
+    "query_store": 15,
+    "query_order": 10,
+    "query_price": 10,
+    "query_promotion": 10,
+    "query_hours": 5,
+    "query_invoice": 5,
+    "query_member": 5,
+    "place_order": 5,
+    "unclear": 5
+  },
+  "difficulty_distribution": {
+    "easy": 181,
+    "medium": 39,
+    "hard": 10
+  },
+  "samples": [
+    {
+      "id": "TRAIN-001",
+      "user_query": "太酸死了，这杯冰沙没法喝",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "expected_action": [
+        "道歉",
+        "确认糖度标准"
+      ],
+      "keywords": [
+        "冰沙"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-002",
+      "user_query": "柠檬茶的太苦味太重了",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "expected_action": [
+        "提供补偿",
+        "确认糖度标准"
+      ],
+      "keywords": [
+        "柠檬茶"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-003",
+      "user_query": "太苦死了，这杯多肉葡萄没法喝",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "expected_action": [
+        "确认糖度标准",
+        "道歉"
+      ],
+      "keywords": [
+        "多肉葡萄"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-004",
+      "user_query": "我要的{2}，结果还是{1}",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "expected_action": [
+        "确认糖度标准",
+        "提供补偿"
+      ],
+      "keywords": [
+        "冰沙"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-005",
+      "user_query": "这个多肉葡萄也太太苦了吧，我要的正常糖啊",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "expected_action": [
+        "道歉",
+        "提供补偿"
+      ],
+      "keywords": [
+        "多肉葡萄"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-006",
+      "user_query": "多肉葡萄喝起来太甜，跟上次味道差好多",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "expected_action": [
+        "确认糖度标准",
+        "道歉"
+      ],
+      "keywords": [
+        "多肉葡萄"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-007",
+      "user_query": "这个冰沙也太怪怪的了吧，我要的正常糖啊",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "expected_action": [
+        "提供补偿",
+        "道歉"
+      ],
+      "keywords": [
+        "冰沙"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-008",
+      "user_query": "杨枝甘露喝起来太苦，跟上次味道差好多",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "expected_action": [
+        "确认糖度标准",
+        "道歉"
+      ],
+      "keywords": [
+        "杨枝甘露"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-009",
+      "user_query": "你们家的珍珠奶茶怎么越做越太酸",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "expected_action": [
+        "道歉",
+        "确认糖度标准"
+      ],
+      "keywords": [
+        "珍珠奶茶"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-010",
+      "user_query": "说好的{2}呢，{1}成这样",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "expected_action": [
+        "确认糖度标准",
+        "道歉"
+      ],
+      "keywords": [
+        "冰沙"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-011",
+      "user_query": "你们家的多肉葡萄怎么越做越怪怪的",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "expected_action": [
+        "提供补偿",
+        "道歉"
+      ],
+      "keywords": [
+        "多肉葡萄"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-012",
+      "user_query": "我要的{2}，结果还是{1}",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "expected_action": [
+        "道歉",
+        "提供补偿"
+      ],
+      "keywords": [
+        "冰沙"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-013",
+      "user_query": "多肉葡萄的怪怪的味太重了",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "expected_action": [
+        "确认糖度标准",
+        "道歉"
+      ],
+      "keywords": [
+        "多肉葡萄"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-014",
+      "user_query": "太{1}了，喝不下去",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "expected_action": [
+        "提供补偿",
+        "确认糖度标准"
+      ],
+      "keywords": [
+        "芋泥波波"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-015",
+      "user_query": "声声乌龙怎么这么怪怪的，是不是坏了",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "expected_action": [
+        "确认糖度标准",
+        "提供补偿"
+      ],
+      "keywords": [
+        "声声乌龙"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-016",
+      "user_query": "太{1}了，喝不下去",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "expected_action": [
+        "确认糖度标准",
+        "提供补偿"
+      ],
+      "keywords": [
+        "糯米奶茶"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-017",
+      "user_query": "抹茶菩提的怪怪的味太重了",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "expected_action": [
+        "确认糖度标准",
+        "提供补偿"
+      ],
+      "keywords": [
+        "抹茶菩提"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-018",
+      "user_query": "说好的{2}呢，{1}成这样",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "expected_action": [
+        "道歉",
+        "提供补偿"
+      ],
+      "keywords": [
+        "声声乌龙"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-019",
+      "user_query": "芋泥波波喝起来味道怪，跟上次味道差好多",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "expected_action": [
+        "道歉",
+        "确认糖度标准"
+      ],
+      "keywords": [
+        "芋泥波波"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-020",
+      "user_query": "茉莉绿茶喝起来味道怪，跟上次味道差好多",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "expected_action": [
+        "道歉",
+        "提供补偿"
+      ],
+      "keywords": [
+        "茉莉绿茶"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-021",
+      "user_query": "多肉葡萄怎么这么太酸，是不是坏了",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "expected_action": [
+        "道歉",
+        "提供补偿"
+      ],
+      "keywords": [
+        "多肉葡萄"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-022",
+      "user_query": "我要的{2}，结果还是{1}",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "expected_action": [
+        "道歉",
+        "提供补偿"
+      ],
+      "keywords": [
+        "柠檬茶"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-023",
+      "user_query": "这杯多肉葡萄的太酸受不了",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "expected_action": [
+        "道歉",
+        "提供补偿"
+      ],
+      "keywords": [
+        "多肉葡萄"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-024",
+      "user_query": "幽兰拿铁的怪怪的味太重了",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "expected_action": [
+        "道歉",
+        "确认糖度标准"
+      ],
+      "keywords": [
+        "幽兰拿铁"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-025",
+      "user_query": "抹茶菩提怎么这么太甜，是不是坏了",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "expected_action": [
+        "道歉",
+        "确认糖度标准"
+      ],
+      "keywords": [
+        "抹茶菩提"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-026",
+      "user_query": "太苦死了，这杯幽兰拿铁没法喝",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "expected_action": [
+        "确认糖度标准",
+        "提供补偿"
+      ],
+      "keywords": [
+        "幽兰拿铁"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-027",
+      "user_query": "怪怪的死了，这杯声声乌龙没法喝",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "expected_action": [
+        "确认糖度标准",
+        "提供补偿"
+      ],
+      "keywords": [
+        "声声乌龙"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-028",
+      "user_query": "我要的{2}，结果还是{1}",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "expected_action": [
+        "道歉",
+        "提供补偿"
+      ],
+      "keywords": [
+        "幽兰拿铁"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-029",
+      "user_query": "这个声声乌龙也太太酸了吧，我要的少糖啊",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "expected_action": [
+        "确认糖度标准",
+        "道歉"
+      ],
+      "keywords": [
+        "声声乌龙"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-030",
+      "user_query": "这杯声声乌龙的太苦受不了",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "expected_action": [
+        "提供补偿",
+        "确认糖度标准"
+      ],
+      "keywords": [
+        "声声乌龙"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TRAIN-031",
+      "user_query": "给你们差评，份量太少了",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "expected_action": [
+        "记录投诉",
+        "核实份量"
+      ],
+      "keywords": [
+        "杨枝甘露"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TRAIN-032",
+      "user_query": "半杯都是冰，茉莉绿茶呢",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "expected_action": [
+        "核实份量",
+        "道歉"
+      ],
+      "keywords": [
+        "茉莉绿茶"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TRAIN-033",
+      "user_query": "杨枝甘露怎么就这一点",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "expected_action": [
+        "道歉",
+        "记录投诉"
+      ],
+      "keywords": [
+        "杨枝甘露"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TRAIN-034",
+      "user_query": "给你们差评，份量太少了",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "expected_action": [
+        "记录投诉",
+        "核实份量"
+      ],
+      "keywords": [
+        "杨枝甘露"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TRAIN-035",
+      "user_query": "茉莉绿茶怎么就这一点",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "expected_action": [
+        "核实份量",
+        "记录投诉"
+      ],
+      "keywords": [
+        "茉莉绿茶"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TRAIN-036",
+      "user_query": "冰沙怎么就这一点",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "expected_action": [
+        "核实份量",
+        "道歉"
+      ],
+      "keywords": [
+        "冰沙"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TRAIN-037",
+      "user_query": "珍珠少一半，怎么喝",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "expected_action": [
+        "道歉",
+        "核实份量"
+      ],
+      "keywords": [
+        "芝芝莓莓"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TRAIN-038",
+      "user_query": "珍珠少一半，怎么喝",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "expected_action": [
+        "道歉",
+        "记录投诉"
+      ],
+      "keywords": [
+        "珍珠奶茶"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TRAIN-039",
+      "user_query": "料都不满，太坑了",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "expected_action": [
+        "核实份量",
+        "记录投诉"
+      ],
+      "keywords": [
+        "冰沙"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TRAIN-040",
+      "user_query": "柠檬茶就这么点，不厚道",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "expected_action": [
+        "核实份量",
+        "记录投诉"
+      ],
+      "keywords": [
+        "柠檬茶"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TRAIN-041",
+      "user_query": "一杯就这点，饿着肚子",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "expected_action": [
+        "记录投诉",
+        "道歉"
+      ],
+      "keywords": [
+        "幽兰拿铁"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TRAIN-042",
+      "user_query": "声声乌龙少得可怜，别的店都满满一碗",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "expected_action": [
+        "核实份量",
+        "道歉"
+      ],
+      "keywords": [
+        "声声乌龙"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TRAIN-043",
+      "user_query": "声声乌龙怎么就这一点",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "expected_action": [
+        "核实份量",
+        "道歉"
+      ],
+      "keywords": [
+        "声声乌龙"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TRAIN-044",
+      "user_query": "冰块太多了，冰沙都没多少",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "expected_action": [
+        "核实份量",
+        "道歉"
+      ],
+      "keywords": [
+        "冰沙"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TRAIN-045",
+      "user_query": "半杯都是冰，杨枝甘露呢",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "expected_action": [
+        "记录投诉",
+        "核实份量"
+      ],
+      "keywords": [
+        "杨枝甘露"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TRAIN-046",
+      "user_query": "半杯都是冰，幽兰拿铁呢",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "expected_action": [
+        "记录投诉",
+        "核实份量"
+      ],
+      "keywords": [
+        "幽兰拿铁"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TRAIN-047",
+      "user_query": "茉莉绿茶就这么点，不厚道",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "expected_action": [
+        "核实份量",
+        "记录投诉"
+      ],
+      "keywords": [
+        "茉莉绿茶"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TRAIN-048",
+      "user_query": "半杯都是冰，芋泥波波呢",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "expected_action": [
+        "道歉",
+        "核实份量"
+      ],
+      "keywords": [
+        "芋泥波波"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TRAIN-049",
+      "user_query": "一杯就这点，饿着肚子",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "expected_action": [
+        "道歉",
+        "核实份量"
+      ],
+      "keywords": [
+        "杨枝甘露"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TRAIN-050",
+      "user_query": "珍珠奶茶就这么点，不厚道",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "expected_action": [
+        "核实份量",
+        "记录投诉"
+      ],
+      "keywords": [
+        "珍珠奶茶"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TRAIN-051",
+      "user_query": "多肉葡萄就这么点，不厚道",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "expected_action": [
+        "道歉",
+        "记录投诉"
+      ],
+      "keywords": [
+        "多肉葡萄"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TRAIN-052",
+      "user_query": "这糯米也太少了吧",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "expected_action": [
+        "核实份量",
+        "道歉"
+      ],
+      "keywords": [
+        "糯米奶茶"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TRAIN-053",
+      "user_query": "这糯米也太少了吧",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "expected_action": [
+        "记录投诉",
+        "核实份量"
+      ],
+      "keywords": [
+        "芝芝莓莓"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TRAIN-054",
+      "user_query": "半杯都是冰，杨枝甘露呢",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "expected_action": [
+        "记录投诉",
+        "核实份量"
+      ],
+      "keywords": [
+        "杨枝甘露"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TRAIN-055",
+      "user_query": "一杯就这点，饿着肚子",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "expected_action": [
+        "记录投诉",
+        "道歉"
+      ],
+      "keywords": [
+        "杨枝甘露"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TRAIN-056",
+      "user_query": "备注不看，太不专业了",
+      "intent": "complaint_service",
+      "difficulty": "medium",
+      "expected_action": [
+        "改进服务",
+        "查询情况"
+      ],
+      "keywords": [
+        "杨枝甘露"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TRAIN-057",
+      "user_query": "店家态度恶劣",
+      "intent": "complaint_service",
+      "difficulty": "medium",
+      "expected_action": [
+        "道歉",
+        "改进服务"
+      ],
+      "keywords": [
+        "冰沙"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TRAIN-058",
+      "user_query": "说了不要冰，结果还是加了",
+      "intent": "complaint_service",
+      "difficulty": "medium",
+      "expected_action": [
+        "查询情况",
+        "道歉"
+      ],
+      "keywords": [
+        "糯米奶茶"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TRAIN-059",
+      "user_query": "催单催了三次才有人理",
+      "intent": "complaint_service",
+      "difficulty": "medium",
+      "expected_action": [
+        "改进服务",
+        "查询情况"
+      ],
+      "keywords": [
+        "冰沙"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TRAIN-060",
+      "user_query": "说了不要冰，结果还是加了",
+      "intent": "complaint_service",
+      "difficulty": "medium",
+      "expected_action": [
+        "查询情况",
+        "改进服务"
+      ],
+      "keywords": [
+        "杨枝甘露"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TRAIN-061",
+      "user_query": "服务态度太差了",
+      "intent": "complaint_service",
+      "difficulty": "medium",
+      "expected_action": [
+        "查询情况",
+        "改进服务"
+      ],
+      "keywords": [
+        "抹茶菩提"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TRAIN-062",
+      "user_query": "催单催了三次才有人理",
+      "intent": "complaint_service",
+      "difficulty": "medium",
+      "expected_action": [
+        "查询情况",
+        "道歉"
+      ],
+      "keywords": [
+        "茉莉绿茶"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TRAIN-063",
+      "user_query": "服务态度太差了",
+      "intent": "complaint_service",
+      "difficulty": "medium",
+      "expected_action": [
+        "查询情况",
+        "改进服务"
+      ],
+      "keywords": [
+        "糯米奶茶"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TRAIN-064",
+      "user_query": "等了半小时没人接待",
+      "intent": "complaint_service",
+      "difficulty": "medium",
+      "expected_action": [
+        "改进服务",
+        "道歉"
+      ],
+      "keywords": [
+        "多肉葡萄"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TRAIN-065",
+      "user_query": "店家态度恶劣",
+      "intent": "complaint_service",
+      "difficulty": "medium",
+      "expected_action": [
+        "道歉",
+        "查询情况"
+      ],
+      "keywords": [
+        "珍珠奶茶"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TRAIN-066",
+      "user_query": "催单催了三次才有人理",
+      "intent": "complaint_service",
+      "difficulty": "medium",
+      "expected_action": [
+        "查询情况",
+        "道歉"
+      ],
+      "keywords": [
+        "冰沙"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TRAIN-067",
+      "user_query": "店家态度恶劣",
+      "intent": "complaint_service",
+      "difficulty": "medium",
+      "expected_action": [
+        "道歉",
+        "查询情况"
+      ],
+      "keywords": [
+        "杨枝甘露"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TRAIN-068",
+      "user_query": "备注不看，太不专业了",
+      "intent": "complaint_service",
+      "difficulty": "medium",
+      "expected_action": [
+        "查询情况",
+        "道歉"
+      ],
+      "keywords": [
+        "幽兰拿铁"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TRAIN-069",
+      "user_query": "问个问题半天不回",
+      "intent": "complaint_service",
+      "difficulty": "medium",
+      "expected_action": [
+        "查询情况",
+        "改进服务"
+      ],
+      "keywords": [
+        "珍珠奶茶"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TRAIN-070",
+      "user_query": "备注不看，太不专业了",
+      "intent": "complaint_service",
+      "difficulty": "medium",
+      "expected_action": [
+        "改进服务",
+        "道歉"
+      ],
+      "keywords": [
+        "幽兰拿铁"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TRAIN-071",
+      "user_query": "等了半天没人理",
+      "intent": "complaint_service",
+      "difficulty": "medium",
+      "expected_action": [
+        "道歉",
+        "改进服务"
+      ],
+      "keywords": [
+        "柠檬茶"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TRAIN-072",
+      "user_query": "等了半小时没人接待",
+      "intent": "complaint_service",
+      "difficulty": "medium",
+      "expected_action": [
+        "查询情况",
+        "改进服务"
+      ],
+      "keywords": [
+        "幽兰拿铁"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TRAIN-073",
+      "user_query": "说了不要冰，结果还是加了",
+      "intent": "complaint_service",
+      "difficulty": "medium",
+      "expected_action": [
+        "道歉",
+        "改进服务"
+      ],
+      "keywords": [
+        "多肉葡萄"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TRAIN-074",
+      "user_query": "打了电话没人接，什么服务",
+      "intent": "complaint_service",
+      "difficulty": "medium",
+      "expected_action": [
+        "改进服务",
+        "查询情况"
+      ],
+      "keywords": [
+        "芝芝莓莓"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TRAIN-075",
+      "user_query": "等了半天没人理",
+      "intent": "complaint_service",
+      "difficulty": "medium",
+      "expected_action": [
+        "查询情况",
+        "改进服务"
+      ],
+      "keywords": [
+        "杨枝甘露"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TRAIN-076",
+      "user_query": "送餐洒了一半",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "expected_action": [
+        "道歉",
+        "超时赔付"
+      ],
+      "keywords": [
+        "幽兰拿铁"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TRAIN-077",
+      "user_query": "送餐洒了一半",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "expected_action": [
+        "超时赔付",
+        "查询订单"
+      ],
+      "keywords": [
+        "柠檬茶"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TRAIN-078",
+      "user_query": "迟迟不取餐",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "expected_action": [
+        "查询订单",
+        "超时赔付"
+      ],
+      "keywords": [
+        "冰沙"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TRAIN-079",
+      "user_query": "迟迟不取餐",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "expected_action": [
+        "道歉",
+        "超时赔付"
+      ],
+      "keywords": [
+        "芝芝莓莓"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TRAIN-080",
+      "user_query": "超时50分钟，奶茶都化了",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "expected_action": [
+        "超时赔付",
+        "道歉"
+      ],
+      "keywords": [
+        "抹茶菩提"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TRAIN-081",
+      "user_query": "送餐洒了一半",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "expected_action": [
+        "道歉",
+        "超时赔付"
+      ],
+      "keywords": [
+        "幽兰拿铁"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TRAIN-082",
+      "user_query": "等了一个多小时，饭都凉了",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "expected_action": [
+        "道歉",
+        "查询订单"
+      ],
+      "keywords": [
+        "声声乌龙"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TRAIN-083",
+      "user_query": "说好的半小时呢",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "expected_action": [
+        "超时赔付",
+        "查询订单"
+      ],
+      "keywords": [
+        "冰沙"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TRAIN-084",
+      "user_query": "迟迟不取餐",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "expected_action": [
+        "查询订单",
+        "道歉"
+      ],
+      "keywords": [
+        "抹茶菩提"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TRAIN-085",
+      "user_query": "送餐洒了一半",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "expected_action": [
+        "查询订单",
+        "道歉"
+      ],
+      "keywords": [
+        "幽兰拿铁"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TRAIN-086",
+      "user_query": "送餐洒了一半",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "expected_action": [
+        "查询订单",
+        "超时赔付"
+      ],
+      "keywords": [
+        "柠檬茶"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TRAIN-087",
+      "user_query": "迟迟不取餐",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "expected_action": [
+        "道歉",
+        "超时赔付"
+      ],
+      "keywords": [
+        "多肉葡萄"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TRAIN-088",
+      "user_query": "迟迟不取餐",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "expected_action": [
+        "查询订单",
+        "超时赔付"
+      ],
+      "keywords": [
+        "柠檬茶"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TRAIN-089",
+      "user_query": "等了一个多小时，饭都凉了",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "expected_action": [
+        "超时赔付",
+        "道歉"
+      ],
+      "keywords": [
+        "幽兰拿铁"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TRAIN-090",
+      "user_query": "送错了，我点的58",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "expected_action": [
+        "查询订单",
+        "超时赔付"
+      ],
+      "keywords": [
+        "幽兰拿铁"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TRAIN-091",
+      "user_query": "就这点东西卖这么贵",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "expected_action": [
+        "解释定价",
+        "提供优惠"
+      ],
+      "keywords": [
+        "抹茶菩提"
+      ],
+      "tool_calls": [
+        "query_menu",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Price"
+    },
+    {
+      "id": "TRAIN-092",
+      "user_query": "贵成这样，谁买啊",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "expected_action": [
+        "解释定价",
+        "提供优惠"
+      ],
+      "keywords": [
+        "冰沙"
+      ],
+      "tool_calls": [
+        "query_menu",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Price"
+    },
+    {
+      "id": "TRAIN-093",
+      "user_query": "这定价不合理",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "expected_action": [
+        "提供优惠",
+        "解释定价"
+      ],
+      "keywords": [
+        "糯米奶茶"
+      ],
+      "tool_calls": [
+        "query_menu",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Price"
+    },
+    {
+      "id": "TRAIN-094",
+      "user_query": "就这点东西卖这么贵",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "expected_action": [
+        "解释定价",
+        "提供优惠"
+      ],
+      "keywords": [
+        "声声乌龙"
+      ],
+      "tool_calls": [
+        "query_menu",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Price"
+    },
+    {
+      "id": "TRAIN-095",
+      "user_query": "不值这个价",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "expected_action": [
+        "提供优惠",
+        "解释定价"
+      ],
+      "keywords": [
+        "声声乌龙"
+      ],
+      "tool_calls": [
+        "query_menu",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Price"
+    },
+    {
+      "id": "TRAIN-096",
+      "user_query": "就这点东西卖这么贵",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "expected_action": [
+        "解释定价",
+        "提供优惠"
+      ],
+      "keywords": [
+        "芝芝莓莓"
+      ],
+      "tool_calls": [
+        "query_menu",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Price"
+    },
+    {
+      "id": "TRAIN-097",
+      "user_query": "就这点东西卖这么贵",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "expected_action": [
+        "提供优惠",
+        "解释定价"
+      ],
+      "keywords": [
+        "冰沙"
+      ],
+      "tool_calls": [
+        "query_menu",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Price"
+    },
+    {
+      "id": "TRAIN-098",
+      "user_query": "不值这个价",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "expected_action": [
+        "提供优惠",
+        "解释定价"
+      ],
+      "keywords": [
+        "糯米奶茶"
+      ],
+      "tool_calls": [
+        "query_menu",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Price"
+    },
+    {
+      "id": "TRAIN-099",
+      "user_query": "就这点东西卖这么贵",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "expected_action": [
+        "解释定价",
+        "提供优惠"
+      ],
+      "keywords": [
+        "声声乌龙"
+      ],
+      "tool_calls": [
+        "query_menu",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Price"
+    },
+    {
+      "id": "TRAIN-100",
+      "user_query": "比别的店贵很多",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "expected_action": [
+        "解释定价",
+        "提供优惠"
+      ],
+      "keywords": [
+        "幽兰拿铁"
+      ],
+      "tool_calls": [
+        "query_menu",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Price"
+    },
+    {
+      "id": "TRAIN-101",
+      "user_query": "你们怎么回事",
+      "intent": "complaint_general",
+      "difficulty": "easy",
+      "expected_action": [],
+      "keywords": [
+        "茉莉绿茶"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "category": "Complaint General"
+    },
+    {
+      "id": "TRAIN-102",
+      "user_query": "给你们差评",
+      "intent": "complaint_general",
+      "difficulty": "easy",
+      "expected_action": [],
+      "keywords": [
+        "多肉葡萄"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "category": "Complaint General"
+    },
+    {
+      "id": "TRAIN-103",
+      "user_query": "这事没完",
+      "intent": "complaint_general",
+      "difficulty": "easy",
+      "expected_action": [],
+      "keywords": [
+        "声声乌龙"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "category": "Complaint General"
+    },
+    {
+      "id": "TRAIN-104",
+      "user_query": "太失望了",
+      "intent": "complaint_general",
+      "difficulty": "easy",
+      "expected_action": [],
+      "keywords": [
+        "糯米奶茶"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "category": "Complaint General"
+    },
+    {
+      "id": "TRAIN-105",
+      "user_query": "我要举报",
+      "intent": "complaint_general",
+      "difficulty": "easy",
+      "expected_action": [],
+      "keywords": [
+        "芝芝莓莓"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "category": "Complaint General"
+    },
+    {
+      "id": "TRAIN-106",
+      "user_query": "这事没完",
+      "intent": "complaint_general",
+      "difficulty": "easy",
+      "expected_action": [],
+      "keywords": [
+        "糯米奶茶"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "category": "Complaint General"
+    },
+    {
+      "id": "TRAIN-107",
+      "user_query": "给你们差评",
+      "intent": "complaint_general",
+      "difficulty": "easy",
+      "expected_action": [],
+      "keywords": [
+        "多肉葡萄"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "category": "Complaint General"
+    },
+    {
+      "id": "TRAIN-108",
+      "user_query": "太不满意了",
+      "intent": "complaint_general",
+      "difficulty": "easy",
+      "expected_action": [],
+      "keywords": [
+        "柠檬茶"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "category": "Complaint General"
+    },
+    {
+      "id": "TRAIN-109",
+      "user_query": "我要投诉",
+      "intent": "complaint_general",
+      "difficulty": "easy",
+      "expected_action": [],
+      "keywords": [
+        "杨枝甘露"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "category": "Complaint General"
+    },
+    {
+      "id": "TRAIN-110",
+      "user_query": "我要投诉",
+      "intent": "complaint_general",
+      "difficulty": "easy",
+      "expected_action": [],
+      "keywords": [
+        "声声乌龙"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "category": "Complaint General"
+    },
+    {
+      "id": "TRAIN-111",
+      "user_query": "太失望了",
+      "intent": "complaint_general",
+      "difficulty": "easy",
+      "expected_action": [],
+      "keywords": [
+        "多肉葡萄"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "category": "Complaint General"
+    },
+    {
+      "id": "TRAIN-112",
+      "user_query": "给你们差评",
+      "intent": "complaint_general",
+      "difficulty": "easy",
+      "expected_action": [],
+      "keywords": [
+        "芋泥波波"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "category": "Complaint General"
+    },
+    {
+      "id": "TRAIN-113",
+      "user_query": "太不满意了",
+      "intent": "complaint_general",
+      "difficulty": "easy",
+      "expected_action": [],
+      "keywords": [
+        "幽兰拿铁"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "category": "Complaint General"
+    },
+    {
+      "id": "TRAIN-114",
+      "user_query": "问题很严重",
+      "intent": "complaint_general",
+      "difficulty": "easy",
+      "expected_action": [],
+      "keywords": [
+        "芋泥波波"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "category": "Complaint General"
+    },
+    {
+      "id": "TRAIN-115",
+      "user_query": "我要举报",
+      "intent": "complaint_general",
+      "difficulty": "easy",
+      "expected_action": [],
+      "keywords": [
+        "冰沙"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "category": "Complaint General"
+    },
+    {
+      "id": "TRAIN-116",
+      "user_query": "{0}酸到发抖，是不是坏了",
+      "intent": "complaint_hygiene",
+      "difficulty": "hard",
+      "expected_action": [
+        "补偿",
+        "高度重视"
+      ],
+      "keywords": [
+        "杨枝甘露"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Hygiene"
+    },
+    {
+      "id": "TRAIN-117",
+      "user_query": "{0}酸到发抖，是不是坏了",
+      "intent": "complaint_hygiene",
+      "difficulty": "hard",
+      "expected_action": [
+        "高度重视",
+        "建议停止饮用"
+      ],
+      "keywords": [
+        "声声乌龙"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Hygiene"
+    },
+    {
+      "id": "TRAIN-118",
+      "user_query": "{0}酸到发抖，是不是坏了",
+      "intent": "complaint_hygiene",
+      "difficulty": "hard",
+      "expected_action": [
+        "高度重视",
+        "补偿"
+      ],
+      "keywords": [
+        "幽兰拿铁"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Hygiene"
+    },
+    {
+      "id": "TRAIN-119",
+      "user_query": "这奶茶味道不对",
+      "intent": "complaint_hygiene",
+      "difficulty": "hard",
+      "expected_action": [
+        "补偿",
+        "高度重视"
+      ],
+      "keywords": [
+        "糯米奶茶"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Hygiene"
+    },
+    {
+      "id": "TRAIN-120",
+      "user_query": "喝到异物了",
+      "intent": "complaint_hygiene",
+      "difficulty": "hard",
+      "expected_action": [
+        "高度重视",
+        "建议停止饮用"
+      ],
+      "keywords": [
+        "珍珠奶茶"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Hygiene"
+    },
+    {
+      "id": "TRAIN-121",
+      "user_query": "包装袋破了",
+      "intent": "complaint_accessory",
+      "difficulty": "easy",
+      "expected_action": [
+        "道歉",
+        "补偿"
+      ],
+      "keywords": [
+        "茉莉绿茶"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Accessory"
+    },
+    {
+      "id": "TRAIN-122",
+      "user_query": "吸管给错了，细吸管怎么喝冰沙",
+      "intent": "complaint_accessory",
+      "difficulty": "easy",
+      "expected_action": [
+        "道歉",
+        "补偿"
+      ],
+      "keywords": [
+        "多肉葡萄"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Accessory"
+    },
+    {
+      "id": "TRAIN-123",
+      "user_query": "包装袋破了",
+      "intent": "complaint_accessory",
+      "difficulty": "easy",
+      "expected_action": [
+        "补偿",
+        "道歉"
+      ],
+      "keywords": [
+        "声声乌龙"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Accessory"
+    },
+    {
+      "id": "TRAIN-124",
+      "user_query": "吸管给错了，细吸管怎么喝冰沙",
+      "intent": "complaint_accessory",
+      "difficulty": "easy",
+      "expected_action": [
+        "补偿",
+        "道歉"
+      ],
+      "keywords": [
+        "茉莉绿茶"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Accessory"
+    },
+    {
+      "id": "TRAIN-125",
+      "user_query": "包装袋破了",
+      "intent": "complaint_accessory",
+      "difficulty": "easy",
+      "expected_action": [
+        "补偿",
+        "道歉"
+      ],
+      "keywords": [
+        "幽兰拿铁"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "category": "Complaint Accessory"
+    },
+    {
+      "id": "TRAIN-126",
+      "user_query": "无糖的有哪些",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "expected_action": [
+        "推荐饮品",
+        "返回菜单列表"
+      ],
+      "keywords": [
+        "珍珠奶茶"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TRAIN-127",
+      "user_query": "热天喝什么好",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回菜单列表",
+        "推荐饮品"
+      ],
+      "keywords": [
+        "糯米奶茶"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TRAIN-128",
+      "user_query": "都有些什么饮品",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "expected_action": [
+        "推荐饮品",
+        "返回菜单列表"
+      ],
+      "keywords": [
+        "芝芝莓莓"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TRAIN-129",
+      "user_query": "招牌推荐一下",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回菜单列表",
+        "推荐饮品"
+      ],
+      "keywords": [
+        "糯米奶茶"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TRAIN-130",
+      "user_query": "把菜单发来看看",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "expected_action": [
+        "推荐饮品",
+        "返回菜单列表"
+      ],
+      "keywords": [
+        "声声乌龙"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TRAIN-131",
+      "user_query": "把菜单发来看看",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回菜单列表",
+        "推荐饮品"
+      ],
+      "keywords": [
+        "声声乌龙"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TRAIN-132",
+      "user_query": "适合女生的有哪些",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "expected_action": [
+        "推荐饮品",
+        "返回菜单列表"
+      ],
+      "keywords": [
+        "冰沙"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TRAIN-133",
+      "user_query": "适合女生的有哪些",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "expected_action": [
+        "推荐饮品",
+        "返回菜单列表"
+      ],
+      "keywords": [
+        "杨枝甘露"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TRAIN-134",
+      "user_query": "招牌推荐一下",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "expected_action": [
+        "推荐饮品",
+        "返回菜单列表"
+      ],
+      "keywords": [
+        "茉莉绿茶"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TRAIN-135",
+      "user_query": "适合女生的有哪些",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "expected_action": [
+        "推荐饮品",
+        "返回菜单列表"
+      ],
+      "keywords": [
+        "芝芝莓莓"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TRAIN-136",
+      "user_query": "招牌推荐一下",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回菜单列表",
+        "推荐饮品"
+      ],
+      "keywords": [
+        "芋泥波波"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TRAIN-137",
+      "user_query": "把菜单发来看看",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回菜单列表",
+        "推荐饮品"
+      ],
+      "keywords": [
+        "多肉葡萄"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TRAIN-138",
+      "user_query": "适合女生的有哪些",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回菜单列表",
+        "推荐饮品"
+      ],
+      "keywords": [
+        "声声乌龙"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TRAIN-139",
+      "user_query": "招牌推荐一下",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "expected_action": [
+        "推荐饮品",
+        "返回菜单列表"
+      ],
+      "keywords": [
+        "芝芝莓莓"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TRAIN-140",
+      "user_query": "你们有什么{0}",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "expected_action": [
+        "推荐饮品",
+        "返回菜单列表"
+      ],
+      "keywords": [
+        "茉莉绿茶"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TRAIN-141",
+      "user_query": "你们有什么{0}",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "expected_action": [
+        "推荐饮品",
+        "返回菜单列表"
+      ],
+      "keywords": [
+        "茉莉绿茶"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TRAIN-142",
+      "user_query": "你们有什么{0}",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回菜单列表",
+        "推荐饮品"
+      ],
+      "keywords": [
+        "抹茶菩提"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TRAIN-143",
+      "user_query": "招牌推荐一下",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回菜单列表",
+        "推荐饮品"
+      ],
+      "keywords": [
+        "幽兰拿铁"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TRAIN-144",
+      "user_query": "把菜单发来看看",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "expected_action": [
+        "推荐饮品",
+        "返回菜单列表"
+      ],
+      "keywords": [
+        "杨枝甘露"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TRAIN-145",
+      "user_query": "招牌推荐一下",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "expected_action": [
+        "推荐饮品",
+        "返回菜单列表"
+      ],
+      "keywords": [
+        "糯米奶茶"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TRAIN-146",
+      "user_query": "推荐一款好喝的",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "expected_action": [
+        "询问口味偏好",
+        "推荐3款热门"
+      ],
+      "keywords": [
+        "芋泥波波"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TRAIN-147",
+      "user_query": "第一次来，有什么必点的",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "expected_action": [
+        "推荐3款热门",
+        "询问口味偏好"
+      ],
+      "keywords": [
+        "芝芝莓莓"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TRAIN-148",
+      "user_query": "推荐一款好喝的",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "expected_action": [
+        "推荐3款热门",
+        "询问口味偏好"
+      ],
+      "keywords": [
+        "珍珠奶茶"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TRAIN-149",
+      "user_query": "第一次来，有什么必点的",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "expected_action": [
+        "询问口味偏好",
+        "推荐3款热门"
+      ],
+      "keywords": [
+        "茉莉绿茶"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TRAIN-150",
+      "user_query": "爆款是哪款",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "expected_action": [
+        "询问口味偏好",
+        "推荐3款热门"
+      ],
+      "keywords": [
+        "茉莉绿茶"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TRAIN-151",
+      "user_query": "你们家什么最好喝",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "expected_action": [
+        "推荐3款热门",
+        "询问口味偏好"
+      ],
+      "keywords": [
+        "珍珠奶茶"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TRAIN-152",
+      "user_query": "最近流行什么",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "expected_action": [
+        "推荐3款热门",
+        "询问口味偏好"
+      ],
+      "keywords": [
+        "芋泥波波"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TRAIN-153",
+      "user_query": "爆款是哪款",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "expected_action": [
+        "询问口味偏好",
+        "推荐3款热门"
+      ],
+      "keywords": [
+        "芝芝莓莓"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TRAIN-154",
+      "user_query": "爆款是哪款",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "expected_action": [
+        "推荐3款热门",
+        "询问口味偏好"
+      ],
+      "keywords": [
+        "多肉葡萄"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TRAIN-155",
+      "user_query": "推荐一款好喝的",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "expected_action": [
+        "询问口味偏好",
+        "推荐3款热门"
+      ],
+      "keywords": [
+        "珍珠奶茶"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TRAIN-156",
+      "user_query": "你们店特色是什么",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "expected_action": [
+        "推荐3款热门",
+        "询问口味偏好"
+      ],
+      "keywords": [
+        "抹茶菩提"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TRAIN-157",
+      "user_query": "有选择困难症，帮我推荐",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "expected_action": [
+        "推荐3款热门",
+        "询问口味偏好"
+      ],
+      "keywords": [
+        "柠檬茶"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TRAIN-158",
+      "user_query": "你们家什么最好喝",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "expected_action": [
+        "推荐3款热门",
+        "询问口味偏好"
+      ],
+      "keywords": [
+        "珍珠奶茶"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TRAIN-159",
+      "user_query": "你们店特色是什么",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "expected_action": [
+        "询问口味偏好",
+        "推荐3款热门"
+      ],
+      "keywords": [
+        "芝芝莓莓"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TRAIN-160",
+      "user_query": "帮我挑一杯",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "expected_action": [
+        "推荐3款热门",
+        "询问口味偏好"
+      ],
+      "keywords": [
+        "杨枝甘露"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TRAIN-161",
+      "user_query": "武大那边有吗",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回门店地址",
+        "返回营业时间"
+      ],
+      "keywords": [
+        "冰沙",
+        "武大"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "category": "Query Store"
+    },
+    {
+      "id": "TRAIN-162",
+      "user_query": "梦时代店几点关门",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回营业时间",
+        "返回门店地址"
+      ],
+      "keywords": [
+        "芋泥波波",
+        "梦时代"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "category": "Query Store"
+    },
+    {
+      "id": "TRAIN-163",
+      "user_query": "有几家店",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回门店地址",
+        "返回营业时间"
+      ],
+      "keywords": [
+        "芋泥波波",
+        "武昌"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "category": "Query Store"
+    },
+    {
+      "id": "TRAIN-164",
+      "user_query": "离我最近的门店在哪",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回门店地址",
+        "返回营业时间"
+      ],
+      "keywords": [
+        "茉莉绿茶",
+        "江汉路"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "category": "Query Store"
+    },
+    {
+      "id": "TRAIN-165",
+      "user_query": "哪家人少一点",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回营业时间",
+        "返回门店地址"
+      ],
+      "keywords": [
+        "芝芝莓莓",
+        "中南"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "category": "Query Store"
+    },
+    {
+      "id": "TRAIN-166",
+      "user_query": "离我最近的门店在哪",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回营业时间",
+        "返回门店地址"
+      ],
+      "keywords": [
+        "抹茶菩提",
+        "街道口"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "category": "Query Store"
+    },
+    {
+      "id": "TRAIN-167",
+      "user_query": "哪家人少一点",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回营业时间",
+        "返回门店地址"
+      ],
+      "keywords": [
+        "声声乌龙",
+        "银泰"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "category": "Query Store"
+    },
+    {
+      "id": "TRAIN-168",
+      "user_query": "武昌附近有店吗",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回门店地址",
+        "返回营业时间"
+      ],
+      "keywords": [
+        "抹茶菩提",
+        "武昌"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "category": "Query Store"
+    },
+    {
+      "id": "TRAIN-169",
+      "user_query": "门店地址发一下",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回营业时间",
+        "返回门店地址"
+      ],
+      "keywords": [
+        "芋泥波波",
+        "银泰"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "category": "Query Store"
+    },
+    {
+      "id": "TRAIN-170",
+      "user_query": "门店地址发一下",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回营业时间",
+        "返回门店地址"
+      ],
+      "keywords": [
+        "茉莉绿茶",
+        "街道口"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "category": "Query Store"
+    },
+    {
+      "id": "TRAIN-171",
+      "user_query": "怎么去你们店",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回营业时间",
+        "返回门店地址"
+      ],
+      "keywords": [
+        "幽兰拿铁",
+        "江汉路"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "category": "Query Store"
+    },
+    {
+      "id": "TRAIN-172",
+      "user_query": "离我最近的门店在哪",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回营业时间",
+        "返回门店地址"
+      ],
+      "keywords": [
+        "冰沙",
+        "群光"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "category": "Query Store"
+    },
+    {
+      "id": "TRAIN-173",
+      "user_query": "武广附近有店吗",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回营业时间",
+        "返回门店地址"
+      ],
+      "keywords": [
+        "糯米奶茶",
+        "武广"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "category": "Query Store"
+    },
+    {
+      "id": "TRAIN-174",
+      "user_query": "哪家人少一点",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回门店地址",
+        "返回营业时间"
+      ],
+      "keywords": [
+        "声声乌龙",
+        "街道口"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "category": "Query Store"
+    },
+    {
+      "id": "TRAIN-175",
+      "user_query": "怎么去你们店",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回营业时间",
+        "返回门店地址"
+      ],
+      "keywords": [
+        "声声乌龙",
+        "武昌"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "category": "Query Store"
+    },
+    {
+      "id": "TRAIN-176",
+      "user_query": "取消订单",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "expected_action": [
+        "查询订单状态",
+        "返回配送进度"
+      ],
+      "keywords": [
+        "柠檬茶",
+        "群光"
+      ],
+      "tool_calls": [
+        "query_order"
+      ],
+      "requires_clarification": false,
+      "category": "Query Order"
+    },
+    {
+      "id": "TRAIN-177",
+      "user_query": "加一杯到订单里",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回配送进度",
+        "查询订单状态"
+      ],
+      "keywords": [
+        "柠檬茶",
+        "汉阳"
+      ],
+      "tool_calls": [
+        "query_order"
+      ],
+      "requires_clarification": false,
+      "category": "Query Order"
+    },
+    {
+      "id": "TRAIN-178",
+      "user_query": "帮我改一下订单",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回配送进度",
+        "查询订单状态"
+      ],
+      "keywords": [
+        "杨枝甘露",
+        "梦时代"
+      ],
+      "tool_calls": [
+        "query_order"
+      ],
+      "requires_clarification": false,
+      "category": "Query Order"
+    },
+    {
+      "id": "TRAIN-179",
+      "user_query": "帮我查下订单51212",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "expected_action": [
+        "查询订单状态",
+        "返回配送进度"
+      ],
+      "keywords": [
+        "芋泥波波",
+        "武广"
+      ],
+      "tool_calls": [
+        "query_order"
+      ],
+      "requires_clarification": false,
+      "category": "Query Order"
+    },
+    {
+      "id": "TRAIN-180",
+      "user_query": "帮我改一下订单",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "expected_action": [
+        "查询订单状态",
+        "返回配送进度"
+      ],
+      "keywords": [
+        "杨枝甘露",
+        "梦时代"
+      ],
+      "tool_calls": [
+        "query_order"
+      ],
+      "requires_clarification": false,
+      "category": "Query Order"
+    },
+    {
+      "id": "TRAIN-181",
+      "user_query": "加一杯到订单里",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回配送进度",
+        "查询订单状态"
+      ],
+      "keywords": [
+        "糯米奶茶",
+        "汉街"
+      ],
+      "tool_calls": [
+        "query_order"
+      ],
+      "requires_clarification": false,
+      "category": "Query Order"
+    },
+    {
+      "id": "TRAIN-182",
+      "user_query": "催一下我的订单",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "expected_action": [
+        "查询订单状态",
+        "返回配送进度"
+      ],
+      "keywords": [
+        "芋泥波波",
+        "群光"
+      ],
+      "tool_calls": [
+        "query_order"
+      ],
+      "requires_clarification": false,
+      "category": "Query Order"
+    },
+    {
+      "id": "TRAIN-183",
+      "user_query": "帮我改一下订单",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回配送进度",
+        "查询订单状态"
+      ],
+      "keywords": [
+        "抹茶菩提",
+        "光谷"
+      ],
+      "tool_calls": [
+        "query_order"
+      ],
+      "requires_clarification": false,
+      "category": "Query Order"
+    },
+    {
+      "id": "TRAIN-184",
+      "user_query": "帮我改一下订单",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回配送进度",
+        "查询订单状态"
+      ],
+      "keywords": [
+        "杨枝甘露",
+        "武广"
+      ],
+      "tool_calls": [
+        "query_order"
+      ],
+      "requires_clarification": false,
+      "category": "Query Order"
+    },
+    {
+      "id": "TRAIN-185",
+      "user_query": "订单78分钟了",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "expected_action": [
+        "查询订单状态",
+        "返回配送进度"
+      ],
+      "keywords": [
+        "冰沙",
+        "银泰"
+      ],
+      "tool_calls": [
+        "query_order"
+      ],
+      "requires_clarification": false,
+      "category": "Query Order"
+    },
+    {
+      "id": "TRAIN-186",
+      "user_query": "最贵的是哪款",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回价格信息"
+      ],
+      "keywords": [
+        "多肉葡萄"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Price"
+    },
+    {
+      "id": "TRAIN-187",
+      "user_query": "最贵的是哪款",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回价格信息"
+      ],
+      "keywords": [
+        "柠檬茶"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Price"
+    },
+    {
+      "id": "TRAIN-188",
+      "user_query": "性价比高的是哪个",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回价格信息"
+      ],
+      "keywords": [
+        "抹茶菩提"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Price"
+    },
+    {
+      "id": "TRAIN-189",
+      "user_query": "最贵的是哪款",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回价格信息"
+      ],
+      "keywords": [
+        "声声乌龙"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Price"
+    },
+    {
+      "id": "TRAIN-190",
+      "user_query": "第二杯半价吗",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回价格信息"
+      ],
+      "keywords": [
+        "糯米奶茶"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Price"
+    },
+    {
+      "id": "TRAIN-191",
+      "user_query": "菜单有价格表吗",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回价格信息"
+      ],
+      "keywords": [
+        "声声乌龙"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Price"
+    },
+    {
+      "id": "TRAIN-192",
+      "user_query": "最便宜的多少钱",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回价格信息"
+      ],
+      "keywords": [
+        "抹茶菩提"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Price"
+    },
+    {
+      "id": "TRAIN-193",
+      "user_query": "最便宜的多少钱",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回价格信息"
+      ],
+      "keywords": [
+        "多肉葡萄"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Price"
+    },
+    {
+      "id": "TRAIN-194",
+      "user_query": "有什么优惠",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回价格信息"
+      ],
+      "keywords": [
+        "芝芝莓莓"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Price"
+    },
+    {
+      "id": "TRAIN-195",
+      "user_query": "这杯茉莉绿茶价格多少",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回价格信息"
+      ],
+      "keywords": [
+        "茉莉绿茶"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Price"
+    },
+    {
+      "id": "TRAIN-196",
+      "user_query": "积分能当钱用吗",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回优惠活动"
+      ],
+      "keywords": [
+        "杨枝甘露"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Promotion"
+    },
+    {
+      "id": "TRAIN-197",
+      "user_query": "新人有什么福利",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回优惠活动"
+      ],
+      "keywords": [
+        "柠檬茶"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Promotion"
+    },
+    {
+      "id": "TRAIN-198",
+      "user_query": "会员有什么权益",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回优惠活动"
+      ],
+      "keywords": [
+        "芋泥波波"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Promotion"
+    },
+    {
+      "id": "TRAIN-199",
+      "user_query": "今天有什么优惠",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回优惠活动"
+      ],
+      "keywords": [
+        "冰沙"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Promotion"
+    },
+    {
+      "id": "TRAIN-200",
+      "user_query": "今天有什么优惠",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回优惠活动"
+      ],
+      "keywords": [
+        "声声乌龙"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Promotion"
+    },
+    {
+      "id": "TRAIN-201",
+      "user_query": "有活动吗",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回优惠活动"
+      ],
+      "keywords": [
+        "杨枝甘露"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Promotion"
+    },
+    {
+      "id": "TRAIN-202",
+      "user_query": "会员有什么权益",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回优惠活动"
+      ],
+      "keywords": [
+        "芝芝莓莓"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Promotion"
+    },
+    {
+      "id": "TRAIN-203",
+      "user_query": "积分能当钱用吗",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回优惠活动"
+      ],
+      "keywords": [
+        "珍珠奶茶"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Promotion"
+    },
+    {
+      "id": "TRAIN-204",
+      "user_query": "怎么成为会员",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回优惠活动"
+      ],
+      "keywords": [
+        "抹茶菩提"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Promotion"
+    },
+    {
+      "id": "TRAIN-205",
+      "user_query": "今天有什么优惠",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回优惠活动"
+      ],
+      "keywords": [
+        "芝芝莓莓"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "category": "Query Promotion"
+    },
+    {
+      "id": "TRAIN-206",
+      "user_query": "几点开门关门",
+      "intent": "query_hours",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回营业时间"
+      ],
+      "keywords": [
+        "抹茶菩提"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "category": "Query Hours"
+    },
+    {
+      "id": "TRAIN-207",
+      "user_query": "几点开门关门",
+      "intent": "query_hours",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回营业时间"
+      ],
+      "keywords": [
+        "杨枝甘露"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "category": "Query Hours"
+    },
+    {
+      "id": "TRAIN-208",
+      "user_query": "几点开门关门",
+      "intent": "query_hours",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回营业时间"
+      ],
+      "keywords": [
+        "多肉葡萄"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "category": "Query Hours"
+    },
+    {
+      "id": "TRAIN-209",
+      "user_query": "晚上最晚几点",
+      "intent": "query_hours",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回营业时间"
+      ],
+      "keywords": [
+        "芝芝莓莓"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "category": "Query Hours"
+    },
+    {
+      "id": "TRAIN-210",
+      "user_query": "晚上最晚几点",
+      "intent": "query_hours",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回营业时间"
+      ],
+      "keywords": [
+        "珍珠奶茶"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "category": "Query Hours"
+    },
+    {
+      "id": "TRAIN-211",
+      "user_query": "发票抬头怎么写",
+      "intent": "query_invoice",
+      "difficulty": "easy",
+      "expected_action": [
+        "说明开票流程"
+      ],
+      "keywords": [
+        "柠檬茶"
+      ],
+      "tool_calls": [],
+      "requires_clarification": false,
+      "category": "Query Invoice"
+    },
+    {
+      "id": "TRAIN-212",
+      "user_query": "可以开发票吗",
+      "intent": "query_invoice",
+      "difficulty": "easy",
+      "expected_action": [
+        "说明开票流程"
+      ],
+      "keywords": [
+        "芋泥波波"
+      ],
+      "tool_calls": [],
+      "requires_clarification": false,
+      "category": "Query Invoice"
+    },
+    {
+      "id": "TRAIN-213",
+      "user_query": "发票抬头怎么写",
+      "intent": "query_invoice",
+      "difficulty": "easy",
+      "expected_action": [
+        "说明开票流程"
+      ],
+      "keywords": [
+        "杨枝甘露"
+      ],
+      "tool_calls": [],
+      "requires_clarification": false,
+      "category": "Query Invoice"
+    },
+    {
+      "id": "TRAIN-214",
+      "user_query": "发票怎么开",
+      "intent": "query_invoice",
+      "difficulty": "easy",
+      "expected_action": [
+        "说明开票流程"
+      ],
+      "keywords": [
+        "声声乌龙"
+      ],
+      "tool_calls": [],
+      "requires_clarification": false,
+      "category": "Query Invoice"
+    },
+    {
+      "id": "TRAIN-215",
+      "user_query": "发票怎么开",
+      "intent": "query_invoice",
+      "difficulty": "easy",
+      "expected_action": [
+        "说明开票流程"
+      ],
+      "keywords": [
+        "珍珠奶茶"
+      ],
+      "tool_calls": [],
+      "requires_clarification": false,
+      "category": "Query Invoice"
+    },
+    {
+      "id": "TRAIN-216",
+      "user_query": "会员卡怎么办理",
+      "intent": "query_member",
+      "difficulty": "easy",
+      "expected_action": [
+        "说明会员权益"
+      ],
+      "keywords": [
+        "声声乌龙"
+      ],
+      "tool_calls": [],
+      "requires_clarification": false,
+      "category": "Query Member"
+    },
+    {
+      "id": "TRAIN-217",
+      "user_query": "积分怎么用",
+      "intent": "query_member",
+      "difficulty": "easy",
+      "expected_action": [
+        "说明会员权益"
+      ],
+      "keywords": [
+        "抹茶菩提"
+      ],
+      "tool_calls": [],
+      "requires_clarification": false,
+      "category": "Query Member"
+    },
+    {
+      "id": "TRAIN-218",
+      "user_query": "会员卡怎么办理",
+      "intent": "query_member",
+      "difficulty": "easy",
+      "expected_action": [
+        "说明会员权益"
+      ],
+      "keywords": [
+        "幽兰拿铁"
+      ],
+      "tool_calls": [],
+      "requires_clarification": false,
+      "category": "Query Member"
+    },
+    {
+      "id": "TRAIN-219",
+      "user_query": "会员有什么优惠",
+      "intent": "query_member",
+      "difficulty": "easy",
+      "expected_action": [
+        "说明会员权益"
+      ],
+      "keywords": [
+        "芋泥波波"
+      ],
+      "tool_calls": [],
+      "requires_clarification": false,
+      "category": "Query Member"
+    },
+    {
+      "id": "TRAIN-220",
+      "user_query": "怎么成为VIP",
+      "intent": "query_member",
+      "difficulty": "easy",
+      "expected_action": [
+        "说明会员权益"
+      ],
+      "keywords": [
+        "杨枝甘露"
+      ],
+      "tool_calls": [],
+      "requires_clarification": false,
+      "category": "Query Member"
+    },
+    {
+      "id": "TRAIN-221",
+      "user_query": "下单声声乌龙两杯",
+      "intent": "place_order",
+      "difficulty": "easy",
+      "expected_action": [
+        "确认订单",
+        "返回下单结果"
+      ],
+      "keywords": [
+        "声声乌龙",
+        "汉口"
+      ],
+      "tool_calls": [
+        "place_order"
+      ],
+      "requires_clarification": false,
+      "category": "Place Order"
+    },
+    {
+      "id": "TRAIN-222",
+      "user_query": "帮我下单",
+      "intent": "place_order",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回下单结果",
+        "确认订单"
+      ],
+      "keywords": [
+        "幽兰拿铁",
+        "汉阳"
+      ],
+      "tool_calls": [
+        "place_order"
+      ],
+      "requires_clarification": false,
+      "category": "Place Order"
+    },
+    {
+      "id": "TRAIN-223",
+      "user_query": "帮我下单",
+      "intent": "place_order",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回下单结果",
+        "确认订单"
+      ],
+      "keywords": [
+        "茉莉绿茶",
+        "中南"
+      ],
+      "tool_calls": [
+        "place_order"
+      ],
+      "requires_clarification": false,
+      "category": "Place Order"
+    },
+    {
+      "id": "TRAIN-224",
+      "user_query": "来一杯柠檬茶",
+      "intent": "place_order",
+      "difficulty": "easy",
+      "expected_action": [
+        "返回下单结果",
+        "确认订单"
+      ],
+      "keywords": [
+        "柠檬茶",
+        "汉口"
+      ],
+      "tool_calls": [
+        "place_order"
+      ],
+      "requires_clarification": false,
+      "category": "Place Order"
+    },
+    {
+      "id": "TRAIN-225",
+      "user_query": "急，来一杯糯米奶茶",
+      "intent": "place_order",
+      "difficulty": "easy",
+      "expected_action": [
+        "确认订单",
+        "返回下单结果"
+      ],
+      "keywords": [
+        "糯米奶茶",
+        "武大"
+      ],
+      "tool_calls": [
+        "place_order"
+      ],
+      "requires_clarification": false,
+      "category": "Place Order"
+    },
+    {
+      "id": "TRAIN-226",
+      "user_query": "有事咨询",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "expected_action": [
+        "询问具体需求"
+      ],
+      "keywords": [
+        "柠檬茶"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "category": "Unclear"
+    },
+    {
+      "id": "TRAIN-227",
+      "user_query": "嗯",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "expected_action": [
+        "询问具体需求"
+      ],
+      "keywords": [
+        "冰沙"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "category": "Unclear"
+    },
+    {
+      "id": "TRAIN-228",
+      "user_query": "有事咨询",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "expected_action": [
+        "询问具体需求"
+      ],
+      "keywords": [
+        "多肉葡萄"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "category": "Unclear"
+    },
+    {
+      "id": "TRAIN-229",
+      "user_query": "有事咨询",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "expected_action": [
+        "询问具体需求"
+      ],
+      "keywords": [
+        "冰沙"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "category": "Unclear"
+    },
+    {
+      "id": "TRAIN-230",
+      "user_query": "那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "expected_action": [
+        "询问具体需求"
+      ],
+      "keywords": [
+        "幽兰拿铁"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "category": "Unclear"
+    }
+  ]
+}

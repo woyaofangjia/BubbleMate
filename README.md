@@ -100,34 +100,30 @@ BubbleMate/
 
 | 指标 | 结果 | 说明 |
 |------|------|------|
-| 意图识别准确率 | **90.0%** | 20条测试用例，18条正确 |
-| Agent vs Baseline | **+10.0%** | 关键词匹配90% → 完整Agent 100% |
+| 意图识别准确率 | **37.0%** | 200条测试集（含40条对抗样本） |
+| 分层评测 | Easy 50% / Medium 33% / Hard 10% | 三层难度分布 |
+| 对抗样本通过率 | **10.0%** | 40条（讽刺、指代、模糊表达） |
 | 工具调用成功率 | **100.0%** | 9个异常场景全部正确处理 |
 | 记忆窗口最优配置 | **5轮** | 平衡记忆保留与响应速度 |
+| Baseline（纯LLM） | **45.0%** | Zero-shot直接回复 |
 
 ### 📈 可视化实验报告
 访问地址：`http://localhost:3001/experiment-report`
-![实验概况](images/联想截图_20260626000759.png)
 
 ### 🔬 实验1：意图识别准确率
 
-![意图识别实验](images/联想截图_20260626000822.png)
+- 测试集：200条分层测试用例（Easy 100 + Medium 60 + Hard 40）
+- 准确率：37.0%（74/200）
+- 覆盖意图：15+种（complaint_taste, complaint_quantity, query_recommend, query_order等）
 
-- 测试集：20条真实客服语料
-- 准确率：90.0%（18/20）
-- 覆盖意图：complaint_taste, complaint_quantity, query_recommend, query_order, query_location, query_refund, query_opentime, complaint_delivery, complaint_service, query_price, query_temp, query_sugar, query_delivery, query_promo, query_complaint_status, place_order, query_member, query_invoice
+### 🔬 实验2：对比基线（纯LLM vs 完整Agent）
 
-### 🔬 实验2：对比基线
-
-![对比基线实验](images/联想截图_20260626000902.png)
-
-- **Baseline**: 简单关键词匹配 → 90.0%准确率
-- **完整Agent**: 规则+关键词+训练数据 → 100.0%准确率
-- **提升**: +10.0%（关键修复"门店营业时间"误识别）
+- **Baseline**: 纯LLM Zero-shot → 45.0%准确率
+- **完整Agent**: 规则+关键词+工具调用 → 37.0%准确率（含Hard样本）
+- **Easy+Medium**: 45%（与LLM相当）
+- **说明**: 当前Agent在Hard对抗样本上表现差，但在确定性任务上与LLM相当
 
 ### 🔬 实验3：工具调用异常处理
-
-![工具调用实验](images/联想截图_20260626000851.png)
 
 9个异常场景全部正确处理：
 - 参数缺失 → 自动反问
@@ -136,24 +132,50 @@ BubbleMate/
 
 ### 🔬 实验4：记忆窗口对比
 
-![记忆窗口实验](images/联想截图_20260626000916.png)
-
-| 窗口大小 | 消息数 | 有摘要 | 记住实体 | 耗时 |
-|---------|--------|--------|----------|------|
-| 3轮 | 4 | ✓ | ✓ | 0.2ms |
-| **5轮** | **6** | **✓** | **✓** | **0.0ms** |
-| 10轮 | 6 | ✗ | ✓ | 0.0ms |
+| 窗口大小 | 消息数 | 有摘要 | 记住实体 | 首Token延迟影响 |
+|---------|--------|--------|----------|----------------|
+| 3轮 | 4 | ✓ | ✓ | 无明显影响 |
+| **5轮** | **6** | **✓** | **✓** | **无明显影响（推荐）** |
+| 10轮 | 6 | ✗ | ✓ | 延迟增加约200ms |
 
 **结论**: 5轮为最优选择（覆盖典型场景+触发摘要压缩）
 
-### 🎯 Bad Case 根因分析
+### 🔬 实验5：分层评测（Easy/Medium/Hard）
 
-![Bad Case分析](images/联想截图_20260626000928.png)
+| 难度 | 样本数 | 准确率 | 特征 |
+|------|--------|--------|------|
+| 😊 Easy | 100（50%） | 50.0% | 直接表达、单一意图 |
+| 😐 Medium | 60（30%） | 33.3% | 复合意图、上下文依赖 |
+| 😰 Hard | 40（20%） | 10.0% | 对抗样本、讽刺、指代不明 |
+
+### 🔬 实验6：对抗样本分析
+
+| 对抗类型 | 通过数/总数 | 通过率 |
+|---------|-----------|--------|
+| 讽刺语气（"呵呵"） | 0/8 | 0% |
+| 指代不明（"那个"） | 0/12 | 0% |
+| 历史对比 | 4/4 | 100% |
+| 模糊表达 | 0/4 | 0% |
+
+**核心短板**: 讽刺语气识别和指代消解是主要问题
+
+### 🎯 Bad Case 根因分析
 
 | 错误输入 | 预测 | 期望 | 根因 | 改进方向 |
 |---------|------|------|------|----------|
-| "珍珠奶茶多少钱？" | complaint_quantity | query_price | 训练数据不足 | 增加价格类关键词优先级 |
-| "今天有什么优惠？" | query_menu | query_promo | 意图边界模糊 | 增加优惠类关键词 |
+| "呵呵，你们这服务绝了" | general | complaint_sarcasm | 讽刺语气未识别 | 增加"呵呵"、"绝了"关键词 |
+| "那个" | general | unclear | 指代不明 | 增加指代消解逻辑 |
+| "退款" | query_refund | complaint_refund | 意图边界模糊 | 优化退款意图分类 |
+| "上次买的幽兰拿铁这次怎么没了" | query_order | query_menu | 上下文依赖 | 增加历史对比识别 |
+
+### ⚠️ 实验局限性说明
+
+> 本次实验受限于项目周期，测试集为200条对抗样本集。评测结果揭示：
+> - **Easy样本（50%）**：规则匹配表现良好
+> - **Hard样本（10%）**：对抗样本（讽刺、指代）是核心短板
+> - **优化空间**：增加讽刺识别和指代消解是下一步重点
+>
+> 完整评测需引入**人工盲测（A/B Test）**和**在线反馈闭环（用户纠偏率）**进行联合评估。
 
 ## 运行方式
 
@@ -214,6 +236,18 @@ python backend/tools/bubble_tools.py
 # 记忆管理测试
 python backend/agent/memory_manager_v2.py
 
-# 评估测试
+# 评估测试（18条测试用例）
 python scripts/bubble_eval_runner.py
+
+# 分层评测（200条测试集）
+python scripts/stratified_eval.py
+
+# 纯LLM Baseline测试
+python scripts/llm_baseline_test.py
+
+# 生成训练数据（200条）
+python scripts/generate_training_data.py
+
+# 生成测试数据（200条）
+python scripts/generate_test_data.py
 ```

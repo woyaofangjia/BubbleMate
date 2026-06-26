@@ -41,31 +41,82 @@ interface ExperimentResults {
   };
 }
 
-// 模拟实验数据（真实数据）
+interface StratifiedResults {
+  easy_accuracy: number;
+  medium_accuracy: number;
+  hard_accuracy: number;
+  overall_accuracy: number;
+  adversarial_pass_rate: number;
+  adversarial_by_type: {
+    sarcasm: { correct: number; total: number };
+    reference: { correct: number; total: number };
+    history_comparison: { correct: number; total: number };
+    vague: { correct: number; total: number };
+    implied?: { correct: number; total: number };
+    neutral?: { correct: number; total: number };
+    implied_complaint?: { correct: number; total: number };
+  };
+}
+
+interface ExperimentResults {
+  intent_accuracy: {
+    accuracy: number;
+    total: number;
+    correct: number;
+    bad_cases: Array<{
+      input: string;
+      expected: string;
+      actual: string;
+      confidence: number;
+    }>;
+  };
+  baseline_comparison: {
+    baseline_accuracy: number;
+    agent_accuracy: number;
+    improvement: number;
+    baseline_type: string;
+  };
+  tool_fallback: {
+    success_rate: number;
+    details: Array<{
+      name: string;
+      expected: string;
+      actual: string;
+      correct: boolean;
+    }>;
+  };
+  memory_window: {
+    memory_results: Array<{
+      window_size: number;
+      message_count: number;
+      has_summary: boolean;
+      remembers_drink: boolean;
+      remembers_sugar: boolean;
+      time_ms: number;
+    }>;
+  };
+  stratified_results: StratifiedResults;
+  timestamp?: string;
+}
+
 const mockData: ExperimentResults = {
   intent_accuracy: {
-    accuracy: 90.0,
-    total: 20,
-    correct: 18,
+    accuracy: 37.0,
+    total: 200,
+    correct: 74,
     bad_cases: [
-      {
-        input: "珍珠奶茶多少钱？",
-        expected: "query_price",
-        actual: "complaint_quantity",
-        confidence: 0.85
-      },
-      {
-        input: "今天有什么优惠？",
-        expected: "query_promo",
-        actual: "query_menu",
-        confidence: 0.53
-      }
+      { input: "你们有什么优惠？", expected: "query_promotion", actual: "query_menu", confidence: 0.53 },
+      { input: "退款", expected: "complaint_refund", actual: "query_refund", confidence: 0.72 },
+      { input: "呵呵，你们这服务绝了", expected: "complaint_sarcasm", actual: "general", confidence: 0.30 },
+      { input: "那个", expected: "unclear", actual: "general", confidence: 0.15 },
+      { input: "上次买的幽兰拿铁这次怎么没了", expected: "query_menu", actual: "query_order", confidence: 0.45 }
     ]
   },
   baseline_comparison: {
-    baseline_accuracy: 90.0,
-    agent_accuracy: 100.0,
-    improvement: 10.0
+    baseline_accuracy: 45.0,
+    agent_accuracy: 37.0,
+    improvement: -8.0,
+    baseline_type: "纯LLM Zero-shot"
   },
   tool_fallback: {
     success_rate: 100.0,
@@ -87,21 +138,60 @@ const mockData: ExperimentResults = {
       { window_size: 5, message_count: 6, has_summary: true, remembers_drink: true, remembers_sugar: true, time_ms: 0.0 },
       { window_size: 10, message_count: 6, has_summary: false, remembers_drink: true, remembers_sugar: true, time_ms: 0.0 }
     ]
-  }
+  },
+  stratified_results: {
+    easy_accuracy: 50.0,
+    medium_accuracy: 33.3,
+    hard_accuracy: 10.0,
+    overall_accuracy: 37.0,
+    adversarial_pass_rate: 10.0,
+    adversarial_by_type: {
+      sarcasm: { correct: 0, total: 8 },
+      reference: { correct: 0, total: 12 },
+      history_comparison: { correct: 4, total: 4 },
+      vague: { correct: 0, total: 4 },
+      implied: { correct: 0, total: 4 },
+      neutral: { correct: 0, total: 4 },
+      implied_complaint: { correct: 0, total: 4 }
+    }
+  },
+  timestamp: '2026-06-26'
 };
 
 export default function ExperimentReport() {
   const [data, setData] = useState<ExperimentResults | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadData = async () => {
+    setError(null);
+    try {
+      const res = await fetch('/api/experiment-results');
+      if (!res.ok) {
+        throw new Error('Failed to fetch experiment results');
+      }
+      const result = await res.json();
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      setData(result);
+    } catch (err) {
+      console.error('Failed to load data:', err);
+      setError('无法加载实验数据，显示默认数据');
+      setData(mockData);
+    }
+  };
 
   useEffect(() => {
-    // 尝试从API加载真实数据
-    fetch('/api/experiment-results')
-      .then(res => res.json())
-      .then(setData)
-      .catch(() => setData(mockData))
-      .finally(() => setLoading(false));
+    loadData();
   }, []);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadData();
+    setRefreshing(false);
+  };
 
   if (loading) {
     return (
@@ -115,17 +205,46 @@ export default function ExperimentReport() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      {/* Header */}
+      {/* Header */
       <header className="bg-gray-800 border-b border-gray-700 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-teal-400">BubbleMate 实验报告</h1>
-            <p className="text-gray-400 text-sm mt-1">Agent评测体系 - 面试核心亮点</p>
+            <p className="text-gray-400 text-sm mt-1">分层评测体系 - 面试核心亮点</p>
           </div>
-          <div className="text-sm text-gray-500">
-            更新时间: 2026-06-25
+          <div className="flex items-center gap-4">
+            <div className="text-sm text-gray-500">
+              更新时间: {results.timestamp || '2026-06-26'} | 测试集: {results.intent_accuracy.total}条
+            </div>
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="px-4 py-2 bg-teal-600 hover:bg-teal-500 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg text-sm font-medium transition-colors"
+            >
+              {refreshing ? (
+                <span className="flex items-center gap-2">
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  刷新中...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  刷新数据
+                </span>
+              )}
+            </button>
           </div>
         </div>
+        {error && (
+          <div className="max-w-7xl mx-auto mt-2 text-sm text-yellow-400 bg-yellow-900/20 px-4 py-2 rounded">
+            ⚠️ {error}
+          </div>
+        )}
       </header>
 
       <main className="max-w-7xl mx-auto p-6 space-y-6">
@@ -150,10 +269,10 @@ export default function ExperimentReport() {
             color="purple"
           />
           <MetricCard
-            title="Bad Case数"
-            value={String(results.intent_accuracy.bad_cases.length)}
-            subtitle="已做根因分析"
-            color="orange"
+            title="对抗样本通过率"
+            value={`${results.stratified_results.adversarial_pass_rate}%`}
+            subtitle="40条对抗样本"
+            color="red"
           />
         </section>
 
@@ -257,6 +376,76 @@ export default function ExperimentReport() {
           </div>
         </section>
 
+        {/* 实验5: 分层评测 */}
+        <section className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            <span className="w-8 h-8 bg-cyan-600 rounded-lg flex items-center justify-center text-sm">5</span>
+            实验5：分层评测（Easy/Medium/Hard）
+          </h2>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="bg-green-900/30 border border-green-600 rounded-lg p-4">
+              <div className="text-gray-400 text-sm">😊 Easy（直接表达）</div>
+              <div className="text-3xl font-bold text-green-400">{results.stratified_results.easy_accuracy}%</div>
+              <div className="text-xs text-gray-500 mt-1">100条（50%）</div>
+            </div>
+            <div className="bg-yellow-900/30 border border-yellow-600 rounded-lg p-4">
+              <div className="text-gray-400 text-sm">😐 Medium（复合意图）</div>
+              <div className="text-3xl font-bold text-yellow-400">{results.stratified_results.medium_accuracy}%</div>
+              <div className="text-xs text-gray-500 mt-1">60条（30%）</div>
+            </div>
+            <div className="bg-red-900/30 border border-red-600 rounded-lg p-4">
+              <div className="text-gray-400 text-sm">😰 Hard（对抗样本）</div>
+              <div className="text-3xl font-bold text-red-400">{results.stratified_results.hard_accuracy}%</div>
+              <div className="text-xs text-gray-500 mt-1">40条（20%）</div>
+            </div>
+          </div>
+          <div className="mt-4 bg-gray-700 rounded-lg p-4">
+            <div className="text-sm text-gray-400 mb-2">分层分析结论</div>
+            <ul className="text-xs space-y-1">
+              <li className="text-green-400">✓ Easy样本：规则匹配表现良好（50%）</li>
+              <li className="text-yellow-400">⚠️ Medium样本：复合意图处理不足（33%）</li>
+              <li className="text-red-400">✗ Hard样本：对抗样本极度困难（10%）</li>
+            </ul>
+          </div>
+        </section>
+
+        {/* 实验6: 对抗样本分析 */}
+        <section className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            <span className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center text-sm">6</span>
+            实验6：对抗样本分析（通过率: {results.stratified_results.adversarial_pass_rate}%）
+          </h2>
+          <div className="grid grid-cols-4 gap-3">
+            {[
+              { name: "讽刺语气", data: results.stratified_results.adversarial_by_type.sarcasm, color: "red" },
+              { name: "指代不明", data: results.stratified_results.adversarial_by_type.reference, color: "red" },
+              { name: "历史对比", data: results.stratified_results.adversarial_by_type.history_comparison, color: "green" },
+              { name: "模糊表达", data: results.stratified_results.adversarial_by_type.vague, color: "red" },
+              { name: "隐含表达", data: results.stratified_results.adversarial_by_type.implied, color: "red" },
+              { name: "中性表达", data: results.stratified_results.adversarial_by_type.neutral, color: "yellow" },
+              { name: "隐含投诉", data: results.stratified_results.adversarial_by_type.implied_complaint, color: "red" },
+            ].filter(item => item.data && item.data.total > 0).map((item) => (
+              <div key={item.name} className={`rounded-lg p-3 ${item.color === 'green' ? 'bg-green-900/30' : 'bg-red-900/30'}`}>
+                <div className="text-xs text-gray-400">{item.name}</div>
+                <div className={`text-xl font-bold ${item.color === 'green' ? 'text-green-400' : 'text-red-400'}`}>
+                  {item.data.correct}/{item.data.total}
+                </div>
+                <div className={`text-xs ${item.color === 'green' ? 'text-green-300/70' : 'text-red-300/70'}`}>
+                  {Math.round(item.data.correct / item.data.total * 100)}%
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 bg-red-900/20 border border-red-700 rounded-lg p-4">
+            <div className="text-sm text-red-400 mb-2">🔴 关键短板</div>
+            <ul className="text-xs text-gray-300 space-y-1">
+              <li>• 讽刺语气（如"呵呵"）无法识别 → 需要增加情感分析</li>
+              <li>• 指代不明（如"那个"）无法解析 → 需要指代消解逻辑</li>
+              <li>• 历史对比场景表现良好 → 上下文记忆有效</li>
+            </ul>
+          </div>
+        </section>
+
         {/* Bad Case 分析 */}
         <section className="bg-gray-800 rounded-xl p-6 border border-gray-700">
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
@@ -278,9 +467,11 @@ export default function ExperimentReport() {
                 </div>
                 <div className="mt-3 pt-3 border-t border-gray-600">
                   <div className="text-sm text-yellow-400">
-                    💡 改进方向: {case_.input.includes('多少钱') 
-                      ? "增加'价格'类关键词('多少钱','价格','贵')的优先级" 
-                      : "增加'优惠'类关键词('优惠','活动','折扣','券')"}
+                    💡 改进方向: {case_.input.includes('呵呵') ? '增加讽刺语气识别（如"呵呵"、"绝了"）' : 
+                               case_.input === '那个' ? '增加指代消解逻辑（如"那个"、"上次"）' :
+                               case_.input.includes('退款') ? '优化退款意图边界（query_refund vs complaint_refund）' :
+                               case_.input.includes('上次') ? '增加历史对比场景的上下文注入' :
+                               '增加"优惠"类关键词优先级'}
                   </div>
                 </div>
               </div>
@@ -292,15 +483,17 @@ export default function ExperimentReport() {
         <section className="bg-gradient-to-r from-teal-900/50 to-blue-900/50 rounded-xl p-6 border border-teal-500/30">
           <h2 className="text-xl font-semibold mb-4">🎯 面试核心话术</h2>
           <div className="bg-gray-900/50 rounded-lg p-4 font-mono text-sm text-gray-300">
-            <p className="mb-2">这是我项目最核心的部分——<span className="text-teal-400">一套完整的Agent评测体系</span>。</p>
-            <p className="mb-2">我不只是写了Agent，我还设计了4个实验来证明它有效：</p>
+            <p className="mb-2">这是我项目最核心的部分——<span className="text-teal-400">一套完整的分层评测体系</span>。</p>
+            <p className="mb-2">我用200条测试集（含40条对抗样本）做了6个实验：</p>
             <ul className="list-disc list-inside mb-2 ml-4">
-              <li>意图识别准确率: <span className="text-green-400">{results.intent_accuracy.accuracy}%</span></li>
+              <li>意图识别准确率: <span className="text-green-400">{results.intent_accuracy.accuracy}%</span>（200条）</li>
+              <li>分层评测: <span className="text-green-400">Easy 50%</span> / <span className="text-yellow-400">Medium 33%</span> / <span className="text-red-400">Hard 10%</span></li>
+              <li>对抗样本通过率: <span className="text-red-400">{results.stratified_results.adversarial_pass_rate}%</span>（40条）</li>
               <li>工具异常处理成功率: <span className="text-green-400">{results.tool_fallback.success_rate}%</span></li>
-              <li>记忆窗口的最优配置: <span className="text-green-400">5轮</span></li>
-              <li>Agent vs Baseline提升: <span className="text-green-400">+{results.baseline_comparison.improvement}%</span></li>
+              <li>记忆窗口最优配置: <span className="text-green-400">5轮</span></li>
+              <li>Baseline对比: 纯LLM <span className="text-gray-400">{results.baseline_comparison.baseline_accuracy}%</span></li>
             </ul>
-            <p className="text-teal-300">这个闭环——发现问题→分析根因→优化→再验证——才是这个项目真正的价值所在。</p>
+            <p className="text-teal-300">这套评测体系揭示了核心短板——讽刺语气和指代不明的处理。发现问题→分析根因→优化→再验证，这个闭环才是项目真正的价值。</p>
           </div>
         </section>
       </main>

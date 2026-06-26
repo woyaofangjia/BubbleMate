@@ -1,0 +1,3557 @@
+{
+  "dataset_name": "BubbleMate_Test_Set",
+  "total": 200,
+  "version": "1.0",
+  "generated_at": "2026-06-26",
+  "description": "BubbleMate奶茶店客服Agent测试数据集，分层采样覆盖Easy/Medium/Hard",
+  "layer_distribution": {
+    "easy": 100,
+    "medium": 60,
+    "hard": 40
+  },
+  "difficulty_distribution": {
+    "easy": 100,
+    "medium": 60,
+    "hard": 40
+  },
+  "intent_distribution": {
+    "complaint_service": 9,
+    "query_promotion": 9,
+    "complaint_quantity": 14,
+    "query_member": 5,
+    "complaint_refund": 9,
+    "complaint_taste": 26,
+    "query_order": 9,
+    "query_menu": 9,
+    "query_customize": 4,
+    "complaint_delivery": 14,
+    "query_price": 9,
+    "complaint_sarcasm": 8,
+    "unclear": 20,
+    "query_hours": 9,
+    "query_store": 10,
+    "complaint_price": 9,
+    "complaint_accessory": 4,
+    "query_invoice": 5,
+    "query_recommend": 13,
+    "place_order": 5
+  },
+  "adversarial_sample_count": 40,
+  "samples": [
+    {
+      "id": "TEST-001",
+      "user_query": "服务态度差",
+      "intent": "complaint_service",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "道歉，查询情况，改进服务",
+      "keywords": [
+        "服务",
+        "差"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TEST-002",
+      "user_query": "你们有什么优惠",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回当前优惠活动",
+      "keywords": [
+        "优惠"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Promotion"
+    },
+    {
+      "id": "TEST-003",
+      "user_query": "糯米少得可怜",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "道歉，核实份量，记录投诉",
+      "keywords": [
+        "糯米",
+        "少"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TEST-004",
+      "user_query": "会员卡怎么办",
+      "intent": "query_member",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "说明会员权益",
+      "keywords": [
+        "会员"
+      ],
+      "tool_calls": [],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Member"
+    },
+    {
+      "id": "TEST-005",
+      "user_query": "冰块太多了",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "道歉，核实份量，记录投诉",
+      "keywords": [
+        "冰块",
+        "多"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TEST-006",
+      "user_query": "我要退款，单号45678",
+      "intent": "complaint_refund",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "确认订单，办理退款",
+      "keywords": [
+        "退款",
+        "45678"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Refund"
+    },
+    {
+      "id": "TEST-007",
+      "user_query": "芝芝莓莓太酸了，跟上次喝的不一样",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "道歉，确认糖度，反馈或退款",
+      "keywords": [
+        "芝芝莓莓",
+        "太酸",
+        "上次"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TEST-008",
+      "user_query": "订单12345什么时候到",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "查询订单状态和配送进度",
+      "keywords": [
+        "订单",
+        "12345"
+      ],
+      "tool_calls": [
+        "query_order"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Order"
+    },
+    {
+      "id": "TEST-009",
+      "user_query": "上次买的幽兰拿铁这次怎么没了",
+      "intent": "query_menu",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "返回菜单列表或推荐",
+      "keywords": [
+        "上次",
+        "没了"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TEST-010",
+      "user_query": "可以加珍珠吗",
+      "intent": "query_customize",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "返回加料选项",
+      "keywords": [
+        "加珍珠"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Customize"
+    },
+    {
+      "id": "TEST-011",
+      "user_query": "退款",
+      "intent": "complaint_refund",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "确认订单，办理退款",
+      "keywords": [
+        "退款"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Refund"
+    },
+    {
+      "id": "TEST-012",
+      "user_query": "退款",
+      "intent": "complaint_refund",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "确认订单，办理退款",
+      "keywords": [
+        "退款"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Refund"
+    },
+    {
+      "id": "TEST-013",
+      "user_query": "包装破了",
+      "intent": "complaint_delivery",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "查询订单，道歉，超时赔付",
+      "keywords": [
+        "包装"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TEST-014",
+      "user_query": "这么贵还这么难喝",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "道歉，确认糖度，反馈或退款",
+      "keywords": [
+        "贵",
+        "难喝"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TEST-015",
+      "user_query": "珍珠奶茶多少钱",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回饮品价格信息",
+      "keywords": [
+        "珍珠奶茶",
+        "钱"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Price"
+    },
+    {
+      "id": "TEST-016",
+      "user_query": "包装破了",
+      "intent": "complaint_delivery",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "查询订单，道歉，超时赔付",
+      "keywords": [
+        "包装"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TEST-017",
+      "user_query": "呵呵，这包装也是绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "识别讽刺，诚恳道歉，询问具体问题",
+      "keywords": [
+        "呵呵",
+        "包装"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": "sarcasm",
+      "category": "Complaint Sarcasm"
+    },
+    {
+      "id": "TEST-018",
+      "user_query": "跟之前一样的",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "礼貌询问具体需求",
+      "keywords": [
+        "之前",
+        "一样"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "adversarial_type": "reference",
+      "category": "Unclear"
+    },
+    {
+      "id": "TEST-019",
+      "user_query": "酸死了",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "道歉，确认糖度，反馈或退款",
+      "keywords": [
+        "酸"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TEST-020",
+      "user_query": "超时40分钟了",
+      "intent": "complaint_delivery",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "查询订单，道歉，超时赔付",
+      "keywords": [
+        "超时"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TEST-021",
+      "user_query": "几点关门",
+      "intent": "query_hours",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回营业时间",
+      "keywords": [
+        "关门"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Hours"
+    },
+    {
+      "id": "TEST-022",
+      "user_query": "你们的服务真是一言难尽",
+      "intent": "complaint_service",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "道歉，查询情况，改进服务",
+      "keywords": [
+        "服务"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TEST-023",
+      "user_query": "汉街汉街那家几点关门",
+      "intent": "query_hours",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "返回营业时间",
+      "keywords": [
+        "街道口",
+        "关门"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Hours"
+    },
+    {
+      "id": "TEST-024",
+      "user_query": "这家店在哪",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回门店地址和营业时间",
+      "keywords": [
+        "在哪"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Store"
+    },
+    {
+      "id": "TEST-025",
+      "user_query": "今天第二杯半价吗",
+      "intent": "query_promotion",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "返回当前优惠活动",
+      "keywords": [
+        "第二杯半价"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Promotion"
+    },
+    {
+      "id": "TEST-026",
+      "user_query": "太贵了",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "解释定价，提供优惠方案",
+      "keywords": [
+        "贵"
+      ],
+      "tool_calls": [
+        "query_menu",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Price"
+    },
+    {
+      "id": "TEST-027",
+      "user_query": "我要退款，单号45678",
+      "intent": "complaint_refund",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "确认订单，办理退款",
+      "keywords": [
+        "退款",
+        "45678"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Refund"
+    },
+    {
+      "id": "TEST-028",
+      "user_query": "这个杨枝甘露也太甜了吧",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "道歉，确认糖度，反馈或退款",
+      "keywords": [
+        "杨枝甘露",
+        "太甜"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TEST-029",
+      "user_query": "跟之前一样的",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "礼貌询问具体需求",
+      "keywords": [
+        "之前",
+        "一样"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "adversarial_type": "reference",
+      "category": "Unclear"
+    },
+    {
+      "id": "TEST-030",
+      "user_query": "超时40分钟，打电话还没人接",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "查询订单，道歉，超时赔付",
+      "keywords": [
+        "超时",
+        "电话"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TEST-031",
+      "user_query": "退款",
+      "intent": "complaint_refund",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "确认订单，办理退款",
+      "keywords": [
+        "退款"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Refund"
+    },
+    {
+      "id": "TEST-032",
+      "user_query": "呵呵，你们这服务绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "识别讽刺，诚恳道歉，询问具体问题",
+      "keywords": [
+        "呵呵",
+        "服务"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": "sarcasm",
+      "category": "Complaint Sarcasm"
+    },
+    {
+      "id": "TEST-033",
+      "user_query": "帮我查一下我上次点的是什么",
+      "intent": "query_order",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "查询订单状态和配送进度",
+      "keywords": [
+        "上次",
+        "点什么"
+      ],
+      "tool_calls": [
+        "query_order"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Order"
+    },
+    {
+      "id": "TEST-034",
+      "user_query": "可以加珍珠吗",
+      "intent": "query_customize",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "返回加料选项",
+      "keywords": [
+        "加珍珠"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Customize"
+    },
+    {
+      "id": "TEST-035",
+      "user_query": "我要退款，单号45678",
+      "intent": "complaint_refund",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "确认订单，办理退款",
+      "keywords": [
+        "退款",
+        "45678"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Refund"
+    },
+    {
+      "id": "TEST-036",
+      "user_query": "你们的服务真是一言难尽",
+      "intent": "complaint_service",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "道歉，查询情况，改进服务",
+      "keywords": [
+        "服务"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TEST-037",
+      "user_query": "这家店在哪",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回门店地址和营业时间",
+      "keywords": [
+        "在哪"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Store"
+    },
+    {
+      "id": "TEST-038",
+      "user_query": "冰沙给了细吸管怎么喝",
+      "intent": "complaint_accessory",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "道歉，补偿下次订单",
+      "keywords": [
+        "冰沙",
+        "吸管"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Accessory"
+    },
+    {
+      "id": "TEST-039",
+      "user_query": "你们有什么优惠",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回当前优惠活动",
+      "keywords": [
+        "优惠"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Promotion"
+    },
+    {
+      "id": "TEST-040",
+      "user_query": "糯米少得可怜，别的店都满满一碗",
+      "intent": "complaint_quantity",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "道歉，核实份量，记录投诉",
+      "keywords": [
+        "糯米",
+        "别的店"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TEST-041",
+      "user_query": "这味道跟上次差太多了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "道歉，确认糖度，反馈或退款",
+      "keywords": [
+        "上次",
+        "差"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": "history_comparison",
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TEST-042",
+      "user_query": "这个杨枝甘露也太甜了吧",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "道歉，确认糖度，反馈或退款",
+      "keywords": [
+        "杨枝甘露",
+        "太甜"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TEST-043",
+      "user_query": "光谷附近有店吗",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回门店地址和营业时间",
+      "keywords": [
+        "光谷",
+        "店"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Store"
+    },
+    {
+      "id": "TEST-044",
+      "user_query": "可以开发票吗",
+      "intent": "query_invoice",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "说明开票流程",
+      "keywords": [
+        "发票"
+      ],
+      "tool_calls": [],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Invoice"
+    },
+    {
+      "id": "TEST-045",
+      "user_query": "超时40分钟了",
+      "intent": "complaint_delivery",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "查询订单，道歉，超时赔付",
+      "keywords": [
+        "超时"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TEST-046",
+      "user_query": "你们有什么优惠",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回当前优惠活动",
+      "keywords": [
+        "优惠"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Promotion"
+    },
+    {
+      "id": "TEST-047",
+      "user_query": "珍珠奶茶多少钱",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回饮品价格信息",
+      "keywords": [
+        "珍珠奶茶",
+        "钱"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Price"
+    },
+    {
+      "id": "TEST-048",
+      "user_query": "珍珠奶茶多少钱",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回饮品价格信息",
+      "keywords": [
+        "珍珠奶茶",
+        "钱"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Price"
+    },
+    {
+      "id": "TEST-049",
+      "user_query": "包装破了",
+      "intent": "complaint_delivery",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "查询订单，道歉，超时赔付",
+      "keywords": [
+        "包装"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TEST-050",
+      "user_query": "给我推荐一款好喝的",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "推荐3款热门饮品",
+      "keywords": [
+        "推荐"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TEST-051",
+      "user_query": "呵呵，你们这服务绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "识别讽刺，诚恳道歉，询问具体问题",
+      "keywords": [
+        "呵呵",
+        "服务"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": "sarcasm",
+      "category": "Complaint Sarcasm"
+    },
+    {
+      "id": "TEST-052",
+      "user_query": "那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "礼貌询问具体需求",
+      "keywords": [
+        "那个"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "adversarial_type": "vague",
+      "category": "Unclear"
+    },
+    {
+      "id": "TEST-053",
+      "user_query": "杨枝甘露少糖少冰多少钱",
+      "intent": "query_price",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "返回饮品价格信息",
+      "keywords": [
+        "杨枝甘露",
+        "少糖少冰"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Price"
+    },
+    {
+      "id": "TEST-054",
+      "user_query": "光谷附近有店吗",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回门店地址和营业时间",
+      "keywords": [
+        "光谷",
+        "店"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Store"
+    },
+    {
+      "id": "TEST-055",
+      "user_query": "糯米少得可怜，别的店都满满一碗",
+      "intent": "complaint_quantity",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "道歉，核实份量，记录投诉",
+      "keywords": [
+        "糯米",
+        "别的店"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TEST-056",
+      "user_query": "订单12345什么时候到",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "查询订单状态和配送进度",
+      "keywords": [
+        "订单",
+        "12345"
+      ],
+      "tool_calls": [
+        "query_order"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Order"
+    },
+    {
+      "id": "TEST-057",
+      "user_query": "杨枝甘露少糖少冰多少钱",
+      "intent": "query_price",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "返回饮品价格信息",
+      "keywords": [
+        "杨枝甘露",
+        "少糖少冰"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Price"
+    },
+    {
+      "id": "TEST-058",
+      "user_query": "那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "礼貌询问具体需求",
+      "keywords": [
+        "那个"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "adversarial_type": "vague",
+      "category": "Unclear"
+    },
+    {
+      "id": "TEST-059",
+      "user_query": "芝芝莓莓太酸了，跟上次喝的不一样",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "道歉，确认糖度，反馈或退款",
+      "keywords": [
+        "芝芝莓莓",
+        "太酸",
+        "上次"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TEST-060",
+      "user_query": "你们家最推荐哪款",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "推荐3款热门饮品",
+      "keywords": [
+        "推荐"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TEST-061",
+      "user_query": "糯米少得可怜，别的店都满满一碗",
+      "intent": "complaint_quantity",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "道歉，核实份量，记录投诉",
+      "keywords": [
+        "糯米",
+        "别的店"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TEST-062",
+      "user_query": "服务态度差",
+      "intent": "complaint_service",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "道歉，查询情况，改进服务",
+      "keywords": [
+        "服务",
+        "差"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TEST-063",
+      "user_query": "无糖的好喝吗",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "推荐3款热门饮品",
+      "keywords": [
+        "无糖",
+        "好喝"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TEST-064",
+      "user_query": "几点关门",
+      "intent": "query_hours",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回营业时间",
+      "keywords": [
+        "关门"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Hours"
+    },
+    {
+      "id": "TEST-065",
+      "user_query": "无糖的好喝吗",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "推荐3款热门饮品",
+      "keywords": [
+        "无糖",
+        "好喝"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TEST-066",
+      "user_query": "光谷附近有店吗",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回门店地址和营业时间",
+      "keywords": [
+        "光谷",
+        "店"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Store"
+    },
+    {
+      "id": "TEST-067",
+      "user_query": "我点的那个饮料呢",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "礼貌询问具体需求",
+      "keywords": [
+        "那个"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "adversarial_type": "reference",
+      "category": "Unclear"
+    },
+    {
+      "id": "TEST-068",
+      "user_query": "这味道跟上次差太多了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "道歉，确认糖度，反馈或退款",
+      "keywords": [
+        "上次",
+        "差"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": "history_comparison",
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TEST-069",
+      "user_query": "菜单发一下",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回菜单列表或推荐",
+      "keywords": [
+        "菜单"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TEST-070",
+      "user_query": "芝芝莓莓太酸了，跟上次喝的不一样",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "道歉，确认糖度，反馈或退款",
+      "keywords": [
+        "芝芝莓莓",
+        "太酸",
+        "上次"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TEST-071",
+      "user_query": "你们家最推荐哪款",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "推荐3款热门饮品",
+      "keywords": [
+        "推荐"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TEST-072",
+      "user_query": "几点关门",
+      "intent": "query_hours",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回营业时间",
+      "keywords": [
+        "关门"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Hours"
+    },
+    {
+      "id": "TEST-073",
+      "user_query": "无糖的好喝吗",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "推荐3款热门饮品",
+      "keywords": [
+        "无糖",
+        "好喝"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TEST-074",
+      "user_query": "包装破了",
+      "intent": "complaint_delivery",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "查询订单，道歉，超时赔付",
+      "keywords": [
+        "包装"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TEST-075",
+      "user_query": "芝芝莓莓太酸了，跟上次喝的不一样",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "道歉，确认糖度，反馈或退款",
+      "keywords": [
+        "芝芝莓莓",
+        "太酸",
+        "上次"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TEST-076",
+      "user_query": "冰沙给了细吸管怎么喝",
+      "intent": "complaint_accessory",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "道歉，补偿下次订单",
+      "keywords": [
+        "冰沙",
+        "吸管"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Accessory"
+    },
+    {
+      "id": "TEST-077",
+      "user_query": "菜单发一下",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回菜单列表或推荐",
+      "keywords": [
+        "菜单"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TEST-078",
+      "user_query": "给我推荐一款好喝的",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "推荐3款热门饮品",
+      "keywords": [
+        "推荐"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TEST-079",
+      "user_query": "上次那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "礼貌询问具体需求",
+      "keywords": [
+        "上次"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "adversarial_type": "reference",
+      "category": "Unclear"
+    },
+    {
+      "id": "TEST-080",
+      "user_query": "来一杯幽兰拿铁",
+      "intent": "place_order",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "确认订单，生成订单号",
+      "keywords": [
+        "幽兰拿铁"
+      ],
+      "tool_calls": [
+        "place_order"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Place Order"
+    },
+    {
+      "id": "TEST-081",
+      "user_query": "服务态度差",
+      "intent": "complaint_service",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "道歉，查询情况，改进服务",
+      "keywords": [
+        "服务",
+        "差"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TEST-082",
+      "user_query": "冰沙给了细吸管怎么喝",
+      "intent": "complaint_accessory",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "道歉，补偿下次订单",
+      "keywords": [
+        "冰沙",
+        "吸管"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Accessory"
+    },
+    {
+      "id": "TEST-083",
+      "user_query": "上次那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "礼貌询问具体需求",
+      "keywords": [
+        "上次"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "adversarial_type": "reference",
+      "category": "Unclear"
+    },
+    {
+      "id": "TEST-084",
+      "user_query": "酸死了",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "道歉，确认糖度，反馈或退款",
+      "keywords": [
+        "酸"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TEST-085",
+      "user_query": "上次那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "礼貌询问具体需求",
+      "keywords": [
+        "上次"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "adversarial_type": "reference",
+      "category": "Unclear"
+    },
+    {
+      "id": "TEST-086",
+      "user_query": "杨枝甘露少糖少冰多少钱",
+      "intent": "query_price",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "返回饮品价格信息",
+      "keywords": [
+        "杨枝甘露",
+        "少糖少冰"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Price"
+    },
+    {
+      "id": "TEST-087",
+      "user_query": "这么贵还这么难喝",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "道歉，确认糖度，反馈或退款",
+      "keywords": [
+        "贵",
+        "难喝"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TEST-088",
+      "user_query": "订单12345什么时候到",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "查询订单状态和配送进度",
+      "keywords": [
+        "订单",
+        "12345"
+      ],
+      "tool_calls": [
+        "query_order"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Order"
+    },
+    {
+      "id": "TEST-089",
+      "user_query": "呵呵，这包装也是绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "识别讽刺，诚恳道歉，询问具体问题",
+      "keywords": [
+        "呵呵",
+        "包装"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": "sarcasm",
+      "category": "Complaint Sarcasm"
+    },
+    {
+      "id": "TEST-090",
+      "user_query": "冰块太多了",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "道歉，核实份量，记录投诉",
+      "keywords": [
+        "冰块",
+        "多"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TEST-091",
+      "user_query": "今天第二杯半价吗",
+      "intent": "query_promotion",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "返回当前优惠活动",
+      "keywords": [
+        "第二杯半价"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Promotion"
+    },
+    {
+      "id": "TEST-092",
+      "user_query": "感觉被坑了",
+      "intent": "complaint_price",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "解释定价，提供优惠方案",
+      "keywords": [
+        "坑"
+      ],
+      "tool_calls": [
+        "query_menu",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": "implied",
+      "category": "Complaint Price"
+    },
+    {
+      "id": "TEST-093",
+      "user_query": "冰块太多了",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "道歉，核实份量，记录投诉",
+      "keywords": [
+        "冰块",
+        "多"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TEST-094",
+      "user_query": "超时40分钟，打电话还没人接",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "查询订单，道歉，超时赔付",
+      "keywords": [
+        "超时",
+        "电话"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TEST-095",
+      "user_query": "酸死了",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "道歉，确认糖度，反馈或退款",
+      "keywords": [
+        "酸"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TEST-096",
+      "user_query": "会员卡怎么办",
+      "intent": "query_member",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "说明会员权益",
+      "keywords": [
+        "会员"
+      ],
+      "tool_calls": [],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Member"
+    },
+    {
+      "id": "TEST-097",
+      "user_query": "超时40分钟了",
+      "intent": "complaint_delivery",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "查询订单，道歉，超时赔付",
+      "keywords": [
+        "超时"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TEST-098",
+      "user_query": "这家店在哪",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回门店地址和营业时间",
+      "keywords": [
+        "在哪"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Store"
+    },
+    {
+      "id": "TEST-099",
+      "user_query": "给我推荐一款好喝的",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "推荐3款热门饮品",
+      "keywords": [
+        "推荐"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TEST-100",
+      "user_query": "汉街汉街那家几点关门",
+      "intent": "query_hours",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "返回营业时间",
+      "keywords": [
+        "街道口",
+        "关门"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Hours"
+    },
+    {
+      "id": "TEST-101",
+      "user_query": "太贵了",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "解释定价，提供优惠方案",
+      "keywords": [
+        "贵"
+      ],
+      "tool_calls": [
+        "query_menu",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Price"
+    },
+    {
+      "id": "TEST-102",
+      "user_query": "包装破了",
+      "intent": "complaint_delivery",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "查询订单，道歉，超时赔付",
+      "keywords": [
+        "包装"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TEST-103",
+      "user_query": "超时40分钟，打电话还没人接",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "查询订单，道歉，超时赔付",
+      "keywords": [
+        "超时",
+        "电话"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TEST-104",
+      "user_query": "还行吧",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "礼貌询问具体需求",
+      "keywords": [
+        "还行"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "adversarial_type": "neutral",
+      "category": "Unclear"
+    },
+    {
+      "id": "TEST-105",
+      "user_query": "无糖的好喝吗",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "推荐3款热门饮品",
+      "keywords": [
+        "无糖",
+        "好喝"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TEST-106",
+      "user_query": "服务态度差",
+      "intent": "complaint_service",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "道歉，查询情况，改进服务",
+      "keywords": [
+        "服务",
+        "差"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TEST-107",
+      "user_query": "菜单发一下",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回菜单列表或推荐",
+      "keywords": [
+        "菜单"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TEST-108",
+      "user_query": "杨枝甘露少糖少冰多少钱",
+      "intent": "query_price",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "返回饮品价格信息",
+      "keywords": [
+        "杨枝甘露",
+        "少糖少冰"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Price"
+    },
+    {
+      "id": "TEST-109",
+      "user_query": "光谷附近有店吗",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回门店地址和营业时间",
+      "keywords": [
+        "光谷",
+        "店"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Store"
+    },
+    {
+      "id": "TEST-110",
+      "user_query": "太贵了",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "解释定价，提供优惠方案",
+      "keywords": [
+        "贵"
+      ],
+      "tool_calls": [
+        "query_menu",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Price"
+    },
+    {
+      "id": "TEST-111",
+      "user_query": "感觉被坑了",
+      "intent": "complaint_price",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "解释定价，提供优惠方案",
+      "keywords": [
+        "坑"
+      ],
+      "tool_calls": [
+        "query_menu",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": "implied",
+      "category": "Complaint Price"
+    },
+    {
+      "id": "TEST-112",
+      "user_query": "退款",
+      "intent": "complaint_refund",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "确认订单，办理退款",
+      "keywords": [
+        "退款"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Refund"
+    },
+    {
+      "id": "TEST-113",
+      "user_query": "呵呵，你们这服务绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "识别讽刺，诚恳道歉，询问具体问题",
+      "keywords": [
+        "呵呵",
+        "服务"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": "sarcasm",
+      "category": "Complaint Sarcasm"
+    },
+    {
+      "id": "TEST-114",
+      "user_query": "上次那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "礼貌询问具体需求",
+      "keywords": [
+        "上次"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "adversarial_type": "reference",
+      "category": "Unclear"
+    },
+    {
+      "id": "TEST-115",
+      "user_query": "跟之前一样的",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "礼貌询问具体需求",
+      "keywords": [
+        "之前",
+        "一样"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "adversarial_type": "reference",
+      "category": "Unclear"
+    },
+    {
+      "id": "TEST-116",
+      "user_query": "你们家最推荐哪款",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "推荐3款热门饮品",
+      "keywords": [
+        "推荐"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TEST-117",
+      "user_query": "会员卡怎么办",
+      "intent": "query_member",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "说明会员权益",
+      "keywords": [
+        "会员"
+      ],
+      "tool_calls": [],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Member"
+    },
+    {
+      "id": "TEST-118",
+      "user_query": "我点的那个饮料呢",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "礼貌询问具体需求",
+      "keywords": [
+        "那个"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "adversarial_type": "reference",
+      "category": "Unclear"
+    },
+    {
+      "id": "TEST-119",
+      "user_query": "还行吧",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "礼貌询问具体需求",
+      "keywords": [
+        "还行"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "adversarial_type": "neutral",
+      "category": "Unclear"
+    },
+    {
+      "id": "TEST-120",
+      "user_query": "徐东徐东那家几点关门",
+      "intent": "query_hours",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "返回营业时间",
+      "keywords": [
+        "街道口",
+        "关门"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Hours"
+    },
+    {
+      "id": "TEST-121",
+      "user_query": "这么贵还这么难喝",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "道歉，确认糖度，反馈或退款",
+      "keywords": [
+        "贵",
+        "难喝"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TEST-122",
+      "user_query": "今天第二杯半价吗",
+      "intent": "query_promotion",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "返回当前优惠活动",
+      "keywords": [
+        "第二杯半价"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Promotion"
+    },
+    {
+      "id": "TEST-123",
+      "user_query": "那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "礼貌询问具体需求",
+      "keywords": [
+        "那个"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "adversarial_type": "vague",
+      "category": "Unclear"
+    },
+    {
+      "id": "TEST-124",
+      "user_query": "你们是不是换配方了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "道歉，确认糖度，反馈或退款",
+      "keywords": [
+        "换配方"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": "implied_complaint",
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TEST-125",
+      "user_query": "这个杨枝甘露也太甜了吧",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "道歉，确认糖度，反馈或退款",
+      "keywords": [
+        "杨枝甘露",
+        "太甜"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TEST-126",
+      "user_query": "呵呵，你们这服务绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "识别讽刺，诚恳道歉，询问具体问题",
+      "keywords": [
+        "呵呵",
+        "服务"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": "sarcasm",
+      "category": "Complaint Sarcasm"
+    },
+    {
+      "id": "TEST-127",
+      "user_query": "糯米少得可怜，别的店都满满一碗",
+      "intent": "complaint_quantity",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "道歉，核实份量，记录投诉",
+      "keywords": [
+        "糯米",
+        "别的店"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TEST-128",
+      "user_query": "你们是不是换配方了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "道歉，确认糖度，反馈或退款",
+      "keywords": [
+        "换配方"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": "implied_complaint",
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TEST-129",
+      "user_query": "会员卡怎么办",
+      "intent": "query_member",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "说明会员权益",
+      "keywords": [
+        "会员"
+      ],
+      "tool_calls": [],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Member"
+    },
+    {
+      "id": "TEST-130",
+      "user_query": "菜单发一下",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回菜单列表或推荐",
+      "keywords": [
+        "菜单"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TEST-131",
+      "user_query": "上次买的幽兰拿铁这次怎么没了",
+      "intent": "query_menu",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "返回菜单列表或推荐",
+      "keywords": [
+        "上次",
+        "没了"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TEST-132",
+      "user_query": "来一杯幽兰拿铁",
+      "intent": "place_order",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "确认订单，生成订单号",
+      "keywords": [
+        "幽兰拿铁"
+      ],
+      "tool_calls": [
+        "place_order"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Place Order"
+    },
+    {
+      "id": "TEST-133",
+      "user_query": "可以开发票吗",
+      "intent": "query_invoice",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "说明开票流程",
+      "keywords": [
+        "发票"
+      ],
+      "tool_calls": [],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Invoice"
+    },
+    {
+      "id": "TEST-134",
+      "user_query": "你们有什么优惠",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回当前优惠活动",
+      "keywords": [
+        "优惠"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Promotion"
+    },
+    {
+      "id": "TEST-135",
+      "user_query": "来一杯幽兰拿铁",
+      "intent": "place_order",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "确认订单，生成订单号",
+      "keywords": [
+        "幽兰拿铁"
+      ],
+      "tool_calls": [
+        "place_order"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Place Order"
+    },
+    {
+      "id": "TEST-136",
+      "user_query": "这家店在哪",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回门店地址和营业时间",
+      "keywords": [
+        "在哪"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Store"
+    },
+    {
+      "id": "TEST-137",
+      "user_query": "我点的那个饮料呢",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "礼貌询问具体需求",
+      "keywords": [
+        "那个"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "adversarial_type": "reference",
+      "category": "Unclear"
+    },
+    {
+      "id": "TEST-138",
+      "user_query": "超时40分钟，打电话还没人接",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "查询订单，道歉，超时赔付",
+      "keywords": [
+        "超时",
+        "电话"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TEST-139",
+      "user_query": "帮我查一下我上次点的是什么",
+      "intent": "query_order",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "查询订单状态和配送进度",
+      "keywords": [
+        "上次",
+        "点什么"
+      ],
+      "tool_calls": [
+        "query_order"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Order"
+    },
+    {
+      "id": "TEST-140",
+      "user_query": "冰块太多了",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "道歉，核实份量，记录投诉",
+      "keywords": [
+        "冰块",
+        "多"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TEST-141",
+      "user_query": "冰沙给了细吸管怎么喝",
+      "intent": "complaint_accessory",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "道歉，补偿下次订单",
+      "keywords": [
+        "冰沙",
+        "吸管"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Accessory"
+    },
+    {
+      "id": "TEST-142",
+      "user_query": "几点关门",
+      "intent": "query_hours",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回营业时间",
+      "keywords": [
+        "关门"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Hours"
+    },
+    {
+      "id": "TEST-143",
+      "user_query": "还行吧",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "礼貌询问具体需求",
+      "keywords": [
+        "还行"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "adversarial_type": "neutral",
+      "category": "Unclear"
+    },
+    {
+      "id": "TEST-144",
+      "user_query": "酸死了",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "道歉，确认糖度，反馈或退款",
+      "keywords": [
+        "酸"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TEST-145",
+      "user_query": "你们是不是换配方了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "道歉，确认糖度，反馈或退款",
+      "keywords": [
+        "换配方"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": "implied_complaint",
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TEST-146",
+      "user_query": "这个杨枝甘露也太甜了吧",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "道歉，确认糖度，反馈或退款",
+      "keywords": [
+        "杨枝甘露",
+        "太甜"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TEST-147",
+      "user_query": "我点的那个饮料呢",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "礼貌询问具体需求",
+      "keywords": [
+        "那个"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "adversarial_type": "reference",
+      "category": "Unclear"
+    },
+    {
+      "id": "TEST-148",
+      "user_query": "珍珠奶茶多少钱",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回饮品价格信息",
+      "keywords": [
+        "珍珠奶茶",
+        "钱"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Price"
+    },
+    {
+      "id": "TEST-149",
+      "user_query": "这么贵还这么难喝",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "道歉，确认糖度，反馈或退款",
+      "keywords": [
+        "贵",
+        "难喝"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TEST-150",
+      "user_query": "几点关门",
+      "intent": "query_hours",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回营业时间",
+      "keywords": [
+        "关门"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Hours"
+    },
+    {
+      "id": "TEST-151",
+      "user_query": "来一杯幽兰拿铁",
+      "intent": "place_order",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "确认订单，生成订单号",
+      "keywords": [
+        "幽兰拿铁"
+      ],
+      "tool_calls": [
+        "place_order"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Place Order"
+    },
+    {
+      "id": "TEST-152",
+      "user_query": "可以开发票吗",
+      "intent": "query_invoice",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "说明开票流程",
+      "keywords": [
+        "发票"
+      ],
+      "tool_calls": [],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Invoice"
+    },
+    {
+      "id": "TEST-153",
+      "user_query": "跟之前一样的",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "礼貌询问具体需求",
+      "keywords": [
+        "之前",
+        "一样"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "adversarial_type": "reference",
+      "category": "Unclear"
+    },
+    {
+      "id": "TEST-154",
+      "user_query": "你们家最推荐哪款",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "推荐3款热门饮品",
+      "keywords": [
+        "推荐"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TEST-155",
+      "user_query": "我要退款，单号45678",
+      "intent": "complaint_refund",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "确认订单，办理退款",
+      "keywords": [
+        "退款",
+        "45678"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Refund"
+    },
+    {
+      "id": "TEST-156",
+      "user_query": "太贵了",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "解释定价，提供优惠方案",
+      "keywords": [
+        "贵"
+      ],
+      "tool_calls": [
+        "query_menu",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Price"
+    },
+    {
+      "id": "TEST-157",
+      "user_query": "糯米少得可怜",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "道歉，核实份量，记录投诉",
+      "keywords": [
+        "糯米",
+        "少"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TEST-158",
+      "user_query": "糯米少得可怜",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "道歉，核实份量，记录投诉",
+      "keywords": [
+        "糯米",
+        "少"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TEST-159",
+      "user_query": "订单12345什么时候到",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "查询订单状态和配送进度",
+      "keywords": [
+        "订单",
+        "12345"
+      ],
+      "tool_calls": [
+        "query_order"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Order"
+    },
+    {
+      "id": "TEST-160",
+      "user_query": "呵呵，这包装也是绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "识别讽刺，诚恳道歉，询问具体问题",
+      "keywords": [
+        "呵呵",
+        "包装"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": "sarcasm",
+      "category": "Complaint Sarcasm"
+    },
+    {
+      "id": "TEST-161",
+      "user_query": "还行吧",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "礼貌询问具体需求",
+      "keywords": [
+        "还行"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "adversarial_type": "neutral",
+      "category": "Unclear"
+    },
+    {
+      "id": "TEST-162",
+      "user_query": "光谷附近有店吗",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回门店地址和营业时间",
+      "keywords": [
+        "光谷",
+        "店"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Store"
+    },
+    {
+      "id": "TEST-163",
+      "user_query": "珍珠奶茶多少钱",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回饮品价格信息",
+      "keywords": [
+        "珍珠奶茶",
+        "钱"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Price"
+    },
+    {
+      "id": "TEST-164",
+      "user_query": "帮我查一下我上次点的是什么",
+      "intent": "query_order",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "查询订单状态和配送进度",
+      "keywords": [
+        "上次",
+        "点什么"
+      ],
+      "tool_calls": [
+        "query_order"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Order"
+    },
+    {
+      "id": "TEST-165",
+      "user_query": "你们有什么优惠",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回当前优惠活动",
+      "keywords": [
+        "优惠"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Promotion"
+    },
+    {
+      "id": "TEST-166",
+      "user_query": "冰块太多了",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "道歉，核实份量，记录投诉",
+      "keywords": [
+        "冰块",
+        "多"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TEST-167",
+      "user_query": "上次买的幽兰拿铁这次怎么没了",
+      "intent": "query_menu",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "返回菜单列表或推荐",
+      "keywords": [
+        "上次",
+        "没了"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TEST-168",
+      "user_query": "菜单发一下",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回菜单列表或推荐",
+      "keywords": [
+        "菜单"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TEST-169",
+      "user_query": "会员卡怎么办",
+      "intent": "query_member",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "说明会员权益",
+      "keywords": [
+        "会员"
+      ],
+      "tool_calls": [],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Member"
+    },
+    {
+      "id": "TEST-170",
+      "user_query": "给我推荐一款好喝的",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "推荐3款热门饮品",
+      "keywords": [
+        "推荐"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TEST-171",
+      "user_query": "订单12345什么时候到",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "查询订单状态和配送进度",
+      "keywords": [
+        "订单",
+        "12345"
+      ],
+      "tool_calls": [
+        "query_order"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Order"
+    },
+    {
+      "id": "TEST-172",
+      "user_query": "武大武大那家几点关门",
+      "intent": "query_hours",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "返回营业时间",
+      "keywords": [
+        "街道口",
+        "关门"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Hours"
+    },
+    {
+      "id": "TEST-173",
+      "user_query": "这味道跟上次差太多了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "道歉，确认糖度，反馈或退款",
+      "keywords": [
+        "上次",
+        "差"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": "history_comparison",
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TEST-174",
+      "user_query": "你们是不是换配方了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "道歉，确认糖度，反馈或退款",
+      "keywords": [
+        "换配方"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": "implied_complaint",
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TEST-175",
+      "user_query": "糯米少得可怜",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "道歉，核实份量，记录投诉",
+      "keywords": [
+        "糯米",
+        "少"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TEST-176",
+      "user_query": "感觉被坑了",
+      "intent": "complaint_price",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "解释定价，提供优惠方案",
+      "keywords": [
+        "坑"
+      ],
+      "tool_calls": [
+        "query_menu",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": "implied",
+      "category": "Complaint Price"
+    },
+    {
+      "id": "TEST-177",
+      "user_query": "可以开发票吗",
+      "intent": "query_invoice",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "说明开票流程",
+      "keywords": [
+        "发票"
+      ],
+      "tool_calls": [],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Invoice"
+    },
+    {
+      "id": "TEST-178",
+      "user_query": "感觉被坑了",
+      "intent": "complaint_price",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "解释定价，提供优惠方案",
+      "keywords": [
+        "坑"
+      ],
+      "tool_calls": [
+        "query_menu",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": "implied",
+      "category": "Complaint Price"
+    },
+    {
+      "id": "TEST-179",
+      "user_query": "这个杨枝甘露也太甜了吧",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "道歉，确认糖度，反馈或退款",
+      "keywords": [
+        "杨枝甘露",
+        "太甜"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TEST-180",
+      "user_query": "上次买的幽兰拿铁这次怎么没了",
+      "intent": "query_menu",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "返回菜单列表或推荐",
+      "keywords": [
+        "上次",
+        "没了"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Menu"
+    },
+    {
+      "id": "TEST-181",
+      "user_query": "退款",
+      "intent": "complaint_refund",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "确认订单，办理退款",
+      "keywords": [
+        "退款"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Refund"
+    },
+    {
+      "id": "TEST-182",
+      "user_query": "超时40分钟了",
+      "intent": "complaint_delivery",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "查询订单，道歉，超时赔付",
+      "keywords": [
+        "超时"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TEST-183",
+      "user_query": "呵呵，这包装也是绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "识别讽刺，诚恳道歉，询问具体问题",
+      "keywords": [
+        "呵呵",
+        "包装"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": "sarcasm",
+      "category": "Complaint Sarcasm"
+    },
+    {
+      "id": "TEST-184",
+      "user_query": "酸死了",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "道歉，确认糖度，反馈或退款",
+      "keywords": [
+        "酸"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TEST-185",
+      "user_query": "服务态度差",
+      "intent": "complaint_service",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "道歉，查询情况，改进服务",
+      "keywords": [
+        "服务",
+        "差"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TEST-186",
+      "user_query": "糯米少得可怜",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "道歉，核实份量，记录投诉",
+      "keywords": [
+        "糯米",
+        "少"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Quantity"
+    },
+    {
+      "id": "TEST-187",
+      "user_query": "那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "礼貌询问具体需求",
+      "keywords": [
+        "那个"
+      ],
+      "tool_calls": [],
+      "requires_clarification": true,
+      "adversarial_type": "vague",
+      "category": "Unclear"
+    },
+    {
+      "id": "TEST-188",
+      "user_query": "可以加珍珠吗",
+      "intent": "query_customize",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "返回加料选项",
+      "keywords": [
+        "加珍珠"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Customize"
+    },
+    {
+      "id": "TEST-189",
+      "user_query": "这家店在哪",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "返回门店地址和营业时间",
+      "keywords": [
+        "在哪"
+      ],
+      "tool_calls": [
+        "query_stores"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Store"
+    },
+    {
+      "id": "TEST-190",
+      "user_query": "今天第二杯半价吗",
+      "intent": "query_promotion",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "返回当前优惠活动",
+      "keywords": [
+        "第二杯半价"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Promotion"
+    },
+    {
+      "id": "TEST-191",
+      "user_query": "可以开发票吗",
+      "intent": "query_invoice",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "说明开票流程",
+      "keywords": [
+        "发票"
+      ],
+      "tool_calls": [],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Invoice"
+    },
+    {
+      "id": "TEST-192",
+      "user_query": "帮我查一下我上次点的是什么",
+      "intent": "query_order",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "查询订单状态和配送进度",
+      "keywords": [
+        "上次",
+        "点什么"
+      ],
+      "tool_calls": [
+        "query_order"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Order"
+    },
+    {
+      "id": "TEST-193",
+      "user_query": "你们的服务真是一言难尽",
+      "intent": "complaint_service",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "道歉，查询情况，改进服务",
+      "keywords": [
+        "服务"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TEST-194",
+      "user_query": "太贵了",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "解释定价，提供优惠方案",
+      "keywords": [
+        "贵"
+      ],
+      "tool_calls": [
+        "query_menu",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Price"
+    },
+    {
+      "id": "TEST-195",
+      "user_query": "这味道跟上次差太多了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "layer": "hard",
+      "expected_action": "道歉，确认糖度，反馈或退款",
+      "keywords": [
+        "上次",
+        "差"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": "history_comparison",
+      "category": "Complaint Taste"
+    },
+    {
+      "id": "TEST-196",
+      "user_query": "给我推荐一款好喝的",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "推荐3款热门饮品",
+      "keywords": [
+        "推荐"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Query Recommend"
+    },
+    {
+      "id": "TEST-197",
+      "user_query": "你们的服务真是一言难尽",
+      "intent": "complaint_service",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "道歉，查询情况，改进服务",
+      "keywords": [
+        "服务"
+      ],
+      "tool_calls": [
+        "log_complaint"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Complaint Service"
+    },
+    {
+      "id": "TEST-198",
+      "user_query": "超时40分钟了",
+      "intent": "complaint_delivery",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "查询订单，道歉，超时赔付",
+      "keywords": [
+        "超时"
+      ],
+      "tool_calls": [
+        "query_order",
+        "log_complaint"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Complaint Delivery"
+    },
+    {
+      "id": "TEST-199",
+      "user_query": "来一杯幽兰拿铁",
+      "intent": "place_order",
+      "difficulty": "easy",
+      "layer": "easy",
+      "expected_action": "确认订单，生成订单号",
+      "keywords": [
+        "幽兰拿铁"
+      ],
+      "tool_calls": [
+        "place_order"
+      ],
+      "requires_clarification": false,
+      "adversarial_type": null,
+      "category": "Place Order"
+    },
+    {
+      "id": "TEST-200",
+      "user_query": "可以加珍珠吗",
+      "intent": "query_customize",
+      "difficulty": "medium",
+      "layer": "medium",
+      "expected_action": "返回加料选项",
+      "keywords": [
+        "加珍珠"
+      ],
+      "tool_calls": [
+        "query_menu"
+      ],
+      "requires_clarification": true,
+      "adversarial_type": null,
+      "category": "Query Customize"
+    }
+  ]
+}
