@@ -1,7 +1,3 @@
-"""
-BubbleMate Tools - 工具模块
-"""
+from .bubble_tools import TOOL_REGISTRY
 
-from .tool_registry import tool_registry, register_all_tools
-
-__all__ = ["tool_registry", "register_all_tools"]
+__all__ = ["TOOL_REGISTRY"]

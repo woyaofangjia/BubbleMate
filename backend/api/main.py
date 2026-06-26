@@ -1,7 +1,3 @@
-"""
-BubbleMate API - FastAPI主入口
-"""
-
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -9,15 +5,10 @@ from typing import Optional, Dict, Any
 import json
 import os
 
-# 导入Agent组件
-from backend.agent.intent_recognizer import IntentRecognizer
 from backend.agent.intent_recognizer_v2 import IntentRecognizerV2
-from backend.agent.react_agent import ReActAgent, create_tools
 from backend.agent.react_agent_v2 import ReActAgentV2
-from backend.agent.memory_manager import MemoryManager
 from backend.agent.memory_manager_v2 import MemoryManagerV2
-from backend.agent.human_in_loop import hil_manager, HumanIntervention, InterventionType
-from backend.tools.tool_registry import tool_registry, register_all_tools
+from backend.agent.human_in_loop import evaluate, resolve_intervention, get_pending_interventions
 from backend.tools.bubble_tools import TOOL_REGISTRY as BUBBLE_TOOLS
 from backend.core.config import config
 
@@ -222,9 +213,8 @@ async def get_menu(category: Optional[str] = None):
 
 # Human-in-the-Loop API端点
 @app.get("/human-in-loop/pending")
-async def get_pending_interventions():
-    """获取待处理的人工介入列表"""
-    return hil_manager.get_pending_interventions()
+async def get_pending_interventions_api():
+    return get_pending_interventions()
 
 @app.get("/eval/report")
 async def get_eval_report():
@@ -271,12 +261,11 @@ async def run_eval():
     }
 
 @app.post("/human-in-loop/{intervention_id}/resolve")
-async def resolve_intervention(intervention_id: str, request: Dict[str, Any]):
-    """解决人工介入请求"""
+async def resolve_intervention_api(intervention_id: str, request: Dict[str, Any]):
     resolution = request.get("resolution", "")
     agent_id = request.get("agent_id", "unknown")
     
-    success = hil_manager.resolve_intervention(intervention_id, resolution, agent_id)
+    success = resolve_intervention(intervention_id, resolution, agent_id)
     
     if success:
         return {"success": True, "message": f"介入请求 {intervention_id} 已解决"}
@@ -284,29 +273,14 @@ async def resolve_intervention(intervention_id: str, request: Dict[str, Any]):
         raise HTTPException(status_code=404, detail="介入请求不存在")
 
 @app.get("/human-in-loop/evaluate")
-async def evaluate_hil(
-    session_id: str,
-    user_message: str,
-    agent_response: str = ""
-):
-    """评估是否需要人工介入"""
-    # 获取意图
+async def evaluate_hil(session_id: str, user_message: str, agent_response: str = ""):
     intent = intent_recognizer.recognize(user_message)
-    
-    # 获取工具调用历史（简化版）
     tool_results = [{"success": True}]
-    
-    # 获取会话历史
     session_history = memory_manager.get_context(session_id) or []
     
-    # 评估
-    result = hil_manager.evaluate(
+    result = evaluate(
         session_id=session_id,
-        intent_result={
-            "name": intent.name,
-            "confidence": intent.confidence,
-            "text": user_message
-        },
+        intent_result={"name": intent.name, "confidence": intent.confidence, "text": user_message},
         tool_results=tool_results,
         session_history=session_history,
         user_message=user_message,

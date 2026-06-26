@@ -1,7 +1,3 @@
-"""
-BubbleMate Agent - 模块初始化
-"""
+from .intent_recognizer_v2 import IntentRecognizerV2, Intent
 
-from .intent_recognizer import IntentRecognizer, Intent
-
-__all__ = ["IntentRecognizer", "Intent"]
+__all__ = ["IntentRecognizerV2", "Intent"]

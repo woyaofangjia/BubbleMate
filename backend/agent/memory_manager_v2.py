@@ -1,16 +1,9 @@
-"""
-BubbleMate Memory V2 - 增强版会话记忆管理
-- Redis连接池支持
-- 会话超时自动清理
-- 用户偏好提取
-- 订单号追踪
-- 摘要质量提升
-"""
-
 import json
 import time
 from typing import List, Dict, Optional
 from collections import deque
+
+from .keywords import SUGAR_MAP, ICE_MAP, DRINK_KEYWORDS, STORE_KEYWORDS, ALLERGEN_MAP, PRICE_MAP, COMPLAINT_TYPE_MAP
 
 class MemoryManagerV2:
     """增强版会话记忆管理器"""
@@ -58,47 +51,72 @@ class MemoryManagerV2:
             self.use_redis = False
     
     def _extract_preferences(self, user_message: str, agent_message: str):
-        """从对话中提取用户偏好"""
         preferences = {}
+        import re
         
-        # 甜度偏好
-        if "无糖" in user_message or "零糖" in user_message:
-            preferences["sugar_level"] = "无糖"
-        elif "三分糖" in user_message:
-            preferences["sugar_level"] = "三分糖"
-        elif "五分糖" in user_message:
-            preferences["sugar_level"] = "五分糖"
-        elif "少糖" in user_message:
-            preferences["sugar_level"] = "少糖"
-        elif "正常糖" in user_message:
-            preferences["sugar_level"] = "正常糖"
+        for level, patterns in SUGAR_MAP.items():
+            for pattern in patterns:
+                if re.search(pattern, user_message):
+                    preferences["sugar_level"] = level
+                    break
         
-        # 冰量偏好
-        if "去冰" in user_message:
-            preferences["ice_level"] = "去冰"
-        elif "少冰" in user_message:
-            preferences["ice_level"] = "少冰"
-        elif "正常冰" in user_message:
-            preferences["ice_level"] = "正常冰"
-        elif "热饮" in user_message or "热的" in user_message:
-            preferences["ice_level"] = "热"
+        for level, patterns in ICE_MAP.items():
+            for pattern in patterns:
+                if re.search(pattern, user_message):
+                    preferences["ice_level"] = level
+                    break
         
-        # 饮品偏好
-        drink_keywords = ["芝芝莓莓", "杨枝甘露", "珍珠奶茶", "茉莉绿茶", 
-                         "柠檬茶", "葡萄", "芒果", "草莓", "芝士"]
-        for keyword in drink_keywords:
+        for keyword in DRINK_KEYWORDS:
             if keyword in user_message:
                 preferences.setdefault("favorite_drinks", []).append(keyword)
         
-        # 订单号提取
-        order_patterns = [r"订单(\d+)", r"单号(\d+)", r"(\d{5,})"]
-        import re
-        for pattern in order_patterns:
-            match = re.search(pattern, user_message)
-            if match:
-                preferences["last_order_id"] = match.group(1)
+        for keyword in STORE_KEYWORDS:
+            if keyword in user_message:
+                preferences["preferred_store"] = keyword
+                break
+        
+        for allergen, patterns in ALLERGEN_MAP.items():
+            for pattern in patterns:
+                if re.search(pattern, user_message) and "过敏" in user_message:
+                    preferences.setdefault("allergens", []).append(allergen)
+        
+        for sensitivity, patterns in PRICE_MAP.items():
+            for pattern in patterns:
+                if re.search(pattern, user_message):
+                    preferences["price_sensitivity"] = sensitivity
+                    break
+        
+        match = re.search(r"(\d{5,})", user_message)
+        if match:
+            preferences["last_order_id"] = match.group(1)
+        
+        for code, keywords in COMPLAINT_TYPE_MAP.items():
+            if any(kw in user_message for kw in keywords):
+                preferences.setdefault("complaint_history", []).append({"type": code, "description": user_message})
+                break
         
         return preferences
+    
+    def format_preferences(self, session_id: str) -> str:
+        pref = self.get_user_preferences(session_id)
+        parts = []
+        if pref.get("sugar_level"):
+            parts.append(f"甜度偏好: {pref['sugar_level']}")
+        if pref.get("ice_level"):
+            parts.append(f"冰量偏好: {pref['ice_level']}")
+        if pref.get("favorite_drinks"):
+            parts.append(f"喜欢的饮品: {', '.join(pref['favorite_drinks'])}")
+        if pref.get("preferred_store"):
+            parts.append(f"偏好门店: {pref['preferred_store']}")
+        if pref.get("allergens"):
+            parts.append(f"过敏原: {', '.join(pref['allergens'])}")
+        if pref.get("price_sensitivity"):
+            parts.append(f"价格敏感度: {pref['price_sensitivity']}")
+        if pref.get("last_order_id"):
+            parts.append(f"最近订单: {pref['last_order_id']}")
+        if pref.get("complaint_history"):
+            parts.append(f"投诉次数: {len(pref['complaint_history'])}次")
+        return " | ".join(parts) if parts else ""
     
     def save_message(self, session_id: str, user_message: str, agent_message: str):
         """保存对话消息（增强版）"""

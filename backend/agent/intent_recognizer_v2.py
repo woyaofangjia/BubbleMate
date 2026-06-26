@@ -1,13 +1,10 @@
-"""
-BubbleMate Agent - 增强版意图识别系统
-优化规则模式 + 增强关键词匹配 + LLM兜底识别
-"""
-
 import re
 import json
 import os
 from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass
+
+from .keywords import INTENT_KEYWORDS, CATEGORY_MAP
 
 @dataclass
 class Intent:
@@ -37,34 +34,7 @@ class IntentRecognizerV2:
                 self.use_llm = False
                 self.llm_client = None
         
-        # 意图类别映射
-        self.category_map = {
-            "complaint_taste": "口感投诉",
-            "complaint_quantity": "份量投诉",
-            "complaint_service": "服务投诉",
-            "complaint_delivery": "配送投诉",
-            "complaint_price": "价格投诉",
-            "complaint_taste_refund": "口感投诉",
-            "complaint_taste_price": "口感投诉",
-            "query_recommend": "推荐查询",
-            "query_menu": "菜单查询",
-            "query_order": "订单查询",
-            "query_refund": "退款查询",
-            "query_opentime": "营业时间查询",
-            "query_location": "门店查询",
-            "query_sugar": "糖度查询",
-            "query_price": "价格查询",
-            "query_temp": "温度查询",
-            "query_delivery": "配送查询",
-            "query_promo": "优惠查询",
-            "query_complaint_status": "投诉状态",
-            "query_member": "会员查询",
-            "query_invoice": "发票查询",
-            "place_order": "下单",
-            "order_create": "创建订单",
-            "order_modify": "修改订单",
-            "general": "通用",
-        }
+        self.category_map = CATEGORY_MAP
     
     def _build_rule_patterns(self) -> Dict[str, List[re.Pattern]]:
         """构建增强版规则匹配模式"""
@@ -304,34 +274,10 @@ class IntentRecognizerV2:
         return None
     
     def _multi_keyword_match(self, text: str) -> Optional[Intent]:
-        """多关键词匹配（增强版）"""
-        keyword_intent_map = {
-            "complaint_taste": ["太甜", "太酸", "太苦", "难喝", "不好喝", "口感", "味道怪", "喝不下"],
-            "complaint_quantity": ["份量", "分量", "冰块太多", "配料少", "珍珠少"],
-            "complaint_service": ["服务差", "态度差", "电话打不通", "备注没按"],
-            "complaint_delivery": ["配送慢", "超时", "送得晚", "等太久"],
-            "complaint_price": ["太贵", "价格高", "不值"],
-            "query_recommend": ["推荐", "招牌", "热门", "特色", "好喝"],
-            "query_menu": ["菜单", "饮品", "有什么"],
-            "query_order": ["订单", "单号", "配送", "送到"],
-            "query_refund": ["退款", "退钱", "售后"],
-            "query_opentime": ["营业时间", "开门", "关门"],
-            "query_location": ["门店", "地址", "附近", "在哪"],
-            "query_sugar": ["糖度", "甜度", "无糖", "少糖"],
-            "query_price": ["多少钱", "价格"],
-            "query_temp": ["热", "冰", "温度"],
-            "query_delivery": ["外卖", "配送"],
-            "query_promo": ["优惠", "活动", "折扣"],
-            "query_complaint_status": ["投诉", "处理"],
-            "query_member": ["会员", "会员卡"],
-            "query_invoice": ["发票", "开票"],
-            "place_order": ["点", "买", "下单"],
-        }
-        
         best_match = None
         best_score = 0
         
-        for intent_name, keywords in keyword_intent_map.items():
+        for intent_name, keywords in INTENT_KEYWORDS.items():
             matched_count = sum(1 for kw in keywords if kw in text)
             if matched_count > 0:
                 # 计算得分：匹配关键词数 / 该意图总关键词数
