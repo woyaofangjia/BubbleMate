@@ -194,9 +194,11 @@ class ToolRouter:
                         params["location"] = kw
                         break
                 if "location" not in params:
-                    match = re.search(r"(在|附近|周边)(.+?)(店|门店|奶茶|的)", user_input)
+                    match = re.search(r"(在|附近|周边)\s*([\u4e00-\u9fa5]{2,})", user_input)
                     if match:
-                        params["location"] = match.group(2).strip()
+                        candidate = match.group(2).strip()
+                        if candidate not in ["门店", "奶茶", "店", "有", "的"]:
+                            params["location"] = candidate
 
             elif param.name == "order_id":
                 match = re.search(r"(\d{5,})", user_input)

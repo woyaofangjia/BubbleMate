@@ -2,7 +2,7 @@
 BubbleMate Three-Layer Memory - 三层记忆系统
 Hot Layer: Redis - 短期会话窗口（最近5轮）
 Warm Layer: MySQL - 长期用户画像（用户偏好、投诉历史）
-Cold Layer: ChromaDB - 语义检索知识库（菜单、门店、常见问题）
+Cold Layer: ChromaDB - 语义检索知识库（菜单、门店、常见问题）+ RAG自进化
 """
 
 import json
@@ -22,6 +22,7 @@ class ThreeLayerMemory:
         self._init_hot_layer()
         self._init_warm_layer()
         self._init_cold_layer()
+        self._init_rag_evolution()
 
     def _init_hot_layer(self):
         """初始化Hot层 - Redis短期会话窗口"""
@@ -41,7 +42,7 @@ class ThreeLayerMemory:
                 max_connections=10,
                 socket_timeout=2,
                 socket_connect_timeout=1,
-                protocol=3
+                protocol=2
             )
             self.hot_client = redis.Redis(connection_pool=pool)
 
@@ -579,6 +580,79 @@ class ThreeLayerMemory:
             "warm_connected": self.warm_client is not None,
             "cold_connected": self.cold_client is not None
         }
+
+
+    def _init_rag_evolution(self):
+        """初始化RAG自进化模块"""
+        self.rag_evolution = None
+        try:
+            from .rag_knowledge_evolution import RAGKnowledgeEvolution
+            self.rag_evolution = RAGKnowledgeEvolution(self.cold_collection)
+            print("RAG Evolution: 自进化模块初始化成功")
+        except ImportError:
+            print("RAG Evolution: 模块未安装，跳过")
+        except Exception as e:
+            print(f"RAG Evolution: 初始化失败 ({e})")
+
+    def evolve_knowledge_from_complaints(self) -> Dict[str, Any]:
+        """从投诉日志中进化知识库"""
+        if not self.rag_evolution:
+            return {"error": "RAG进化模块未初始化"}
+
+        try:
+            self.rag_evolution.load_complaint_logs()
+            results = self.rag_evolution.evolve_from_complaints()
+            print(f"RAG Evolution: 进化完成 - 新增{results['knowledge_points_added']}条知识点")
+            return results
+        except Exception as e:
+            print(f"RAG Evolution: 进化失败 ({e})")
+            return {"error": str(e)}
+
+    def save_complaint_and_evolve(self, user_id: str, order_id: str, complaint_type: str, description: str):
+        """保存投诉并触发知识库进化"""
+        complaint_id = self.save_complaint(user_id, order_id, complaint_type, description)
+
+        if complaint_id and self.rag_evolution:
+            complaints_path = os.path.join(os.path.dirname(__file__), "..", "..", "data", "complaints.json")
+            complaints_path = os.path.abspath(complaints_path)
+
+            all_complaints = []
+            if os.path.exists(complaints_path):
+                try:
+                    with open(complaints_path, "r", encoding="utf-8") as f:
+                        all_complaints = json.load(f)
+                except:
+                    pass
+
+            new_complaint = {
+                "complaint_id": complaint_id,
+                "user_id": user_id,
+                "order_id": order_id,
+                "complaint_type": complaint_type,
+                "description": description,
+                "status": "pending",
+                "created_at": time.strftime("%Y-%m-%d %H:%M:%S")
+            }
+            all_complaints.append(new_complaint)
+
+            try:
+                with open(complaints_path, "w", encoding="utf-8") as f:
+                    json.dump(all_complaints, f, ensure_ascii=False, indent=2)
+
+                self.rag_evolution.load_complaint_logs()
+                self.rag_evolution.evolve_from_complaints()
+                print(f"RAG Evolution: 新投诉已触发知识库进化")
+            except Exception as e:
+                print(f"RAG Evolution: 保存投诉日志失败 ({e})")
+
+        return complaint_id
+
+    def get_knowledge_evolution_stats(self) -> Dict[str, Any]:
+        """获取知识库进化统计"""
+        if not self.rag_evolution:
+            return {"error": "RAG进化模块未初始化"}
+
+        return self.rag_evolution.get_knowledge_stats()
 
 
 import re
