@@ -1,0 +1,21 @@
+{
+  "complaint_patterns": {
+    "taste": [
+      "太甜了，喝不下去",
+      "太甜了，喝不下去，我要投诉"
+    ]
+  },
+  "solutions": {
+    "taste": {
+      "default": "非常抱歉给您带来不好的体验，我们会为您重新制作一杯。",
+      "variants": []
+    }
+  },
+  "compensation_strategies": {
+    "taste": {
+      "default": "免费重做 + 5元优惠券",
+      "threshold": 3
+    }
+  },
+  "case_count": 2
+}

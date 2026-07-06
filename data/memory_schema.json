@@ -1,0 +1,64 @@
+{
+    "user_id": "string",
+    "session_id": "string",
+    "preferences": {
+        "sugar_level": {
+            "type": "enum",
+            "values": ["无糖", "三分糖", "五分糖", "七分糖", "正常糖"],
+            "description": "用户偏好糖度"
+        },
+        "ice_level": {
+            "type": "enum",
+            "values": ["热", "温", "去冰", "少冰", "正常冰"],
+            "description": "用户偏好冰量"
+        },
+        "favorite_drinks": {
+            "type": "list",
+            "description": "用户常点/喜欢的饮品列表"
+        },
+        "preferred_store": {
+            "type": "string",
+            "description": "用户偏好的门店"
+        },
+        "allergens": {
+            "type": "list",
+            "description": "用户过敏原列表"
+        },
+        "price_sensitivity": {
+            "type": "enum",
+            "values": ["high", "medium", "low"],
+            "description": "价格敏感度"
+        },
+        "last_order_id": {
+            "type": "string",
+            "description": "最近订单号"
+        },
+        "last_order_time": {
+            "type": "datetime",
+            "description": "最近下单时间"
+        }
+    },
+    "complaint_history": {
+        "type": "list",
+        "description": "历史投诉记录",
+        "items": {
+            "complaint_type": {
+                "type": "enum",
+                "values": ["taste", "quantity", "service", "delivery", "price", "refund", "sarcasm", "accessory"]
+            },
+            "description": "string",
+            "timestamp": "datetime",
+            "resolved": "boolean",
+            "solution": "string"
+        }
+    },
+    "interaction_stats": {
+        "total_interactions": "integer",
+        "total_orders": "integer",
+        "total_complaints": "integer",
+        "avg_interaction_duration": "float",
+        "last_interaction_time": "datetime"
+    },
+    "created_at": "datetime",
+    "updated_at": "datetime"
+}
