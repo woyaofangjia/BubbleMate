@@ -14,6 +14,12 @@ class Intent:
     category: str
     keywords: List[str]
     source: str
+    clarification: str = ""
+    sub_intents: List['Intent'] = None
+    
+    def __post_init__(self):
+        if self.sub_intents is None:
+            self.sub_intents = []
 
 class IntentRecognizerV2:
     """增强版意图识别器 - 规则 + LLM混合策略"""
@@ -35,6 +41,75 @@ class IntentRecognizerV2:
                 self.llm_client = None
         
         self.category_map = CATEGORY_MAP
+        self.intent_descriptions = {
+            "query_location": "查询门店位置",
+            "query_menu": "查询菜单",
+            "query_recommend": "获取推荐",
+            "query_order": "查询订单",
+            "query_refund": "查询退款",
+            "query_promotion": "查询优惠活动",
+            "query_customize": "定制饮品",
+            "query_history": "查询历史订单",
+            "query_hours": "查询营业时间",
+            "query_store": "查询门店",
+            "query_price": "查询价格",
+            "query_member": "查询会员信息",
+            "query_invoice": "查询发票",
+            "complaint_taste": "投诉口感",
+            "complaint_quantity": "投诉份量",
+            "complaint_service": "投诉服务",
+            "complaint_delivery": "投诉配送",
+            "complaint_price": "投诉价格",
+            "complaint_refund": "投诉退款",
+            "complaint_sarcasm": "表达不满",
+            "complaint_accessory": "投诉配件",
+            "place_order": "下单",
+            "general": "进行其他操作",
+        }
+        
+        self.composite_patterns = [
+            (re.compile(r"(又.*?甜|甜.*?又|太甜).*?(又.*?贵|贵.*?又|太贵)", re.I), 
+             ["complaint_taste", "complaint_price"]),
+            (re.compile(r"(又.*?少|少.*?又).*?(又.*?甜|甜.*?又)", re.I), 
+             ["complaint_quantity", "complaint_taste"]),
+            (re.compile(r"(好喝吗|好喝不好喝).*?(多少钱|价格)", re.I), 
+             ["query_recommend", "query_price"]),
+            (re.compile(r"(点).*?(一杯).*?(优惠|活动|有优惠吗)", re.I), 
+             ["place_order", "query_promotion"]),
+            (re.compile(r"(太甜).*?(还.*?贵|又.*?贵)", re.I), 
+             ["complaint_taste", "complaint_price"]),
+            (re.compile(r"(珍珠.*?少|料.*?少).*?(还.*?甜|又.*?甜)", re.I), 
+             ["complaint_quantity", "complaint_taste"]),
+        ]
+    
+    def _get_intent_description(self, intent_name: str) -> str:
+        """获取意图描述用于反问确认"""
+        return self.intent_descriptions.get(intent_name, "进行相关操作")
+    
+    def _composite_intent_match(self, text: str) -> Optional[Intent]:
+        """识别复合意图"""
+        for pattern, intent_names in self.composite_patterns:
+            if pattern.search(text):
+                sub_intents = []
+                for intent_name in intent_names:
+                    sub_intents.append(Intent(
+                        name=intent_name,
+                        confidence=0.85,
+                        category=self.category_map.get(intent_name, "通用"),
+                        keywords=[],
+                        source="composite"
+                    ))
+                
+                return Intent(
+                    name="composite",
+                    confidence=0.85,
+                    category="复合意图",
+                    keywords=[],
+                    source="composite",
+                    sub_intents=sub_intents
+                )
+        
+        return None
     
     def _build_rule_patterns(self) -> Dict[str, List[re.Pattern]]:
         """构建增强版规则匹配模式"""
@@ -49,6 +124,9 @@ class IntentRecognizerV2:
                 re.compile(r"(酸死了|换配方|跟上次不一样)", re.I),
                 re.compile(r"(味道不对|跟之前比差)", re.I),
                 re.compile(r"(上次.*?(味道|口感|喝).*?(不对|不好|差))", re.I),
+                re.compile(r"(甜了点|太甜了|冰太多)", re.I),
+                re.compile(r"(味道一般|味道普通)", re.I),
+                re.compile(r"(甜度.*?调高|甜度.*?太高|冰放太多)", re.I),
             ],
             "complaint_quantity": [
                 re.compile(r"(份量|分量|量).*?(少|小|不够|不足)", re.I),
@@ -58,6 +136,7 @@ class IntentRecognizerV2:
                 re.compile(r"(少得可怜)", re.I),
                 re.compile(r"(红豆|椰果|配料).*?(不够多|太少了)", re.I),
                 re.compile(r"(料.*?太少|料.*?不够)", re.I),
+                re.compile(r"(料不够|配料太少)", re.I),
             ],
             "complaint_service": [
                 re.compile(r"(服务|态度).*?(差|不好|恶劣)", re.I),
@@ -72,6 +151,9 @@ class IntentRecognizerV2:
                 re.compile(r"(超时)", re.I),
                 re.compile(r"(包装破了|包装坏了|包装破损)", re.I),
                 re.compile(r"(等了半小时|半小时.*?(没到|还没送))", re.I),
+                re.compile(r"(送太慢|配送慢)", re.I),
+                re.compile(r"(超时.*?分钟|等了.*?分钟)", re.I),
+                re.compile(r"(等了.*?小时|一个小时.*?没到)", re.I),
             ],
             "complaint_price": [
                 re.compile(r"(贵|价格|性价比).*?(高|低|不好|不值)", re.I),
@@ -81,6 +163,7 @@ class IntentRecognizerV2:
             "complaint_refund": [
                 re.compile(r"(要求退款|申请退款)", re.I),
                 re.compile(r"(我要退款|退钱)", re.I),
+                re.compile(r"^退款$", re.I),
             ],
             "complaint_sarcasm": [
                 re.compile(r"(呵呵|绝了|也是绝了)", re.I),
@@ -91,6 +174,9 @@ class IntentRecognizerV2:
             "complaint_accessory": [
                 re.compile(r"(吸管).*?(细|怎么喝)", re.I),
                 re.compile(r"(冰沙).*?(吸管)", re.I),
+                re.compile(r"(要吸管|给根吸管)", re.I),
+                re.compile(r"(吸管.*?太细|吸不上来)", re.I),
+                re.compile(r"(吸管太细|吸不上来|没法喝)", re.I),
             ],
             
             # 查询类意图 - 增强版
@@ -114,6 +200,7 @@ class IntentRecognizerV2:
                 re.compile(r"(上次的没了|这次怎么没了)", re.I),
                 re.compile(r"(.*?).*?(有吗|有没有)", re.I),
                 re.compile(r"(有哪些).*?(饮品|饮料|水果茶)", re.I),
+                re.compile(r"(有啥喝的|有什么喝的)", re.I),
             ],
             "query_order": [
                 re.compile(r"(订单|单号).*?(查询|状态|进度|到哪了)", re.I),
@@ -128,6 +215,7 @@ class IntentRecognizerV2:
                 re.compile(r"(怎么退款|如何退款|退款流程)", re.I),
                 re.compile(r"(退款).*?(多久|需要多久|几天)", re.I),
                 re.compile(r"(售后).*?(怎么|如何)", re.I),
+                re.compile(r"(能退吗|可以退吗|能不能退)", re.I),
             ],
             "query_opentime": [
                 re.compile(r"(营业时间|开门|关门|营业|几点开门)", re.I),
@@ -184,6 +272,7 @@ class IntentRecognizerV2:
                 re.compile(r"(现在有什么优惠)", re.I),
                 re.compile(r"(活动).*?(结束|什么时候结束)", re.I),
                 re.compile(r"(买一送一|第二杯半价).*?(还有吗|有没有)", re.I),
+                re.compile(r"(有啥优惠|有什么优惠)", re.I),
             ],
             "query_complaint_status": [
                 re.compile(r"(投诉).*?(处理|进度|结果)", re.I),
@@ -192,10 +281,12 @@ class IntentRecognizerV2:
             "query_member": [
                 re.compile(r"(会员|会员卡|积分).*?(办|怎么|查询)", re.I),
                 re.compile(r"(会员权益)", re.I),
+                re.compile(r"(会员有啥用|会员有什么用)", re.I),
             ],
             "query_invoice": [
                 re.compile(r"(发票|开票).*?(能|可以|怎么)", re.I),
                 re.compile(r"(开发票)", re.I),
+                re.compile(r"(能开发票不|可以开发票吗)", re.I),
             ],
             "query_customize": [
                 re.compile(r"(加料|配料|料|珍珠|椰果|仙草|芋圆).*?(可以|能加|有哪些|有什么)", re.I),
@@ -207,6 +298,7 @@ class IntentRecognizerV2:
                 re.compile(r"(能换|可以换|换).*?(配料|料|奶)", re.I),
                 re.compile(r"(默认).*?(甜度|糖度|冰量)", re.I),
                 re.compile(r"(燕麦奶|椰奶|牛奶).*?(可以换|能换)", re.I),
+                re.compile(r"(少糖去冰|去冰少糖|正常糖正常冰)", re.I),
             ],
             "query_history": [
                 re.compile(r"(历史订单|之前.*?(订单|买过)|以前.*?(点|买))", re.I),
@@ -214,6 +306,7 @@ class IntentRecognizerV2:
                 re.compile(r"(订单记录|购买记录|消费记录)", re.I),
                 re.compile(r"(最近.*?(订单|买过|点过))", re.I),
                 re.compile(r"(上次买的|之前点的)", re.I),
+                re.compile(r"(之前点过啥|上次买的啥)", re.I),
             ],
             
             # 点单类意图
@@ -223,6 +316,7 @@ class IntentRecognizerV2:
                 re.compile(r"(我要)", re.I),
                 re.compile(r"(来一杯).*?", re.I),
                 re.compile(r"(芒果|草莓|珍珠|芋泥|杨枝甘露).*?(少糖|无糖|去冰|少冰|正常糖|正常冰)", re.I),
+                re.compile(r"(点一杯|再来一杯)", re.I),
             ],
             "order_modify": [
                 re.compile(r"(修改|改).*?(订单|饮品)", re.I),
@@ -234,6 +328,7 @@ class IntentRecognizerV2:
                 re.compile(r"(上次那个)", re.I),
                 re.compile(r"(还行吧|还行)", re.I),
                 re.compile(r"(我点的那个)", re.I),
+                re.compile(r"(那个.*?算了|算了.*?那个)", re.I),
             ],
         }
         return patterns
@@ -247,16 +342,46 @@ class IntentRecognizerV2:
         return []
     
     def recognize(self, text: str) -> Intent:
-        """识别意图（规则优先 → 关键词阈值 → LLM兜底）"""
+        """识别意图（规则优先 → 复合意图 → 关键词阈值 → LLM兜底）"""
         # 1. 规则匹配（覆盖80%常见问法，最高优先级）
         intent = self._rule_match(text)
-        if intent and intent.confidence > 0.7:
-            return intent
         
-        # 2. 多关键词匹配（阈值保护，防止低质量匹配抢跑）
+        # 2. 复合意图识别（如果规则匹配的是复合意图的子意图，优先复合意图）
+        composite_intent = self._composite_intent_match(text)
+        if composite_intent:
+            sub_intent_names = [s.name for s in composite_intent.sub_intents]
+            if intent and intent.name in sub_intent_names:
+                return composite_intent
+            return composite_intent
+        
+        # 3. 返回规则匹配结果
+        if intent:
+            if intent.confidence >= 0.55:
+                return intent
+            elif intent.confidence > 0.35:
+                return Intent(
+                    name="ask_for_clarification",
+                    confidence=intent.confidence,
+                    category="需要确认",
+                    keywords=[],
+                    source="rule_low_confidence",
+                    clarification=f"请问您是想{self._get_intent_description(intent.name)}吗？"
+                )
+        
+        # 3. 多关键词匹配（阈值保护，防止低质量匹配抢跑）
         intent = self._multi_keyword_match(text)
-        if intent and intent.confidence > 0.6:
-            return intent
+        if intent:
+            if intent.confidence > 0.55:
+                return intent
+            elif intent.confidence > 0.35:
+                return Intent(
+                    name="ask_for_clarification",
+                    confidence=intent.confidence,
+                    category="需要确认",
+                    keywords=[],
+                    source="keyword_low_confidence",
+                    clarification=f"请问您是想{self._get_intent_description(intent.name)}吗？"
+                )
         
         # 3. 训练数据匹配（补充覆盖）
         intent = self._training_data_match(text)
@@ -328,23 +453,55 @@ class IntentRecognizerV2:
             print(f"LLM意图识别失败: {e}")
             return None
     
+    def _calculate_confidence(self, pattern: re.Pattern, match_text: str, text_length: int) -> float:
+        """动态计算置信度"""
+        pattern_str = pattern.pattern
+        
+        base_confidence = 0.5
+        
+        if len(pattern_str) >= 8:
+            base_confidence = 0.75
+        elif len(pattern_str) >= 5:
+            base_confidence = 0.65
+        elif len(pattern_str) >= 3:
+            base_confidence = 0.55
+        
+        if "*?" in pattern_str or "(.*?)" in pattern_str:
+            base_confidence = min(base_confidence, 0.55)
+        
+        match_ratio = len(match_text) / text_length if text_length > 0 else 0
+        
+        if match_ratio >= 0.7:
+            confidence = min(base_confidence + 0.15, 0.92)
+        elif match_ratio >= 0.5:
+            confidence = min(base_confidence + 0.1, 0.85)
+        elif match_ratio >= 0.3:
+            confidence = min(base_confidence + 0.05, 0.78)
+        else:
+            confidence = min(base_confidence, 0.7)
+        
+        if len(match_text) >= 4 and match_ratio >= 0.5:
+            confidence = min(confidence + 0.05, 0.95)
+        
+        return confidence
+    
     def _rule_match(self, text: str) -> Optional[Intent]:
-        """规则匹配（增强版）"""
+        """规则匹配（增强版，动态置信度）"""
         matched_patterns = []
+        text_length = len(text)
         
         for intent_name, patterns in self.rule_patterns.items():
             for pattern in patterns:
                 match = pattern.search(text)
                 if match:
                     matched_text = match.group()
-                    matched_patterns.append((intent_name, matched_text))
+                    confidence = self._calculate_confidence(pattern, matched_text, text_length)
+                    matched_patterns.append((intent_name, matched_text, confidence, len(matched_text)))
         
-        # 如果有多个匹配，选择最具体的
         if matched_patterns:
-            # 优先选择投诉类和查询类中更具体的意图
             priority_order = [
                 "complaint_sarcasm", "complaint_refund", "complaint_accessory",
-                "complaint_taste", "complaint_service", "complaint_delivery", 
+                "complaint_taste", "complaint_delivery", "complaint_service", 
                 "complaint_price", "complaint_quantity",
                 "query_order", "query_refund", "query_hours", "query_price",
                 "query_store", "query_location", "query_promotion",
@@ -353,21 +510,23 @@ class IntentRecognizerV2:
             ]
             
             for priority in priority_order:
-                for intent_name, matched_text in matched_patterns:
-                    if intent_name == priority:
-                        return Intent(
-                            name=intent_name,
-                            confidence=0.85,
-                            category=self.category_map.get(intent_name, "通用"),
-                            keywords=[matched_text],
-                            source="rule"
-                        )
+                priority_matches = [m for m in matched_patterns if m[0] == priority]
+                if priority_matches:
+                    priority_matches.sort(key=lambda x: -x[3])
+                    intent_name, matched_text, confidence, _ = priority_matches[0]
+                    return Intent(
+                        name=intent_name,
+                        confidence=confidence,
+                        category=self.category_map.get(intent_name, "通用"),
+                        keywords=[matched_text],
+                        source="rule"
+                    )
             
-            # 默认返回第一个匹配
-            intent_name, matched_text = matched_patterns[0]
+            matched_patterns.sort(key=lambda x: -x[3])
+            intent_name, matched_text, confidence, _ = matched_patterns[0]
             return Intent(
                 name=intent_name,
-                confidence=0.85,
+                confidence=confidence,
                 category=self.category_map.get(intent_name, "通用"),
                 keywords=[matched_text],
                 source="rule"
