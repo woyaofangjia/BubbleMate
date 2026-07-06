@@ -47,6 +47,8 @@ class IntentRecognizerV2:
                 re.compile(r"(喝不下|喝不下去)", re.I),
                 re.compile(r"(重做|重新做)", re.I),
                 re.compile(r"(酸死了|换配方|跟上次不一样)", re.I),
+                re.compile(r"(味道不对|跟之前比差)", re.I),
+                re.compile(r"(上次.*?(味道|口感|喝).*?(不对|不好|差))", re.I),
             ],
             "complaint_quantity": [
                 re.compile(r"(份量|分量|量).*?(少|小|不够|不足)", re.I),
@@ -54,6 +56,8 @@ class IntentRecognizerV2:
                 re.compile(r"(糯米|珍珠|配料|料).*?(太少|少了|不够|不足)", re.I),
                 re.compile(r"(饮料).*?(没了|没多少)", re.I),
                 re.compile(r"(少得可怜)", re.I),
+                re.compile(r"(红豆|椰果|配料).*?(不够多|太少了)", re.I),
+                re.compile(r"(料.*?太少|料.*?不够)", re.I),
             ],
             "complaint_service": [
                 re.compile(r"(服务|态度).*?(差|不好|恶劣)", re.I),
@@ -66,7 +70,8 @@ class IntentRecognizerV2:
                 re.compile(r"(配送|送达|送).*?(慢|超时|晚|迟迟不到)", re.I),
                 re.compile(r"(等).*?(久|长|慢|很久)", re.I),
                 re.compile(r"(超时)", re.I),
-                re.compile(r"(包装破了|包装坏了)", re.I),
+                re.compile(r"(包装破了|包装坏了|包装破损)", re.I),
+                re.compile(r"(等了半小时|半小时.*?(没到|还没送))", re.I),
             ],
             "complaint_price": [
                 re.compile(r"(贵|价格|性价比).*?(高|低|不好|不值)", re.I),
@@ -74,12 +79,14 @@ class IntentRecognizerV2:
                 re.compile(r"(被坑了)", re.I),
             ],
             "complaint_refund": [
-                re.compile(r"(退款|退钱|要求退款|申请退款)", re.I),
-                re.compile(r"(我要退款)", re.I),
+                re.compile(r"(要求退款|申请退款)", re.I),
+                re.compile(r"(我要退款|退钱)", re.I),
             ],
             "complaint_sarcasm": [
                 re.compile(r"(呵呵|绝了|也是绝了)", re.I),
                 re.compile(r"(真是|一言难尽).*?(服务|包装)", re.I),
+                re.compile(r"(真的是|太坑了)", re.I),
+                re.compile(r"(也是没谁了|服了)", re.I),
             ],
             "complaint_accessory": [
                 re.compile(r"(吸管).*?(细|怎么喝)", re.I),
@@ -105,6 +112,8 @@ class IntentRecognizerV2:
                 re.compile(r"(价格|多少钱).*?(列表|表)", re.I),
                 re.compile(r"(菜单发一下)", re.I),
                 re.compile(r"(上次的没了|这次怎么没了)", re.I),
+                re.compile(r"(.*?).*?(有吗|有没有)", re.I),
+                re.compile(r"(有哪些).*?(饮品|饮料|水果茶)", re.I),
             ],
             "query_order": [
                 re.compile(r"(订单|单号).*?(查询|状态|进度|到哪了)", re.I),
@@ -113,11 +122,12 @@ class IntentRecognizerV2:
                 re.compile(r"(\d{5,}).*?(订单)", re.I),
                 re.compile(r"(查订单|我的单|订单号)", re.I),
                 re.compile(r"(帮我查|我的订单|下单记录)", re.I),
+                re.compile(r"(配送时间|送达时间).*?(多久|要多久)", re.I),
             ],
             "query_refund": [
-                re.compile(r"(退款|退钱|退货|售后)", re.I),
-                re.compile(r"(要求退款)", re.I),
-                re.compile(r"(怎么退款)", re.I),
+                re.compile(r"(怎么退款|如何退款|退款流程)", re.I),
+                re.compile(r"(退款).*?(多久|需要多久|几天)", re.I),
+                re.compile(r"(售后).*?(怎么|如何)", re.I),
             ],
             "query_opentime": [
                 re.compile(r"(营业时间|开门|关门|营业|几点开门)", re.I),
@@ -155,6 +165,7 @@ class IntentRecognizerV2:
                 re.compile(r"(便宜|最便宜).*?(奶茶|饮品|多少钱|店)", re.I),
                 re.compile(r"(哪家|什么).*?(便宜|贵|价格)", re.I),
                 re.compile(r"(附近).*?(哪家|什么).*?(便宜|贵)", re.I),
+                re.compile(r"(打包|外卖).*?(收费|多少钱|额外)", re.I),
             ],
             "query_temp": [
                 re.compile(r"(热|冰|温度).*?(可以|能做|选择)", re.I),
@@ -171,6 +182,8 @@ class IntentRecognizerV2:
                 re.compile(r"(打折|特价)", re.I),
                 re.compile(r"(第二杯半价|优惠活动|今日优惠)", re.I),
                 re.compile(r"(现在有什么优惠)", re.I),
+                re.compile(r"(活动).*?(结束|什么时候结束)", re.I),
+                re.compile(r"(买一送一|第二杯半价).*?(还有吗|有没有)", re.I),
             ],
             "query_complaint_status": [
                 re.compile(r"(投诉).*?(处理|进度|结果)", re.I),
@@ -190,6 +203,10 @@ class IntentRecognizerV2:
                 re.compile(r"(定制|甜度|温度|糖度|冰度).*?(选择|选项|调整)", re.I),
                 re.compile(r"(有什么.*?(料|加料|配料))", re.I),
                 re.compile(r"(加珍珠)", re.I),
+                re.compile(r"(能不能.*?(少放|多放|不放|换).*?(冰|糖|料|奶|配料))", re.I),
+                re.compile(r"(能换|可以换|换).*?(配料|料|奶)", re.I),
+                re.compile(r"(默认).*?(甜度|糖度|冰量)", re.I),
+                re.compile(r"(燕麦奶|椰奶|牛奶).*?(可以换|能换)", re.I),
             ],
             "query_history": [
                 re.compile(r"(历史订单|之前.*?(订单|买过)|以前.*?(点|买))", re.I),
@@ -205,6 +222,7 @@ class IntentRecognizerV2:
                 re.compile(r"(下单|购买|订购)", re.I),
                 re.compile(r"(我要)", re.I),
                 re.compile(r"(来一杯).*?", re.I),
+                re.compile(r"(芒果|草莓|珍珠|芋泥|杨枝甘露).*?(少糖|无糖|去冰|少冰|正常糖|正常冰)", re.I),
             ],
             "order_modify": [
                 re.compile(r"(修改|改).*?(订单|饮品)", re.I),
