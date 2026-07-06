@@ -46,27 +46,44 @@ class IntentRecognizerV2:
                 re.compile(r"(味道).*?(差|怪|不好)", re.I),
                 re.compile(r"(喝不下|喝不下去)", re.I),
                 re.compile(r"(重做|重新做)", re.I),
+                re.compile(r"(酸死了|换配方|跟上次不一样)", re.I),
             ],
             "complaint_quantity": [
                 re.compile(r"(份量|分量|量).*?(少|小|不够|不足)", re.I),
                 re.compile(r"(冰块).*?(太多|全是|太多了)", re.I),
-                re.compile(r"(糯米|珍珠|配料|料).*?(少|没|不够|不足)", re.I),
+                re.compile(r"(糯米|珍珠|配料|料).*?(太少|少了|不够|不足)", re.I),
                 re.compile(r"(饮料).*?(没了|没多少)", re.I),
+                re.compile(r"(少得可怜)", re.I),
             ],
             "complaint_service": [
                 re.compile(r"(服务|态度).*?(差|不好|恶劣)", re.I),
                 re.compile(r"(电话).*?(打不通|没人接|打了没人接)", re.I),
                 re.compile(r"(备注).*?(没按|不给|没给|没照做)", re.I),
                 re.compile(r"(差评|投诉服务)", re.I),
+                re.compile(r"(一言难尽)", re.I),
             ],
             "complaint_delivery": [
                 re.compile(r"(配送|送达|送).*?(慢|超时|晚|迟迟不到)", re.I),
                 re.compile(r"(等).*?(久|长|慢|很久)", re.I),
                 re.compile(r"(超时)", re.I),
+                re.compile(r"(包装破了|包装坏了)", re.I),
             ],
             "complaint_price": [
                 re.compile(r"(贵|价格|性价比).*?(高|低|不好|不值)", re.I),
                 re.compile(r"(这么贵|太贵)", re.I),
+                re.compile(r"(被坑了)", re.I),
+            ],
+            "complaint_refund": [
+                re.compile(r"(退款|退钱|要求退款|申请退款)", re.I),
+                re.compile(r"(我要退款)", re.I),
+            ],
+            "complaint_sarcasm": [
+                re.compile(r"(呵呵|绝了|也是绝了)", re.I),
+                re.compile(r"(真是|一言难尽).*?(服务|包装)", re.I),
+            ],
+            "complaint_accessory": [
+                re.compile(r"(吸管).*?(细|怎么喝)", re.I),
+                re.compile(r"(冰沙).*?(吸管)", re.I),
             ],
             
             # 查询类意图 - 增强版
@@ -77,6 +94,8 @@ class IntentRecognizerV2:
                 re.compile(r"(帮我|给我).*?(推荐|选|挑)", re.I),
                 re.compile(r"(喝什么|点什么|买什么)", re.I),
                 re.compile(r"(什么).*?(好喝|好吃)", re.I),
+                re.compile(r"(给我推荐一款|最推荐)", re.I),
+                re.compile(r"(好喝吗)", re.I),
             ],
             "query_menu": [
                 # 菜单查询 - 扩充
@@ -84,19 +103,28 @@ class IntentRecognizerV2:
                 re.compile(r"(有什么).*?(喝的|饮品|饮料)", re.I),
                 re.compile(r"(看看).*?(菜单|饮品)", re.I),
                 re.compile(r"(价格|多少钱).*?(列表|表)", re.I),
+                re.compile(r"(菜单发一下)", re.I),
+                re.compile(r"(上次的没了|这次怎么没了)", re.I),
             ],
             "query_order": [
                 re.compile(r"(订单|单号).*?(查询|状态|进度|到哪了)", re.I),
                 re.compile(r"(我的|查询).*?(订单)", re.I),
                 re.compile(r"(订单).*?(什么时候|能送到)", re.I),
                 re.compile(r"(\d{5,}).*?(订单)", re.I),
+                re.compile(r"(查订单|我的单|订单号)", re.I),
+                re.compile(r"(帮我查|我的订单|下单记录)", re.I),
             ],
             "query_refund": [
                 re.compile(r"(退款|退钱|退货|售后)", re.I),
                 re.compile(r"(要求退款)", re.I),
+                re.compile(r"(怎么退款)", re.I),
             ],
             "query_opentime": [
                 re.compile(r"(营业时间|开门|关门|营业|几点开门)", re.I),
+            ],
+            "query_hours": [
+                re.compile(r"(几点关门|几点开门)", re.I),
+                re.compile(r"(营业时间|开门时间|关门时间)", re.I),
             ],
             "query_location": [
                 # 门店/位置查询 - 大幅扩充关键词池
@@ -108,25 +136,41 @@ class IntentRecognizerV2:
                 re.compile(r"(附近有门店吗)", re.I),
                 re.compile(r"(最近的一家店)", re.I),
             ],
+            "query_store": [
+                re.compile(r"(门店|店铺|店|地址|位置)", re.I),
+                re.compile(r"(附近|周边).*?(有|店)", re.I),
+                re.compile(r"(在哪|在哪边).*?(店|门店)", re.I),
+                re.compile(r"(这家店在哪|附近有店吗)", re.I),
+            ],
             "query_sugar": [
                 re.compile(r"(糖度|无糖|少糖|正常糖|糖).*?(选择|选项|有)", re.I),
                 re.compile(r"(甜度).*?(几种|多少种)", re.I),
             ],
             "query_price": [
                 re.compile(r"(多少钱|价格|贵不贵)", re.I),
+                re.compile(r"(\w+)?多少钱$", re.I),
+                re.compile(r"(卖|要|买).*?多少钱", re.I),
+                re.compile(r"(价位|一杯多少钱|多少钱一杯)", re.I),
                 re.compile(r"(.*?)多少钱", re.I),
+                re.compile(r"(便宜|最便宜).*?(奶茶|饮品|多少钱|店)", re.I),
+                re.compile(r"(哪家|什么).*?(便宜|贵|价格)", re.I),
+                re.compile(r"(附近).*?(哪家|什么).*?(便宜|贵)", re.I),
             ],
             "query_temp": [
                 re.compile(r"(热|冰|温度).*?(可以|能做|选择)", re.I),
                 re.compile(r"(热的|冰的|温的)", re.I),
+                re.compile(r"(去冰|少冰)", re.I),
             ],
             "query_delivery": [
                 re.compile(r"(外卖|配送|送餐).*?(有|可以|支持)", re.I),
                 re.compile(r"(能送|送到)", re.I),
             ],
-            "query_promo": [
+            "query_promotion": [
                 re.compile(r"(优惠|活动|折扣|券).*?(有|今天|现在)", re.I),
+                re.compile(r"(有什么).*?(优惠|活动|折扣)", re.I),
                 re.compile(r"(打折|特价)", re.I),
+                re.compile(r"(第二杯半价|优惠活动|今日优惠)", re.I),
+                re.compile(r"(现在有什么优惠)", re.I),
             ],
             "query_complaint_status": [
                 re.compile(r"(投诉).*?(处理|进度|结果)", re.I),
@@ -134,21 +178,25 @@ class IntentRecognizerV2:
             ],
             "query_member": [
                 re.compile(r"(会员|会员卡|积分).*?(办|怎么|查询)", re.I),
+                re.compile(r"(会员权益)", re.I),
             ],
             "query_invoice": [
                 re.compile(r"(发票|开票).*?(能|可以|怎么)", re.I),
+                re.compile(r"(开发票)", re.I),
             ],
             "query_customize": [
                 re.compile(r"(加料|配料|料|珍珠|椰果|仙草|芋圆).*?(可以|能加|有哪些|有什么)", re.I),
                 re.compile(r"(可以加|能加|加个|加一份).*?(珍珠|椰果|仙草|芋圆|布丁)", re.I),
                 re.compile(r"(定制|甜度|温度|糖度|冰度).*?(选择|选项|调整)", re.I),
                 re.compile(r"(有什么.*?(料|加料|配料))", re.I),
+                re.compile(r"(加珍珠)", re.I),
             ],
             "query_history": [
                 re.compile(r"(历史订单|之前.*?(订单|买过)|以前.*?(点|买))", re.I),
                 re.compile(r"(我之前|我以前|我上次).*?(点|买|喝|下单)", re.I),
                 re.compile(r"(订单记录|购买记录|消费记录)", re.I),
                 re.compile(r"(最近.*?(订单|买过|点过))", re.I),
+                re.compile(r"(上次买的|之前点的)", re.I),
             ],
             
             # 点单类意图
@@ -156,10 +204,18 @@ class IntentRecognizerV2:
                 re.compile(r"(点|买|要).*?(一杯|奶茶|饮品)", re.I),
                 re.compile(r"(下单|购买|订购)", re.I),
                 re.compile(r"(我要)", re.I),
+                re.compile(r"(来一杯).*?", re.I),
             ],
             "order_modify": [
                 re.compile(r"(修改|改).*?(订单|饮品)", re.I),
                 re.compile(r"(取消|退).*?(订单)", re.I),
+            ],
+            "unclear": [
+                re.compile(r"(那个)$", re.I),
+                re.compile(r"(跟之前一样|和上次一样)", re.I),
+                re.compile(r"(上次那个)", re.I),
+                re.compile(r"(还行吧|还行)", re.I),
+                re.compile(r"(我点的那个)", re.I),
             ],
         }
         return patterns
@@ -173,27 +229,27 @@ class IntentRecognizerV2:
         return []
     
     def recognize(self, text: str) -> Intent:
-        """识别意图（规则 + LLM混合策略）"""
-        # 1. 规则匹配（最高优先级）
+        """识别意图（规则优先 → 关键词阈值 → LLM兜底）"""
+        # 1. 规则匹配（覆盖80%常见问法，最高优先级）
         intent = self._rule_match(text)
-        if intent and intent.confidence > 0.8:
+        if intent and intent.confidence > 0.7:
             return intent
         
-        # 2. 多关键词匹配
+        # 2. 多关键词匹配（阈值保护，防止低质量匹配抢跑）
         intent = self._multi_keyword_match(text)
+        if intent and intent.confidence > 0.6:
+            return intent
+        
+        # 3. 训练数据匹配（补充覆盖）
+        intent = self._training_data_match(text)
         if intent and intent.confidence > 0.5:
             return intent
         
-        # 3. LLM兜底识别（针对疑难样本）
+        # 4. LLM兜底识别（处理剩余20%疑难样本）
         if self.use_llm and self.llm_client:
             intent = self._llm_recognize(text)
-            if intent and intent.confidence > 0.4:
+            if intent and intent.confidence > 0.5:
                 return intent
-        
-        # 4. 训练数据匹配
-        intent = self._training_data_match(text)
-        if intent and intent.confidence > 0.4:
-            return intent
         
         # 5. 默认通用意图
         return Intent(
@@ -215,15 +271,25 @@ class IntentRecognizerV2:
 - query_recommend: 推荐查询
 - query_order: 订单查询
 - query_refund: 退款查询
-- query_promo: 优惠活动查询
+- query_promotion: 优惠活动查询
 - query_customize: 加料定制查询
 - query_history: 历史订单查询
+- query_hours: 营业时间查询
+- query_store: 门店位置查询
+- query_price: 价格查询
+- query_member: 会员查询
+- query_invoice: 发票查询
 - complaint_taste: 口感投诉
 - complaint_quantity: 份量投诉
 - complaint_service: 服务投诉
 - complaint_delivery: 配送投诉
 - complaint_price: 价格投诉
+- complaint_refund: 退款投诉
+- complaint_sarcasm: 讽刺投诉
+- complaint_accessory: 配件投诉
+- place_order: 下单
 - general: 通用/无法识别
+- unclear: 不明确
 
 直接输出类别名称，不要其他文字。"""
 
@@ -259,10 +325,13 @@ class IntentRecognizerV2:
         if matched_patterns:
             # 优先选择投诉类和查询类中更具体的意图
             priority_order = [
-                "complaint_taste", "complaint_quantity", "complaint_service", 
-                "complaint_delivery", "complaint_price",
-                "query_order", "query_refund", "query_location",
-                "query_recommend", "query_menu",
+                "complaint_sarcasm", "complaint_refund", "complaint_accessory",
+                "complaint_taste", "complaint_service", "complaint_delivery", 
+                "complaint_price", "complaint_quantity",
+                "query_order", "query_refund", "query_hours", "query_price",
+                "query_store", "query_location", "query_promotion",
+                "query_recommend", "query_menu", "query_customize",
+                "place_order", "unclear",
             ]
             
             for priority in priority_order:
@@ -295,9 +364,7 @@ class IntentRecognizerV2:
         for intent_name, keywords in INTENT_KEYWORDS.items():
             matched_count = sum(1 for kw in keywords if kw in text)
             if matched_count > 0:
-                # 计算得分：匹配关键词数 / 该意图总关键词数
                 score = matched_count / len(keywords)
-                # 如果匹配多个关键词，增加置信度
                 if matched_count >= 2:
                     score = min(score * 1.2, 0.95)
                 
@@ -305,7 +372,7 @@ class IntentRecognizerV2:
                     best_score = score
                     best_match = intent_name
         
-        if best_match and best_score >= 0.3:
+        if best_match and best_score >= 0.4:
             return Intent(
                 name=best_match,
                 confidence=min(best_score + 0.2, 0.9),
@@ -373,7 +440,7 @@ def test_intent_recognizer_v2():
         ("可以做热的吗？", "query_temp"),
         ("甜度有几种选择？", "query_sugar"),
         ("有外卖吗？", "query_delivery"),
-        ("今天有什么优惠？", "query_promo"),
+        ("今天有什么优惠？", "query_promotion"),
         ("上次的投诉处理好了吗？", "query_complaint_status"),
         ("我要下单", "place_order"),
         ("会员卡怎么办？", "query_member"),

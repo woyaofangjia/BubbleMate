@@ -29,7 +29,7 @@ def load_test_data() -> List[Dict]:
             if isinstance(data, dict) and "samples" in data:
                 return data["samples"][:50]
     return [
-        {"query": "你们有什么优惠活动？", "intent": "query_promo", "difficulty": "easy"},
+        {"query": "你们有什么优惠活动？", "intent": "query_promotion", "difficulty": "easy"},
         {"query": "幽兰拿铁可以加珍珠吗？", "intent": "query_customize", "difficulty": "easy"},
         {"query": "我之前买过什么？", "intent": "query_history", "difficulty": "medium"},
         {"query": "推荐点清爽的", "intent": "query_recommend", "difficulty": "easy"},
@@ -44,7 +44,7 @@ def load_test_data() -> List[Dict]:
 
 def mock_agent_response(query: str, intent: str) -> str:
     responses = {
-        "query_promo": "当前有7个活动正在进行：新客立减8元、第二杯半价、满25减5、周三会员日8.8折等。请问您想了解哪个活动的详情？",
+        "query_promotion": "当前有7个活动正在进行：新客立减8元、第二杯半价、满25减5、周三会员日8.8折等。请问您想了解哪个活动的详情？",
         "query_customize": "这款饮品支持11种加料选择，包括珍珠、椰果、仙草冻等，还有5档糖度和温度可以调整。需要我帮您推荐搭配吗？",
         "query_history": "为您找到最近3条历史订单：幽兰拿铁、多肉葡萄、霸气芝士草莓。需要复购哪一款？",
         "query_recommend": "根据您的口味偏好，为您推荐3款饮品：柠檬水、多肉葡萄、霸气芝士草莓。需要详细介绍哪款？",

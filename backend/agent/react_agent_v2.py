@@ -22,7 +22,7 @@ DIRECT_RESPONSES = {
     "query_price": "饮品价格8-20元不等，具体价格可在菜单中查看。",
     "query_temp": "支持热、温、冰三种温度。",
     "query_delivery": "支持外卖配送，满20元免配送费。",
-    "query_promo": "今日优惠：新品第二杯半价，会员9折。",
+    "query_promotion": "今日优惠：新品第二杯半价，会员9折。",
     "query_member": "会员卡免费办理，首单立减5元。",
     "query_invoice": "支持电子发票，在小程序申请。",
     "query_complaint_status": "请提供投诉单号或订单号查询进度。",

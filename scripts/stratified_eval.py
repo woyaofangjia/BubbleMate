@@ -12,16 +12,23 @@ from typing import Dict, List, Tuple
 # 添加项目路径
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# 导入Agent组件
+# 导入意图识别器
 try:
     from backend.agent.intent_recognizer_v2 import IntentRecognizerV2
+    HAS_INTENT_RECOGNIZER = True
+except ImportError as e:
+    HAS_INTENT_RECOGNIZER = False
+    print(f"警告: 意图识别器导入失败: {e}")
+
+# 尝试导入完整Agent组件（用于回复质量评估）
+try:
     from backend.agent.react_agent_v2 import ReActAgentV2
     from backend.agent.memory_manager_v2 import MemoryManagerV2
     from backend.tools.bubble_tools import TOOL_REGISTRY
     HAS_AGENT = True
 except ImportError as e:
     HAS_AGENT = False
-    print(f"警告: Agent组件导入失败: {e}")
+    print(f"提示: 完整Agent组件导入失败（缺少requests），仅测试意图识别: {e}")
 
 # 尝试导入LLM
 HAS_LLM = False
@@ -33,7 +40,7 @@ if os.getenv("ZHIPUAI_API_KEY", ""):
         pass
 
 if not HAS_LLM:
-    print("提示: 智谱AI未配置或无API Key，跳过LLM Baseline测试")
+    print("提示: 智谱AI未配置或无API Key，使用纯规则模式测试")
 
 def load_test_data():
     """加载测试数据集"""
@@ -56,6 +63,18 @@ def call_pure_llm(query: str) -> str:
         return call_llm([{"role": "user", "content": prompt}], max_tokens=200, temperature=0.7)
     except:
         return "系统暂时无法处理"
+
+def call_intent_recognizer(query: str, recognizer) -> Dict:
+    """调用意图识别器"""
+    if not recognizer:
+        return {"intent": "unknown", "confidence": 0}
+    
+    try:
+        intent = recognizer.recognize(query)
+        return {"intent": intent.name, "confidence": intent.confidence}
+    except Exception as e:
+        print(f"意图识别错误: {e}")
+        return {"intent": "error", "confidence": 0}
 
 def call_agent(query: str, agent=None) -> Tuple[str, Dict]:
     """调用Agent获取回复"""
@@ -86,7 +105,7 @@ def evaluate_response(response: str, expected_keywords: List[str]) -> float:
     matches = sum(1 for kw in expected_keywords if kw.lower() in response_lower)
     return matches / len(expected_keywords)
 
-def run_stratified_evaluation(samples: List[Dict], agent=None, use_llm_baseline: bool = False) -> Dict:
+def run_stratified_evaluation(samples: List[Dict], agent=None, recognizer=None, use_llm_baseline: bool = False) -> Dict:
     """分层评估"""
     results = {
         "total": len(samples),
@@ -103,12 +122,16 @@ def run_stratified_evaluation(samples: List[Dict], agent=None, use_llm_baseline:
         keywords = sample.get("keywords", [])
         is_adversarial = sample.get("adversarial_type") is not None
 
-        # 调用Agent
-        agent_response, intent_info = call_agent(query, agent)
+        # 优先使用完整Agent，否则使用意图识别器
+        if HAS_AGENT and agent:
+            agent_response, intent_info = call_agent(query, agent)
+            response_score = evaluate_response(agent_response, keywords)
+        else:
+            intent_info = call_intent_recognizer(query, recognizer)
+            response_score = 0.5
 
         # 意图匹配
         intent_score = evaluate_intent_match(intent_info["intent"], expected_intent)
-        response_score = evaluate_response(agent_response, keywords)
 
         # 综合得分
         final_score = intent_score * 0.7 + response_score * 0.3
@@ -260,13 +283,23 @@ def main():
 
     print(f"\n加载测试数据: {len(samples)} 条")
 
-    # 初始化Agent
+    # 初始化意图识别器（优先）
+    recognizer = None
+    if HAS_INTENT_RECOGNIZER:
+        print("初始化意图识别器...")
+        try:
+            recognizer = IntentRecognizerV2("data", use_llm=HAS_LLM)
+            print(f"意图识别器初始化成功 (LLM模式: {HAS_LLM})")
+        except Exception as e:
+            print(f"意图识别器初始化失败: {e}")
+
+    # 初始化完整Agent（如果可用）
     agent = None
     if HAS_AGENT:
         print("初始化Agent组件...")
         try:
             tools = {k: v["handler"] for k, v in TOOL_REGISTRY.items()}
-            ir = IntentRecognizerV2("data")
+            ir = IntentRecognizerV2("data", use_llm=HAS_LLM)
             mm = MemoryManagerV2(use_redis=False)
             agent = ReActAgentV2(tools, ir, mm)
             print("Agent初始化成功")
@@ -275,7 +308,7 @@ def main():
 
     # 运行分层评估
     print("\n运行分层评估...")
-    results = run_stratified_evaluation(samples, agent)
+    results = run_stratified_evaluation(samples, agent, recognizer)
 
     # 打印报告
     print_report(results)
