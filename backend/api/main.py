@@ -1,13 +1,17 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
 import json
 import os
 
-from backend.bubble_agent import process_message, recognize_intent, create_memory_store, get_context, TOOLS, get_user_id
-from backend.storage.database import init_db, get_user_preferences, get_complaint_history, get_user_stats
-from backend.storage.memory_store import get_all_complaints, get_knowledge_list, review_knowledge, delete_knowledge, get_complaint_stats
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
+from bubble_agent import process_message, recognize_intent, create_memory_store, get_context, TOOLS, get_user_id
+from storage.database import init_db, get_user_preferences, get_complaint_history, get_user_stats, get_knowledge_candidates, approve_candidate, reject_candidate, get_complaint_knowledge, get_knowledge_complaints, update_knowledge_parent
+from storage.memory_store import get_all_complaints, get_knowledge_list, get_knowledge_graph, get_knowledge_graph_aggregated, review_knowledge, delete_knowledge, get_complaint_stats, resolve_complaint, add_knowledge_node
 
 init_db()
 
@@ -37,6 +41,15 @@ class ReviewRequest(BaseModel):
 
 class ReplyRequest(BaseModel):
     message: str
+
+class AddKnowledgeRequest(BaseModel):
+    node_type: str
+    content: str
+    parent_id: Optional[int] = None
+
+class AddRelationRequest(BaseModel):
+    parent_id: int
+    child_id: int
 
 @app.get("/")
 async def root():
@@ -143,6 +156,16 @@ async def admin_get_knowledge(reviewed_only: Optional[bool] = False):
     knowledge = get_knowledge_list(reviewed_only)
     return {"knowledge": knowledge}
 
+@app.get("/api/admin/knowledge/graph")
+async def admin_get_knowledge_graph():
+    graph = get_knowledge_graph()
+    return {"graph": graph}
+
+@app.get("/api/admin/knowledge/graph/aggregated")
+async def admin_get_knowledge_graph_aggregated():
+    result = get_knowledge_graph_aggregated()
+    return result
+
 @app.post("/api/admin/knowledge/review")
 async def admin_review_knowledge(request: ReviewRequest):
     review_knowledge(request.id)
@@ -152,6 +175,71 @@ async def admin_review_knowledge(request: ReviewRequest):
 async def admin_delete_knowledge(id: int):
     delete_knowledge(id)
     return {"success": True, "id": id}
+
+@app.post("/api/admin/knowledge")
+async def admin_add_knowledge(request: AddKnowledgeRequest):
+    new_id = add_knowledge_node(request.node_type, request.content, request.parent_id)
+    return {"success": True, "id": new_id}
+
+@app.post("/api/admin/knowledge/relation")
+async def admin_add_relation(request: AddRelationRequest):
+    update_knowledge_parent(request.child_id, request.parent_id)
+    return {"success": True}
+
+@app.post("/api/admin/complaints/resolve/{id}")
+async def admin_resolve_complaint(id: int):
+    resolve_complaint(id)
+    return {"success": True, "id": id}
+
+@app.get("/api/admin/candidates")
+async def admin_get_candidates(status: Optional[str] = None):
+    candidates = get_knowledge_candidates(status)
+    return {"candidates": candidates}
+
+@app.post("/api/admin/candidates/{id}/approve")
+async def admin_approve_candidate(id: int):
+    success = approve_candidate(id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Candidate not found")
+    return {"success": True, "id": id}
+
+@app.post("/api/admin/candidates/{id}/reject")
+async def admin_reject_candidate(id: int):
+    success = reject_candidate(id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Candidate not found")
+    return {"success": True, "id": id}
+
+@app.post("/api/admin/candidate-approve")
+async def admin_candidate_approve(request: Request):
+    data = await request.json()
+    success = approve_candidate(data.get("id"))
+    if not success:
+        raise HTTPException(status_code=404, detail="Candidate not found")
+    return {"success": True, "id": data.get("id")}
+
+@app.post("/api/admin/candidate-reject")
+async def admin_candidate_reject(request: Request):
+    data = await request.json()
+    success = reject_candidate(data.get("id"))
+    if not success:
+        raise HTTPException(status_code=404, detail="Candidate not found")
+    return {"success": True, "id": data.get("id")}
+
+@app.get("/api/admin/complaints/{id}/knowledge")
+async def admin_get_complaint_knowledge(id: int):
+    knowledge = get_complaint_knowledge(id)
+    return {"knowledge": knowledge}
+
+@app.get("/api/admin/knowledge/{id}/complaints")
+async def admin_get_knowledge_complaints(id: int):
+    complaints = get_knowledge_complaints(id)
+    return {"complaints": complaints}
+
+@app.get("/api/admin/knowledge-complaints")
+async def admin_get_knowledge_complaints_v2(knowledge_id: int):
+    complaints = get_knowledge_complaints(knowledge_id)
+    return {"complaints": complaints}
 
 @app.get("/api/admin/context/{session_id}")
 async def admin_get_context(session_id: str):

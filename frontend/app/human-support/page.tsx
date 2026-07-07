@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 interface Intervention {
   id: string;
@@ -30,33 +30,38 @@ export default function HumanSupport() {
   });
   const [selected, setSelected] = useState<Intervention | null>(null);
   const [resolution, setResolution] = useState('');
+  const isMounted = useRef(true);
 
-  useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
+    if (!isMounted.current) return;
     try {
       const [intervRes, statsRes] = await Promise.all([
         fetch('/api/human-in-loop/pending'),
         fetch('/api/human-in-loop/stats')
       ]);
       
-      if (intervRes.ok) {
+      if (intervRes.ok && isMounted.current) {
         const data = await intervRes.json();
         setInterventions(data);
       }
-      if (statsRes.ok) {
+      if (statsRes.ok && isMounted.current) {
         const statsData = await statsRes.json();
         setStats(statsData);
       }
     } catch (error) {
       console.error('获取数据失败:', error);
-      // 保持默认空数据，不使用mock
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    isMounted.current = true;
+    fetchData();
+    const interval = setInterval(fetchData, 15000);
+    return () => {
+      isMounted.current = false;
+      clearInterval(interval);
+    };
+  }, [fetchData]);
 
   const handleResolve = async () => {
     if (!selected || !resolution.trim()) return;
@@ -68,7 +73,7 @@ export default function HumanSupport() {
         body: JSON.stringify({ resolution, agent_id: 'agent-001' })
       });
 
-      if (response.ok) {
+      if (response.ok && isMounted.current) {
         setResolution('');
         setSelected(null);
         fetchData();
@@ -102,7 +107,6 @@ export default function HumanSupport() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
@@ -134,7 +138,6 @@ export default function HumanSupport() {
 
       <main className="max-w-7xl mx-auto p-6">
         <div className="grid grid-cols-2 gap-6">
-          {/* 左侧：待处理列表 */}
           <div>
             <h2 className="text-lg font-semibold mb-4">待处理介入请求</h2>
             <div className="space-y-3">
@@ -179,12 +182,10 @@ export default function HumanSupport() {
             </div>
           </div>
 
-          {/* 右侧：处理面板 */}
           <div>
             <h2 className="text-lg font-semibold mb-4">处理详情</h2>
             {selected ? (
               <div className="bg-white rounded-lg p-6 space-y-4">
-                {/* 会话信息 */}
                 <div>
                   <label className="text-sm font-medium text-gray-600">用户消息</label>
                   <div className="mt-1 p-3 bg-gray-50 rounded-lg text-sm">
@@ -192,7 +193,6 @@ export default function HumanSupport() {
                   </div>
                 </div>
 
-                {/* 置信度详情 */}
                 <div>
                   <label className="text-sm font-medium text-gray-600">置信度分析</label>
                   <div className="mt-2 space-y-2">
@@ -218,7 +218,6 @@ export default function HumanSupport() {
                   </div>
                 </div>
 
-                {/* 解决输入 */}
                 <div>
                   <label className="text-sm font-medium text-gray-600">处理方案</label>
                   <textarea
@@ -230,7 +229,6 @@ export default function HumanSupport() {
                   />
                 </div>
 
-                {/* 操作按钮 */}
                 <div className="flex gap-3">
                   <button
                     onClick={handleResolve}

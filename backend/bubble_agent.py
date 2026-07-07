@@ -3,6 +3,7 @@ import json
 import os
 import random
 import time
+import sqlite3
 from collections import deque
 
 try:
@@ -11,13 +12,20 @@ except:
     requests = None
 
 try:
-    from backend.storage.database import save_session, get_user_by_session, save_user_preference, get_user_preferences, save_complaint
+    from storage.database import save_session, get_user_by_session, save_user_preference, get_user_preferences, save_complaint, save_complaint_with_candidate
+    from storage.memory_store import get_knowledge_list, get_knowledge_graph, save_knowledge as _save_knowledge, save_complaint_db as _save_complaint_db, get_complaint_stats
 except:
     save_session = lambda s, u: None
     get_user_by_session = lambda s: None
     save_user_preference = lambda u, k, v: None
     get_user_preferences = lambda u: {}
     save_complaint = lambda u, d: None
+    save_complaint_with_candidate = lambda u, ct, d: (None, None)
+    get_knowledge_list = lambda reviewed_only=False: []
+    get_knowledge_graph = lambda: []
+    _save_knowledge = lambda ct, s, c: None
+    _save_complaint_db = lambda u, ct, d: None
+    get_complaint_stats = lambda: {"by_type": []}
 
 # ==================== 用户映射 ====================
 
@@ -89,7 +97,7 @@ RULE_PATTERNS = {
     "complaint_price": [re.compile(r"(贵|价格).*?(高|不值)", re.I)],
     "complaint_refund": [re.compile(r"(要求退款|申请退款|我要退款)", re.I)],
     "complaint_sarcasm": [re.compile(r"(呵呵|绝了|也是绝了|太坑了)", re.I)],
-    "complaint_accessory": [re.compile(r"(吸管).*?(细|怎么喝)", re.I)],
+    "complaint_accessory": [re.compile(r"(吸管).*?(细|怎么喝)", re.I), re.compile(r"(吸管|配件).*?(少|没|缺失|不见)", re.I)],
     "query_recommend": [re.compile(r"(推荐|招牌|热门|特色|新品|必点)", re.I), re.compile(r"(有什么).*?(好喝|推荐)", re.I)],
     "query_menu": [re.compile(r"(菜单|饮品).*?(列出|看看|都有)", re.I), re.compile(r"(有什么).*?(喝的|饮品)", re.I)],
     "query_order": [re.compile(r"(订单|单号).*?(查询|状态|进度|到哪)", re.I), re.compile(r"(订单).*?(\d{5,})|(\d{5,}).*?(订单)", re.I), re.compile(r"(查|查看|我的).*?(订单)", re.I)],
@@ -137,7 +145,38 @@ COMPLAINT_RESPONSES = {
     "complaint_service": "抱歉服务不佳，已通知门店整改。",
     "complaint_delivery": "抱歉配送超时，已申请超时赔付。",
     "complaint_price": "抱歉价格问题，核实后提供优惠券补偿。",
+    "complaint_accessory": "抱歉配件缺失，我们会为您补发。",
+    "complaint_refund": "抱歉，我们会为您办理退款。",
+    "complaint_sarcasm": "抱歉给您带来不好的体验，请问具体是什么问题？",
 }
+
+INTENT_TO_CATEGORY = {
+    "complaint_taste": "口味",
+    "complaint_quantity": "份量",
+    "complaint_service": "服务",
+    "complaint_delivery": "配送",
+    "complaint_price": "价格",
+    "complaint_refund": "退款",
+    "complaint_sarcasm": "讽刺",
+    "complaint_accessory": "配件",
+}
+
+def get_knowledge_response(intent_name):
+    category = INTENT_TO_CATEGORY.get(intent_name)
+    if not category:
+        return None, None
+    graph = get_knowledge_graph()
+    for node in graph:
+        if node.get("reviewed") and node.get("content") == category:
+            solution = ""
+            compensation = ""
+            for child in node.get("children", []):
+                if child.get("node_type") == "solution":
+                    solution = child.get("content", "")
+                elif child.get("node_type") == "compensation":
+                    compensation = child.get("content", "")
+            return solution, compensation
+    return None, None
 
 INTENT_TOOL = {
     "query_location": "query_stores", "query_menu": "query_menu",
@@ -146,7 +185,8 @@ INTENT_TOOL = {
     "query_recommend": "query_recommend",
     "complaint_taste": "log_complaint", "complaint_quantity": "log_complaint",
     "complaint_service": "log_complaint", "complaint_delivery": "log_complaint",
-    "complaint_price": "log_complaint",
+    "complaint_price": "log_complaint", "complaint_accessory": "log_complaint",
+    "complaint_refund": "log_complaint", "complaint_sarcasm": "log_complaint",
 }
 
 PARAM_EXTRACTORS = {
@@ -266,7 +306,7 @@ def check_stock(item_name, store_name=None):
     available = random.choice([True, True, False]) if item_name in hot else random.choice([True, True, True, False])
     return {"success": True, "item": item_name, "available": available, "quantity": random.randint(0, 50) if available else 0}
 
-def log_complaint(user_id=None, complaint=None, severity="普通", category="口味"):
+def log_complaint(user_id=None, complaint=None, severity="普通", category="口味", intent_name=None):
     user_id = user_id or "default_user"
     complaint = complaint or ""
     complaint_id = f"CMP-{int(time.time())}"
@@ -275,7 +315,92 @@ def log_complaint(user_id=None, complaint=None, severity="普通", category="口
     with open(log_path, "a", encoding="utf-8") as f:
         f.write(f"{complaint_id} | {user_id} | {severity} | {category} | {complaint}\n")
     save_complaint(user_id, {"complaint_id": complaint_id, "complaint": complaint, "severity": severity, "category": category, "time": time.time()})
-    return {"success": True, "complaint_id": complaint_id}
+    
+    has_knowledge = False
+    if intent_name:
+        solution, compensation = get_knowledge_response(intent_name)
+        has_knowledge = solution is not None
+    
+    if has_knowledge:
+        conn = sqlite3.connect(os.path.join(os.path.dirname(__file__), "../data/bubblemate.db"))
+        c = conn.cursor()
+        c.execute("""
+            INSERT INTO complaints (user_id, complaint_type, description)
+            VALUES (?, ?, ?)
+        """, (user_id, category, complaint))
+        db_id = c.lastrowid
+        c.execute("""
+            SELECT id FROM knowledge WHERE node_type = ? AND content = ? AND reviewed = 1
+        """, (category, category))
+        row = c.fetchone()
+        if row:
+            c.execute("UPDATE complaints SET knowledge_id = ? WHERE id = ?", (row[0], db_id))
+        conn.commit()
+        conn.close()
+        return {"success": True, "complaint_id": complaint_id, "db_id": db_id, "candidate_id": None}
+    else:
+        db_id, candidate_id = save_complaint_with_candidate(user_id, category, complaint)
+        return {"success": True, "complaint_id": complaint_id, "db_id": db_id, "candidate_id": candidate_id}
+
+def _auto_learn_knowledge(category, complaint):
+    knowledge_list = get_knowledge_list(reviewed_only=False)
+    existing = [k for k in knowledge_list if k.get("content") == category and k.get("node_type") == category]
+    if existing:
+        _create_variant_node(category, complaint)
+        return
+    solution = _generate_solution(category)
+    compensation = _generate_compensation(category)
+    _save_knowledge(category, solution, compensation)
+
+def _create_variant_node(parent_category, complaint):
+    knowledge_list = get_knowledge_list(reviewed_only=False)
+    parent_node = next((k for k in knowledge_list if k.get("content") == parent_category and k.get("node_type") == parent_category), None)
+    if not parent_node:
+        return
+    variant_keywords = ["太甜", "太酸", "太苦", "难喝", "冰块太多", "料少", "服务差", "超时", "太贵"]
+    matched = next((kw for kw in variant_keywords if kw in complaint), None)
+    if not matched:
+        return
+    variant_content = f"{parent_category}_{matched}"
+    existing_variant = [k for k in knowledge_list if k.get("content") == variant_content]
+    if existing_variant:
+        return
+    solution = _generate_solution(parent_category)
+    compensation = _generate_compensation(parent_category)
+    conn = sqlite3.connect(os.path.join(os.path.dirname(__file__), "../data/bubblemate.db"))
+    c = conn.cursor()
+    c.execute("INSERT INTO knowledge (node_type, content, parent_id) VALUES (?, ?, ?)", (parent_category, variant_content, parent_node["id"]))
+    variant_id = c.lastrowid
+    c.execute("INSERT INTO knowledge (node_type, content, parent_id) VALUES ('solution', ?, ?)", (solution, variant_id))
+    c.execute("INSERT INTO knowledge (node_type, content, parent_id) VALUES ('compensation', ?, ?)", (compensation, variant_id))
+    conn.commit()
+    conn.close()
+
+def _generate_solution(category):
+    templates = {
+        "口味": f"非常抱歉您对{category}不满意，我们会尽快为您处理。",
+        "份量": f"非常抱歉{category}不足，我们会为您补发或补偿。",
+        "服务": f"非常抱歉{category}态度不佳，我们已通知门店整改。",
+        "配送": f"非常抱歉{category}超时，我们会申请超时赔付。",
+        "价格": f"非常抱歉{category}问题，核实后提供优惠券补偿。",
+        "退款": "非常抱歉，我们会为您办理退款。",
+        "讽刺": "非常抱歉给您带来不好的体验，请问具体是什么问题？",
+        "配件": f"非常抱歉{category}缺失，我们会为您补发。",
+    }
+    return templates.get(category, f"非常抱歉给您带来不好的体验，关于{category}问题我们会尽快处理。")
+
+def _generate_compensation(category):
+    templates = {
+        "口味": "免费重做或退款",
+        "份量": "补发配料或5元优惠券",
+        "服务": "赠送饮品券",
+        "配送": "超时赔付或免单",
+        "价格": "优惠券补偿",
+        "退款": "全额退款",
+        "讽刺": "请告知具体问题",
+        "配件": "补发配件",
+    }
+    return templates.get(category, "请联系客服处理")
 
 def query_promotions(data_dir="data"):
     promo = _read_json(os.path.join(data_dir, "promotions.json"))
@@ -323,6 +448,8 @@ def extract_params(text, intent_name, session_id=None):
         if match: params["order_id"] = match.group(1)
     elif tool_name == "log_complaint":
         params["complaint"] = PARAM_EXTRACTORS["complaint"](text)
+        params["intent_name"] = intent_name
+        params["category"] = INTENT_TO_CATEGORY.get(intent_name, "口味")
     return params
 
 def get_tool_response(intent_name, text, tools=TOOLS, session_id=None):
@@ -374,9 +501,14 @@ def get_context(store, session_id):
 
 def build_response(intent, text, tool_result=None):
     if intent["name"].startswith("complaint"):
+        solution, compensation = get_knowledge_response(intent["name"])
+        if solution and compensation:
+            reply = f"{solution} 补偿方案：{compensation}"
+        else:
+            reply = COMPLAINT_RESPONSES.get(intent["name"], "抱歉给您带来不好的体验。")
         if tool_result and tool_result["success"]:
-            return f"【思考】{intent['name']}\n【行动】记录投诉\n【回复】{COMPLAINT_RESPONSES.get(intent['name'], '抱歉给您带来不好的体验。')}"
-        return f"【思考】{intent['name']}\n【回复】{COMPLAINT_RESPONSES.get(intent['name'], '抱歉给您带来不好的体验。')}"
+            return f"【思考】{intent['name']}\n【行动】记录投诉\n【回复】{reply}"
+        return f"【思考】{intent['name']}\n【回复】{reply}"
     if intent["name"].startswith("query"):
         if tool_result and tool_result["success"]:
             return f"【思考】{intent['name']}\n【行动】调用工具\n【回复】{_format_tool_result(intent['name'], tool_result)}"

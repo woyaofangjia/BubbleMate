@@ -1,4 +1,4 @@
-from backend.storage.database import (
+from .database import (
     save_user_preference as _save_pref,
     get_user_preferences as _get_prefs,
     save_complaint as _save_comp,
@@ -12,9 +12,13 @@ from backend.storage.database import (
     get_user_by_session as _get_user_by_sess,
     save_knowledge as _save_knowledge,
     get_knowledge_list as _get_knowledge_list,
+    get_knowledge_graph as _get_knowledge_graph,
+    get_knowledge_graph_aggregated as _get_knowledge_graph_aggregated,
+    add_knowledge_node as _add_knowledge_node,
     review_knowledge as _review_knowledge,
     delete_knowledge as _delete_knowledge,
     get_complaint_stats as _get_complaint_stats,
+    resolve_complaint as _resolve_complaint,
 )
 
 def save_user_preference(user_id, key, value):
@@ -64,3 +68,15 @@ def delete_knowledge(id):
 
 def get_complaint_stats():
     return _get_complaint_stats()
+
+def resolve_complaint(id):
+    _resolve_complaint(id)
+
+def get_knowledge_graph():
+    return _get_knowledge_graph()
+
+def get_knowledge_graph_aggregated():
+    return _get_knowledge_graph_aggregated()
+
+def add_knowledge_node(node_type, content, parent_id=None):
+    return _add_knowledge_node(node_type, content, parent_id)

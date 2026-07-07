@@ -81,7 +81,7 @@ export default function ChatInterface({
       setCurrentTools(tools);
       
       // 提取最终回复
-      const replyMatch = agentMessage.match(/【回复】(.+)/s);
+      const replyMatch = agentMessage.match(/【回复】([\s\S]+)/);
       const reply = replyMatch ? replyMatch[1] : agentMessage;
       
       // 添加Agent回复

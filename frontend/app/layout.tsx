@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { RoleProvider } from '@/context/RoleContext';
 
 export const metadata: Metadata = {
   title: 'BubbleMate - 智能奶茶店客服',
@@ -13,7 +14,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="zh-CN">
-      <body className="font-sans antialiased">{children}</body>
+      <body className="font-sans antialiased">
+        <RoleProvider>{children}</RoleProvider>
+      </body>
     </html>
   );
 }

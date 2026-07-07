@@ -2,8 +2,10 @@
 
 import { useState, useRef, useEffect, Suspense } from 'react';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import ChatInterface from '@/components/ChatInterface';
-import Header from '@/components/Header';
+import NavBar from '@/components/NavBar';
+import { useRole } from '@/context/RoleContext';
 
 const ThoughtChainPanel = dynamic(
   () => import('@/components/ThoughtChainPanel'),
@@ -16,6 +18,7 @@ const ToolVisualization = dynamic(
 );
 
 export default function Home() {
+  const { role } = useRole();
   const [messages, setMessages] = useState<Array<{
     role: 'user' | 'agent';
     content: string;
@@ -33,13 +36,10 @@ export default function Home() {
   const [isStreaming, setIsStreaming] = useState(false);
 
   return (
-    <main className="min-h-screen flex flex-col">
-      {/* 头部 */}
-      <Header />
-      
-      {/* 主内容区 */}
+    <main className="min-h-screen flex flex-col pt-16">
+      <NavBar />
+
       <div className="flex-1 flex gap-4 p-4 max-w-7xl mx-auto w-full">
-        {/* 左侧：聊天界面 */}
         <div className="flex-1 flex flex-col">
           <ChatInterface 
             messages={messages}
@@ -51,21 +51,26 @@ export default function Home() {
           />
         </div>
         
-        {/* 右侧：可视化面板 */}
         <div className="w-80 flex flex-col gap-4">
-          {/* 思考链面板 */}
           <ThoughtChainPanel 
             thought={currentThought}
             isStreaming={isStreaming}
           />
           
-          {/* 工具调用面板 */}
           <ToolVisualization 
             tools={currentTools}
             isStreaming={isStreaming}
           />
         </div>
       </div>
+
+      <footer className="bg-gray-50 border-t border-gray-100 py-3 px-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-center gap-4 text-sm text-gray-500">
+          <span>当前角色：👤 {role === 'customer' ? '顾客' : role === 'admin' ? '管理员' : '客服'}</span>
+          <span className="text-gray-300">|</span>
+          <Link href="/landing" className="text-blue-500 hover:text-blue-600">切换角色</Link>
+        </div>
+      </footer>
     </main>
   );
 }

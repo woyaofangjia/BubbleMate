@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-
-const ADMIN_KEY = 'bubble2026';
+import NavBar from '@/components/NavBar';
+import { useRole } from '@/context/RoleContext';
 
 interface ContextMessage {
   user: string;
@@ -25,21 +26,19 @@ interface AdminContext {
 }
 
 export default function AgentDashboardPage() {
-  const [password, setPassword] = useState('');
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [error, setError] = useState('');
+  const router = useRouter();
+  const { role, agentVerified, adminVerified } = useRole();
+  
+  useEffect(() => {
+    if (role !== 'agent' && role !== 'admin') {
+      router.push('/landing');
+    }
+  }, [role, router]);
+
   const [sessionId, setSessionId] = useState('');
   const [context, setContext] = useState<AdminContext | null>(null);
   const [reply, setReply] = useState('');
-
-  const handleLogin = () => {
-    if (password === ADMIN_KEY) {
-      setLoggedIn(true);
-      setError('');
-    } else {
-      setError('密码错误');
-    }
-  };
+  const [error, setError] = useState('');
 
   const loadContext = () => {
     if (!sessionId.trim()) return;
@@ -79,52 +78,9 @@ export default function AgentDashboardPage() {
     });
   };
 
-  if (!loggedIn) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="bg-white rounded-xl p-8 shadow-lg w-full max-w-md">
-          <h1 className="text-2xl font-bold text-center mb-6">客服工作台</h1>
-          <div className="mb-4">
-            <label className="block text-gray-700 mb-2">请输入密码</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500"
-              placeholder="输入密码..."
-            />
-          </div>
-          {error && <div className="text-red-500 mb-4">{error}</div>}
-          <button
-            onClick={handleLogin}
-            className="w-full py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
-          >
-            登录
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold">客服工作台</h1>
-            <nav className="flex gap-4">
-              <Link href="/admin" className="text-gray-600 hover:text-primary-500">
-                运营后台
-              </Link>
-              <Link href="/" className="text-gray-600 hover:text-primary-500">
-                返回首页
-              </Link>
-            </nav>
-          </div>
-          <div className="text-sm text-gray-500">客服人员</div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gray-100 pt-16">
+      <NavBar />
 
       <main className="max-w-6xl mx-auto px-4 py-6">
         <div className="bg-white rounded-xl p-4 border border-gray-200 mb-6">
@@ -135,11 +91,11 @@ export default function AgentDashboardPage() {
               onChange={(e) => setSessionId(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && loadContext()}
               placeholder="输入 session_id 查询..."
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
             />
             <button
               onClick={loadContext}
-              className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
+              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
             >
               查询
             </button>
@@ -200,7 +156,7 @@ export default function AgentDashboardPage() {
                       onChange={(e) => setReply(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleReply()}
                       placeholder="输入回复消息..."
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500"
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                     />
                     <button
                       onClick={handleReply}
