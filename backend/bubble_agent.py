@@ -10,14 +10,30 @@ try:
 except:
     requests = None
 
+try:
+    from backend.storage.database import save_session, get_user_by_session, save_user_preference, get_user_preferences, save_complaint
+except:
+    save_session = lambda s, u: None
+    get_user_by_session = lambda s: None
+    save_user_preference = lambda u, k, v: None
+    get_user_preferences = lambda u: {}
+    save_complaint = lambda u, d: None
+
 # ==================== 用户映射 ====================
 
 SESSION_TO_USER = {}
 
 def get_user_id(session_id: str) -> str:
-    if session_id not in SESSION_TO_USER:
-        SESSION_TO_USER[session_id] = f"user_{session_id}"
-    return SESSION_TO_USER[session_id]
+    if session_id in SESSION_TO_USER:
+        return SESSION_TO_USER[session_id]
+    stored = get_user_by_session(session_id)
+    if stored:
+        SESSION_TO_USER[session_id] = stored
+        return stored
+    user_id = f"user_{session_id}"
+    SESSION_TO_USER[session_id] = user_id
+    save_session(session_id, user_id)
+    return user_id
 
 # ==================== 关键词 & 配置 ====================
 
@@ -258,6 +274,7 @@ def log_complaint(user_id=None, complaint=None, severity="普通", category="口
     os.makedirs(os.path.dirname(log_path), exist_ok=True)
     with open(log_path, "a", encoding="utf-8") as f:
         f.write(f"{complaint_id} | {user_id} | {severity} | {category} | {complaint}\n")
+    save_complaint(user_id, {"complaint_id": complaint_id, "complaint": complaint, "severity": severity, "category": category, "time": time.time()})
     return {"success": True, "complaint_id": complaint_id}
 
 def query_promotions(data_dir="data"):
@@ -319,26 +336,35 @@ def get_tool_response(intent_name, text, tools=TOOLS, session_id=None):
 def create_memory_store(window_size=5):
     return {"sessions": {}, "window_size": window_size}
 
-def save_message(store, session_id, user_msg, agent_msg):
-    if session_id not in store["sessions"]:
-        store["sessions"][session_id] = {"history": deque(maxlen=store["window_size"]), "preferences": {}}
-    store["sessions"][session_id]["history"].append({"user": user_msg, "agent": agent_msg})
-    _extract_prefs(store["sessions"][session_id]["preferences"], user_msg)
-
-def _extract_prefs(prefs, text):
+def _extract_prefs(text):
     sugar_map = {"无糖": ["无糖", "零糖"], "三分糖": ["少糖"], "五分糖": ["半糖"]}
     ice_map = {"热": ["热饮"], "去冰": ["去冰"], "少冰": ["少冰"]}
+    prefs = {}
     for level, patterns in sugar_map.items():
         if any(p in text for p in patterns): prefs["sugar"] = level
     for level, patterns in ice_map.items():
         if any(p in text for p in patterns): prefs["ice"] = level
+    return prefs
+
+def save_message(store, session_id, user_msg, agent_msg):
+    if session_id not in store["sessions"]:
+        store["sessions"][session_id] = {"history": deque(maxlen=store["window_size"]), "preferences": {}}
+    store["sessions"][session_id]["history"].append({"user": user_msg, "agent": agent_msg})
+    user_id = get_user_id(session_id)
+    new_prefs = _extract_prefs(user_msg)
+    for k, v in new_prefs.items():
+        save_user_preference(user_id, k, v)
+        store["sessions"][session_id]["preferences"][k] = v
 
 def get_context(store, session_id):
     sess = store["sessions"].get(session_id)
     if not sess: return ""
+    user_id = get_user_id(session_id)
+    db_prefs = get_user_preferences(user_id)
+    prefs = {**db_prefs, **(sess.get("preferences", {}))}
     parts = []
-    if sess["preferences"]:
-        parts.append(f"偏好: {', '.join([f'{k}={v}' for k, v in sess['preferences'].items()])}")
+    if prefs:
+        parts.append(f"偏好: {', '.join([f'{k}={v}' for k, v in prefs.items()])}")
     for msg in sess["history"]:
         parts.append(f"用户: {msg['user']}")
         parts.append(f"客服: {msg['agent']}")

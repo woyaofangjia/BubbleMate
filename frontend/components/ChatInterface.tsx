@@ -2,6 +2,15 @@
 
 import { useState, useRef, useEffect } from 'react';
 
+const getSessionId = () => {
+  let sessionId = localStorage.getItem('bubblemate_session_id');
+  if (!sessionId) {
+    sessionId = `session_${Date.now()}`;
+    localStorage.setItem('bubblemate_session_id', sessionId);
+  }
+  return sessionId;
+};
+
 interface Message {
   role: 'user' | 'agent';
   content: string;
@@ -51,7 +60,7 @@ export default function ChatInterface({
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMessage }),
+        body: JSON.stringify({ message: userMessage, session_id: getSessionId() }),
       });
       
       const data = await response.json();

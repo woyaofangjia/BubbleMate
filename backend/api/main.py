@@ -5,9 +5,16 @@ from typing import Optional, Dict, Any
 import json
 import os
 
-from backend.bubble_agent import process_message, recognize_intent, create_memory_store, get_context, TOOLS
+from backend.bubble_agent import process_message, recognize_intent, create_memory_store, get_context, TOOLS, get_user_id
+from backend.storage.database import init_db, get_user_preferences, get_complaint_history, get_user_stats
+from backend.storage.memory_store import get_all_complaints, get_knowledge_list, review_knowledge, delete_knowledge, get_complaint_stats
 
-app = FastAPI(title="BubbleMate API", version="0.3.0")
+init_db()
+
+ADMIN_KEY = "bubble2026"
+TAKEOVER_SESSIONS = set()
+
+app = FastAPI(title="BubbleMate API", version="0.4.0")
 
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
@@ -21,6 +28,15 @@ class ChatResponse(BaseModel):
     response: str
     intent: Dict
     session_id: str
+
+class LoginRequest(BaseModel):
+    key: str
+
+class ReviewRequest(BaseModel):
+    id: int
+
+class ReplyRequest(BaseModel):
+    message: str
 
 @app.get("/")
 async def root():
@@ -80,6 +96,92 @@ async def get_eval_report():
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
     return {"message": "请运行评测脚本"}
+
+@app.get("/api/user/profile")
+async def get_user_profile(session_id: str):
+    user_id = get_user_id(session_id)
+    preferences = get_user_preferences(user_id)
+    complaints = get_complaint_history(user_id)
+    stats = get_user_stats(user_id)
+    orders_path = os.path.join(os.path.dirname(__file__), "../../data/orders_mock.json")
+    recent_orders = []
+    if os.path.exists(orders_path):
+        with open(orders_path, "r", encoding="utf-8") as f:
+            orders_data = json.load(f)
+            user_orders = orders_data.get(user_id, [])
+            recent_orders = [{"order_id": o["order_id"], "store": o["store"], "items": o["items"], "total": o["total"], "status": o["status"], "create_time": o["create_time"]} for o in user_orders][:5]
+    return {
+        "user_id": user_id,
+        "preferences": preferences,
+        "stats": {
+            "total_complaints": stats["total_complaints"],
+            "total_feedback": stats["total_feedback"],
+            "total_orders": len(recent_orders),
+        },
+        "complaints": complaints,
+        "recent_orders": recent_orders,
+    }
+
+@app.post("/api/admin/login")
+async def admin_login(request: LoginRequest):
+    if request.key == ADMIN_KEY:
+        return {"success": True, "token": "admin_token"}
+    raise HTTPException(status_code=401, detail="密码错误")
+
+@app.get("/api/admin/complaints")
+async def admin_get_complaints():
+    complaints = get_all_complaints()
+    return {"complaints": complaints}
+
+@app.get("/api/admin/stats")
+async def admin_get_stats():
+    stats = get_complaint_stats()
+    return stats
+
+@app.get("/api/admin/knowledge")
+async def admin_get_knowledge(reviewed_only: Optional[bool] = False):
+    knowledge = get_knowledge_list(reviewed_only)
+    return {"knowledge": knowledge}
+
+@app.post("/api/admin/knowledge/review")
+async def admin_review_knowledge(request: ReviewRequest):
+    review_knowledge(request.id)
+    return {"success": True, "id": request.id}
+
+@app.delete("/api/admin/knowledge/{id}")
+async def admin_delete_knowledge(id: int):
+    delete_knowledge(id)
+    return {"success": True, "id": id}
+
+@app.get("/api/admin/context/{session_id}")
+async def admin_get_context(session_id: str):
+    user_id = get_user_id(session_id)
+    preferences = get_user_preferences(user_id)
+    complaints = get_complaint_history(user_id)
+    context = get_context(memory_store, session_id)
+    is_taken_over = session_id in TAKEOVER_SESSIONS
+    return {
+        "session_id": session_id,
+        "user_id": user_id,
+        "preferences": preferences,
+        "complaints": complaints,
+        "context": context,
+        "is_taken_over": is_taken_over,
+    }
+
+@app.post("/api/admin/takeover/{session_id}")
+async def admin_takeover(session_id: str):
+    TAKEOVER_SESSIONS.add(session_id)
+    return {"success": True, "session_id": session_id, "status": "taken_over"}
+
+@app.post("/api/admin/reply/{session_id}")
+async def admin_reply(session_id: str, request: ReplyRequest):
+    return {"success": True, "session_id": session_id, "message": request.message}
+
+@app.post("/api/admin/release/{session_id}")
+async def admin_release(session_id: str):
+    TAKEOVER_SESSIONS.discard(session_id)
+    return {"success": True, "session_id": session_id, "status": "released"}
 
 def main():
     import uvicorn

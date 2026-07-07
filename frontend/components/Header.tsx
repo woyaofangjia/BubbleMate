@@ -26,6 +26,9 @@ export default function Header() {
           
           {/* 快捷入口 */}
           <nav className="flex gap-2">
+            <Link href="/profile" className="px-3 py-1 rounded-lg text-sm text-gray-600 hover:bg-gray-100">
+              我的画像
+            </Link>
             <Link href="/experiment-report" className="px-3 py-1 rounded-lg text-sm text-gray-600 hover:bg-gray-100">
               实验报告
             </Link>
