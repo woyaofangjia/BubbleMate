@@ -1,4 +1,50 @@
 {
+  "user_default": [
+    {
+      "order_id": "ORD-20260701-001",
+      "store": "茶颜悦色-武汉大学店",
+      "items": ["幽兰拿铁x1"],
+      "total": 18,
+      "status": "已完成",
+      "create_time": "2026-07-01 12:00:00",
+      "delivery_time": "2026-07-01 12:30:00",
+      "address": "武汉大学梅园"
+    }
+  ],
+  "user_session_abc123": [
+    {
+      "order_id": "ORD-20260702-001",
+      "store": "喜茶-光谷店",
+      "items": ["多肉葡萄x1", "芝芝芒芒x1"],
+      "total": 42,
+      "status": "已完成",
+      "create_time": "2026-07-02 15:00:00",
+      "delivery_time": "2026-07-02 15:40:00",
+      "address": "光谷广场"
+    },
+    {
+      "order_id": "ORD-20260703-002",
+      "store": "奈雪的茶-银泰店",
+      "items": ["霸气橙子x1"],
+      "total": 22,
+      "status": "配送中",
+      "create_time": "2026-07-03 10:00:00",
+      "delivery_time": null,
+      "address": "银泰创意城"
+    }
+  ],
+  "user_session_xyz789": [
+    {
+      "order_id": "ORD-20260702-003",
+      "store": "蜜雪冰城-街道口店",
+      "items": ["珍珠奶茶x2"],
+      "total": 16,
+      "status": "已完成",
+      "create_time": "2026-07-02 18:00:00",
+      "delivery_time": "2026-07-02 18:30:00",
+      "address": "街道口地铁站"
+    }
+  ],
   "user_13800138000": [
     {
       "order_id": "ORD-20260625-001",

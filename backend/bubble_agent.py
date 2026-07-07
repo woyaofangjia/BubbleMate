@@ -10,6 +10,15 @@ try:
 except:
     requests = None
 
+# ==================== 用户映射 ====================
+
+SESSION_TO_USER = {}
+
+def get_user_id(session_id: str) -> str:
+    if session_id not in SESSION_TO_USER:
+        SESSION_TO_USER[session_id] = f"user_{session_id}"
+    return SESSION_TO_USER[session_id]
+
 # ==================== 关键词 & 配置 ====================
 
 INTENT_KEYWORDS = {
@@ -67,7 +76,7 @@ RULE_PATTERNS = {
     "complaint_accessory": [re.compile(r"(吸管).*?(细|怎么喝)", re.I)],
     "query_recommend": [re.compile(r"(推荐|招牌|热门|特色|新品|必点)", re.I), re.compile(r"(有什么).*?(好喝|推荐)", re.I)],
     "query_menu": [re.compile(r"(菜单|饮品).*?(列出|看看|都有)", re.I), re.compile(r"(有什么).*?(喝的|饮品)", re.I)],
-    "query_order": [re.compile(r"(订单|单号).*?(查询|状态|进度|到哪)", re.I), re.compile(r"(订单).*?(\d{5,})|(\d{5,}).*?(订单)", re.I)],
+    "query_order": [re.compile(r"(订单|单号).*?(查询|状态|进度|到哪)", re.I), re.compile(r"(订单).*?(\d{5,})|(\d{5,}).*?(订单)", re.I), re.compile(r"(查|查看|我的).*?(订单)", re.I)],
     "query_hours": [re.compile(r"(营业时间|开门|关门|几点开门)", re.I)],
     "query_location": [re.compile(r"(门店|地址|位置)", re.I), re.compile(r"(附近|周边).*?(有|店|奶茶)", re.I)],
     "query_price": [re.compile(r"(多少钱|价格|贵不贵)", re.I)],
@@ -127,7 +136,6 @@ INTENT_TOOL = {
 PARAM_EXTRACTORS = {
     "location": lambda text: re.search(r"(在|附近|周边)\s*([\u4e00-\u9fa5]{2,})", text),
     "order_id": lambda text: re.search(r"(\d{5,})", text),
-    "user_id": lambda text: "default_user",
     "complaint": lambda text: text,
 }
 
@@ -230,9 +238,10 @@ def query_stores(location, radius=3000, data_dir="data"):
     if around.get("status") != "1": return {"success": False, "data": []}
     return {"success": True, "data": around["pois"], "count": len(around["pois"])}
 
-def query_order(user_id, order_id=None, data_dir="data"):
+def query_order(user_id=None, order_id=None, data_dir="data"):
+    user_id = user_id or "default_user"
     orders = _read_json(os.path.join(data_dir, "orders_mock.json"))
-    user_orders = orders.get(f"user_{user_id}", [])
+    user_orders = orders.get(user_id, [])
     if order_id: user_orders = [o for o in user_orders if o["order_id"] == order_id]
     return {"success": True, "data": user_orders, "count": len(user_orders)}
 
@@ -241,7 +250,9 @@ def check_stock(item_name, store_name=None):
     available = random.choice([True, True, False]) if item_name in hot else random.choice([True, True, True, False])
     return {"success": True, "item": item_name, "available": available, "quantity": random.randint(0, 50) if available else 0}
 
-def log_complaint(user_id, complaint, severity="普通", category="口味"):
+def log_complaint(user_id=None, complaint=None, severity="普通", category="口味"):
+    user_id = user_id or "default_user"
+    complaint = complaint or ""
     complaint_id = f"CMP-{int(time.time())}"
     log_path = os.path.join("data", "complaints.log")
     os.makedirs(os.path.dirname(log_path), exist_ok=True)
@@ -257,9 +268,10 @@ def query_customize(item_name):
     toppings = [{"name": t, "price": 3 if t in ["珍珠", "椰果"] else 4} for t in ["珍珠", "椰果", "仙草冻", "芋圆", "布丁"]]
     return {"success": True, "item": item_name, "toppings": toppings, "sugar": ["标准糖", "七分糖", "五分糖", "三分糖", "无糖"]}
 
-def query_history(user_id, limit=3, data_dir="data"):
+def query_history(user_id=None, limit=3, data_dir="data"):
+    user_id = user_id or "default_user"
     orders = _read_json(os.path.join(data_dir, "orders_mock.json"))
-    return {"success": True, "data": orders.get(f"user_{user_id}", [])[:limit]}
+    return {"success": True, "data": orders.get(user_id, [])[:limit]}
 
 def query_recommend(preference=None, data_dir="data"):
     menu = _read_json(os.path.join(data_dir, "menu_data.json"))
@@ -281,9 +293,11 @@ TOOLS = {
 
 # ==================== 路由 & 参数提取 ====================
 
-def extract_params(text, intent_name):
+def extract_params(text, intent_name, session_id=None):
     params = {}
     tool_name = INTENT_TOOL.get(intent_name)
+    if session_id:
+        params["user_id"] = get_user_id(session_id)
     if tool_name == "query_stores":
         match = PARAM_EXTRACTORS["location"](text)
         if match: params["location"] = match.group(2)
@@ -291,14 +305,13 @@ def extract_params(text, intent_name):
         match = PARAM_EXTRACTORS["order_id"](text)
         if match: params["order_id"] = match.group(1)
     elif tool_name == "log_complaint":
-        params["user_id"] = PARAM_EXTRACTORS["user_id"](text)
         params["complaint"] = PARAM_EXTRACTORS["complaint"](text)
     return params
 
-def get_tool_response(intent_name, text, tools=TOOLS):
+def get_tool_response(intent_name, text, tools=TOOLS, session_id=None):
     tool_name = INTENT_TOOL.get(intent_name)
     if not tool_name or tool_name not in tools: return None
-    params = extract_params(text, intent_name)
+    params = extract_params(text, intent_name, session_id)
     return tools[tool_name](**params)
 
 # ==================== 记忆管理 ====================
@@ -355,13 +368,16 @@ def _format_tool_result(intent_name, result):
         return f"饮品：{', '.join(names)}。"
     if intent_name == "query_order":
         if result["data"]:
-            return f"订单状态：{result['data'][0].get('status', '')}。"
+            orders = []
+            for o in result["data"]:
+                orders.append(f"{o.get('order_id', '')} ({o.get('store', '')})：{o.get('status', '')}")
+            return f"您有{len(result['data'])}个订单：{'；'.join(orders)}。"
         return "未找到订单记录。"
     return "查询完成。"
 
 def process_message(text, session_id="default", memory_store=None, llm_client=None):
     intent = recognize_intent(text, llm_client)
-    tool_result = get_tool_response(intent["name"], text)
+    tool_result = get_tool_response(intent["name"], text, session_id=session_id)
     response = build_response(intent, text, tool_result)
     if memory_store:
         save_message(memory_store, session_id, text, response)
