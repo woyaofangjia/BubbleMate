@@ -5,6 +5,7 @@ import random
 import time
 import sqlite3
 from collections import deque
+from functools import lru_cache
 
 try:
     import requests
@@ -192,10 +193,6 @@ INTENT_TOOL = {
     "query_order": "query_order", "query_promotion": "query_promotions",
     "query_customize": "query_customize", "query_history": "query_history",
     "query_recommend": "query_recommend",
-    "complaint_taste": "log_complaint", "complaint_quantity": "log_complaint",
-    "complaint_service": "log_complaint", "complaint_delivery": "log_complaint",
-    "complaint_price": "log_complaint", "complaint_accessory": "log_complaint",
-    "complaint_refund": "log_complaint", "complaint_sarcasm": "log_complaint",
 }
 
 PARAM_EXTRACTORS = {
@@ -270,6 +267,7 @@ def _read_json(path):
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
+@lru_cache(maxsize=32)
 def query_menu(store_name=None, keyword=None, category=None, data_dir="data"):
     menu_data = _read_json(os.path.join(data_dir, "menu_data.json"))
     if not store_name:
@@ -411,10 +409,12 @@ def _generate_compensation(category):
     }
     return templates.get(category, "请联系客服处理")
 
+@lru_cache(maxsize=16)
 def query_promotions(data_dir="data"):
     promo = _read_json(os.path.join(data_dir, "promotions.json"))
     return {"success": True, "data": promo.get("active", [])}
 
+@lru_cache(maxsize=64)
 def query_customize(item_name):
     toppings = [{"name": t, "price": 3 if t in ["珍珠", "椰果"] else 4} for t in ["珍珠", "椰果", "仙草冻", "芋圆", "布丁"]]
     return {"success": True, "item": item_name, "toppings": toppings, "sugar": ["标准糖", "七分糖", "五分糖", "三分糖", "无糖"]}
@@ -424,6 +424,7 @@ def query_history(user_id=None, limit=3, data_dir="data"):
     orders = _read_json(os.path.join(data_dir, "orders_mock.json"))
     return {"success": True, "data": orders.get(user_id, [])[:limit]}
 
+@lru_cache(maxsize=32)
 def query_recommend(preference=None, data_dir="data"):
     menu = _read_json(os.path.join(data_dir, "menu_data.json"))
     all_items = []
@@ -469,8 +470,35 @@ def get_tool_response(intent_name, text, tools=TOOLS, session_id=None):
 
 # ==================== 记忆管理 ====================
 
+try:
+    from storage.redis_store import session_store
+    REDIS_AVAILABLE = True
+except ImportError:
+    REDIS_AVAILABLE = False
+
+class MemoryStore:
+    def __init__(self, window_size=5):
+        self._window_size = window_size
+        self._store = {"sessions": {}}
+    
+    def _get_session(self, session_id):
+        if REDIS_AVAILABLE:
+            return session_store.get_session(session_id)
+        return self._store["sessions"].get(session_id)
+    
+    def _save_session(self, session_id, data):
+        if REDIS_AVAILABLE:
+            session_store.save_session(session_id, data)
+        else:
+            self._store["sessions"][session_id] = data
+    
+    def get_sessions(self):
+        if REDIS_AVAILABLE:
+            return session_store.get_all_sessions()
+        return dict(self._store["sessions"])
+
 def create_memory_store(window_size=5):
-    return {"sessions": {}, "window_size": window_size}
+    return MemoryStore(window_size)
 
 def _extract_prefs(text):
     sugar_map = {"无糖": ["无糖", "零糖"], "三分糖": ["少糖"], "五分糖": ["半糖"]}
@@ -483,17 +511,34 @@ def _extract_prefs(text):
     return prefs
 
 def save_message(store, session_id, user_msg, agent_msg):
-    if session_id not in store["sessions"]:
-        store["sessions"][session_id] = {"history": deque(maxlen=store["window_size"]), "preferences": {}}
-    store["sessions"][session_id]["history"].append({"user": user_msg, "agent": agent_msg})
-    user_id = get_user_id(session_id)
-    new_prefs = _extract_prefs(user_msg)
-    for k, v in new_prefs.items():
-        save_user_preference(user_id, k, v)
-        store["sessions"][session_id]["preferences"][k] = v
+    if isinstance(store, MemoryStore):
+        sess = store._get_session(session_id)
+        if not sess:
+            sess = {"history": [], "preferences": {}}
+        if len(sess["history"]) >= store._window_size:
+            sess["history"] = sess["history"][1:]
+        sess["history"].append({"user": user_msg, "agent": agent_msg})
+        user_id = get_user_id(session_id)
+        new_prefs = _extract_prefs(user_msg)
+        for k, v in new_prefs.items():
+            save_user_preference(user_id, k, v)
+            sess["preferences"][k] = v
+        store._save_session(session_id, sess)
+    else:
+        if session_id not in store["sessions"]:
+            store["sessions"][session_id] = {"history": deque(maxlen=store["window_size"]), "preferences": {}}
+        store["sessions"][session_id]["history"].append({"user": user_msg, "agent": agent_msg})
+        user_id = get_user_id(session_id)
+        new_prefs = _extract_prefs(user_msg)
+        for k, v in new_prefs.items():
+            save_user_preference(user_id, k, v)
+            store["sessions"][session_id]["preferences"][k] = v
 
 def get_context(store, session_id):
-    sess = store["sessions"].get(session_id)
+    if isinstance(store, MemoryStore):
+        sess = store._get_session(session_id)
+    else:
+        sess = store["sessions"].get(session_id)
     if not sess: return ""
     user_id = get_user_id(session_id)
     db_prefs = get_user_preferences(user_id)
@@ -546,7 +591,11 @@ def _format_tool_result(intent_name, result):
 
 def process_message(text, session_id="default", memory_store=None, llm_client=None):
     intent = recognize_intent(text, llm_client)
-    tool_result = get_tool_response(intent["name"], text, session_id=session_id)
+    tool_name = INTENT_TOOL.get(intent["name"])
+    if tool_name == "log_complaint":
+        tool_result = None
+    else:
+        tool_result = get_tool_response(intent["name"], text, session_id=session_id)
     response = build_response(intent, text, tool_result)
     if memory_store:
         save_message(memory_store, session_id, text, response)

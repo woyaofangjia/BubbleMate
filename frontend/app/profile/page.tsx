@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import useSWR from 'swr';
 import Header from '@/components/Header';
+import { fetcher } from '@/lib/swr';
 
 interface Preferences {
   sugar?: string;
@@ -56,25 +58,19 @@ const defaultProfile: ProfileData = {
 };
 
 export default function ProfilePage() {
-  const [profile, setProfile] = useState<ProfileData>(defaultProfile);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>('');
-
+  const [sessionId, setSessionId] = useState<string>('');
+  
   useEffect(() => {
-    const sessionId = getSessionId();
-    
-    fetch(`/api/user/profile?session_id=${sessionId}`)
-      .then(res => res.json())
-      .then(data => {
-        setProfile({ ...defaultProfile, ...data });
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error(err);
-        setError('加载失败');
-        setLoading(false);
-      });
+    setSessionId(getSessionId());
   }, []);
+
+  const { data: profile, error, isLoading } = useSWR<ProfileData>(
+    sessionId ? `/api/user/profile?session_id=${sessionId}` : null,
+    fetcher,
+    { refreshInterval: 60000, revalidateOnFocus: false }
+  );
+
+  const displayProfile = profile || defaultProfile;
 
   const getStatusColor = (status: string) => {
     if (status.includes('已完成')) return 'bg-green-100 text-green-700';
@@ -87,7 +83,7 @@ export default function ProfilePage() {
     return new Date(timestamp * 1000).toLocaleDateString();
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
@@ -112,22 +108,22 @@ export default function ProfilePage() {
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-red-600">
-            {error}
+            加载失败
           </div>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="bg-white rounded-xl p-4 border border-gray-200">
             <div className="text-sm text-gray-500 mb-2">总订单数</div>
-            <div className="text-3xl font-bold text-primary-500">{profile.stats.total_orders}</div>
+            <div className="text-3xl font-bold text-primary-500">{displayProfile.stats.total_orders}</div>
           </div>
           <div className="bg-white rounded-xl p-4 border border-gray-200">
             <div className="text-sm text-gray-500 mb-2">投诉次数</div>
-            <div className="text-3xl font-bold text-red-500">{profile.stats.total_complaints}</div>
+            <div className="text-3xl font-bold text-red-500">{displayProfile.stats.total_complaints}</div>
           </div>
           <div className="bg-white rounded-xl p-4 border border-gray-200">
             <div className="text-sm text-gray-500 mb-2">反馈次数</div>
-            <div className="text-3xl font-bold text-blue-500">{profile.stats.total_feedback}</div>
+            <div className="text-3xl font-bold text-blue-500">{displayProfile.stats.total_feedback}</div>
           </div>
         </div>
 
@@ -141,7 +137,7 @@ export default function ProfilePage() {
               <div>
                 <div className="text-sm text-gray-500">糖度</div>
                 <div className="font-medium text-gray-800">
-                  {profile.preferences?.sugar || '未设置'}
+                  {displayProfile.preferences?.sugar || '未设置'}
                 </div>
               </div>
             </div>
@@ -152,7 +148,7 @@ export default function ProfilePage() {
               <div>
                 <div className="text-sm text-gray-500">冰量</div>
                 <div className="font-medium text-gray-800">
-                  {profile.preferences?.ice || '未设置'}
+                  {displayProfile.preferences?.ice || '未设置'}
                 </div>
               </div>
             </div>
@@ -161,9 +157,9 @@ export default function ProfilePage() {
 
         <div className="bg-white rounded-xl p-4 border border-gray-200 mb-6">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">📋 最近订单</h2>
-          {profile.recent_orders?.length > 0 ? (
+          {displayProfile.recent_orders?.length > 0 ? (
             <div className="space-y-3">
-              {profile.recent_orders.map(order => (
+              {displayProfile.recent_orders.map(order => (
                 <div key={order.order_id} className="border border-gray-100 rounded-lg p-3">
                   <div className="flex justify-between items-center mb-2">
                     <span className="font-medium text-gray-800">{order.order_id}</span>
@@ -187,9 +183,9 @@ export default function ProfilePage() {
 
         <div className="bg-white rounded-xl p-4 border border-gray-200">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">📝 投诉记录</h2>
-          {profile.complaints?.length > 0 ? (
+          {displayProfile.complaints?.length > 0 ? (
             <div className="space-y-3">
-              {profile.complaints.map(complaint => (
+              {displayProfile.complaints.map(complaint => (
                 <div key={complaint.complaint_id} className="border border-gray-100 rounded-lg p-3">
                   <div className="flex justify-between items-center mb-2">
                     <span className="font-medium text-gray-800">{complaint.complaint_id}</span>

@@ -1,13 +1,69 @@
 import sqlite3
 import os
 import json
+import threading
 from datetime import datetime
+from contextlib import contextmanager
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "../../data/bubblemate.db")
 
+class SQLiteConnectionPool:
+    _instance = None
+    _lock = threading.Lock()
+    
+    def __new__(cls):
+        if cls._instance is None:
+            with cls._lock:
+                if cls._instance is None:
+                    cls._instance = super().__new__(cls)
+                    cls._instance._connections = {}
+                    cls._instance._connection_lock = threading.Lock()
+        return cls._instance
+    
+    def _create_connection(self):
+        os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+        conn = sqlite3.connect(
+            DB_PATH,
+            check_same_thread=False,
+            isolation_level=None,
+            timeout=30
+        )
+        conn.row_factory = sqlite3.Row
+        return conn
+    
+    @contextmanager
+    def get_connection(self):
+        thread_id = threading.current_thread().ident
+        with self._connection_lock:
+            if thread_id not in self._connections:
+                self._connections[thread_id] = self._create_connection()
+            conn = self._connections[thread_id]
+        try:
+            yield conn
+        finally:
+            pass
+    
+    def close_all(self):
+        with self._connection_lock:
+            for conn in self._connections.values():
+                conn.close()
+            self._connections.clear()
+
+connection_pool = SQLiteConnectionPool()
+
+@contextmanager
+def get_db_connection():
+    with connection_pool.get_connection() as conn:
+        yield conn
+
 def _connect():
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(
+        DB_PATH,
+        check_same_thread=False,
+        isolation_level=None,
+        timeout=30
+    )
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -148,6 +204,16 @@ def init_db():
                 c.execute("UPDATE knowledge_graph SET is_active = 0 WHERE id = ?", (dup_id,))
     except:
         pass
+
+    c.execute("CREATE INDEX IF NOT EXISTS idx_complaints_user_id ON complaints(user_id)")
+    c.execute("CREATE INDEX IF NOT EXISTS idx_complaints_status ON complaints(status)")
+    c.execute("CREATE INDEX IF NOT EXISTS idx_complaints_type ON complaints(complaint_type)")
+    c.execute("CREATE INDEX IF NOT EXISTS idx_complaints_created ON complaints(created_at)")
+    c.execute("CREATE INDEX IF NOT EXISTS idx_knowledge_parent ON knowledge_graph(parent_id)")
+    c.execute("CREATE INDEX IF NOT EXISTS idx_knowledge_type ON knowledge_graph(node_type)")
+    c.execute("CREATE INDEX IF NOT EXISTS idx_candidates_status ON knowledge_candidates(status)")
+    c.execute("CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id)")
+
     conn.commit()
     conn.close()
 

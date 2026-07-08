@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import useSWR from 'swr';
 import NavBar from '@/components/NavBar';
 import { useRole } from '@/context/RoleContext';
+import { fetcher } from '@/lib/swr';
 
 interface ContextMessage {
   user: string;
@@ -36,24 +38,20 @@ export default function AgentDashboardPage() {
   }, [role, router]);
 
   const [sessionId, setSessionId] = useState('');
-  const [context, setContext] = useState<AdminContext | null>(null);
   const [reply, setReply] = useState('');
-  const [error, setError] = useState('');
 
-  const loadContext = () => {
-    if (!sessionId.trim()) return;
-    fetch(`/api/admin/context/${sessionId.trim()}`)
-      .then(res => res.json())
-      .then(data => setContext(data))
-      .catch(() => setError('无法加载会话'));
-  };
+  const { data: context, mutate: mutateContext, error } = useSWR<AdminContext>(
+    sessionId.trim() ? `/api/admin/context/${sessionId.trim()}` : null,
+    fetcher,
+    { revalidateOnFocus: false }
+  );
 
   const handleTakeover = () => {
     if (!sessionId.trim()) return;
     fetch(`/api/admin/takeover/${sessionId.trim()}`, { method: 'POST' })
       .then(res => res.json())
       .then(data => {
-        setContext(prev => prev ? { ...prev, is_taken_over: true } : null);
+        mutateContext();
       });
   };
 
@@ -62,7 +60,7 @@ export default function AgentDashboardPage() {
     fetch(`/api/admin/release/${sessionId.trim()}`, { method: 'POST' })
       .then(res => res.json())
       .then(data => {
-        setContext(prev => prev ? { ...prev, is_taken_over: false } : null);
+        mutateContext();
       });
   };
 
@@ -74,7 +72,7 @@ export default function AgentDashboardPage() {
       body: JSON.stringify({ message: reply }),
     }).then(() => {
       setReply('');
-      loadContext();
+      mutateContext();
     });
   };
 
@@ -89,16 +87,10 @@ export default function AgentDashboardPage() {
               type="text"
               value={sessionId}
               onChange={(e) => setSessionId(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && loadContext()}
+              onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
               placeholder="输入 session_id 查询..."
               className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
             />
-            <button
-              onClick={loadContext}
-              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-            >
-              查询
-            </button>
           </div>
         </div>
 

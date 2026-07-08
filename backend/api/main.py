@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Response, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
@@ -9,8 +9,9 @@ import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from bubble_agent import process_message, recognize_intent, create_memory_store, get_context, TOOLS, get_user_id
+from bubble_agent import process_message, recognize_intent, create_memory_store, get_context, TOOLS, get_user_id, query_menu, query_promotions, query_recommend, query_customize, MemoryStore
 from storage.database import init_db, get_user_preferences, get_complaint_history, get_user_stats, get_knowledge_candidates, approve_candidate, reject_candidate, get_complaint_knowledge, get_knowledge_complaints, update_knowledge_parent, get_all_complaints, get_knowledge_list, get_knowledge_graph, get_knowledge_graph_aggregated, review_knowledge, delete_knowledge, get_complaint_stats, resolve_complaint, add_knowledge_node
+from storage.redis_store import session_store
 
 init_db()
 
@@ -58,14 +59,37 @@ async def root():
 async def health():
     return {"status": "healthy"}
 
+async def process_complaint_async(session_id: str, message: str, intent_name: str):
+    user_id = get_user_id(session_id)
+    category_map = {
+        "complaint_taste": "口味", "complaint_quantity": "份量",
+        "complaint_service": "服务", "complaint_delivery": "配送",
+        "complaint_price": "价格", "complaint_refund": "退款",
+        "complaint_sarcasm": "讽刺", "complaint_accessory": "配件",
+    }
+    category = category_map.get(intent_name, "口味")
+    log_complaint(user_id=user_id, complaint=message, severity="普通", category=category, intent_name=intent_name)
+
 @app.post("/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest):
+async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
     response, intent = process_message(request.message, request.session_id, memory_store)
+    
+    if intent["name"].startswith("complaint"):
+        background_tasks.add_task(process_complaint_async, request.session_id, request.message, intent["name"])
+    
     return ChatResponse(response=response, intent=intent, session_id=request.session_id)
 
 @app.get("/tools")
 async def list_tools():
     return {"tools": list(TOOLS.keys()), "count": len(TOOLS)}
+
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "healthy",
+        "redis_enabled": session_store.is_using_redis(),
+        "version": "0.4.0"
+    }
 
 @app.get("/intent/{text}")
 async def get_intent(text: str):
@@ -79,7 +103,10 @@ async def get_session_info(session_id: str):
 
 @app.delete("/session/{session_id}")
 async def clear_session(session_id: str):
-    memory_store["sessions"].pop(session_id, None)
+    if isinstance(memory_store, MemoryStore):
+        session_store.delete_session(session_id)
+    else:
+        memory_store["sessions"].pop(session_id, None)
     return {"message": f"Session {session_id} cleared"}
 
 @app.get("/menu")
@@ -90,7 +117,8 @@ async def get_menu(category: Optional[str] = None):
         "奶茶系列": [{"name": "珍珠奶茶", "price": 12}, {"name": "糯米奶茶", "price": 14}],
         "纯茶系列": [{"name": "茉莉绿茶", "price": 15}, {"name": "柠檬茶", "price": 10}],
     }
-    return {"menu": menu} if not category else {"category": category, "items": menu.get(category, [])}
+    result = {"menu": menu} if not category else {"category": category, "items": menu.get(category, [])}
+    return Response(content=json.dumps(result, ensure_ascii=False), media_type="application/json", headers={"Cache-Control": "public, max-age=300"})
 
 @app.get("/shops")
 async def list_shops():
@@ -98,7 +126,8 @@ async def list_shops():
     if os.path.exists(path):
         with open(path, "r", encoding="utf-8") as f:
             shops = json.load(f)
-        return {"shops": shops, "count": len(shops)}
+        result = {"shops": shops, "count": len(shops)}
+        return Response(content=json.dumps(result, ensure_ascii=False), media_type="application/json", headers={"Cache-Control": "public, max-age=600"})
     return {"shops": [], "count": 0}
 
 @app.get("/eval/report")
@@ -283,6 +312,14 @@ async def admin_reply(session_id: str, request: ReplyRequest):
 async def admin_release(session_id: str):
     TAKEOVER_SESSIONS.discard(session_id)
     return {"success": True, "session_id": session_id, "status": "released"}
+
+@app.post("/api/admin/cache/clear")
+async def admin_clear_cache():
+    query_menu.cache_clear()
+    query_promotions.cache_clear()
+    query_recommend.cache_clear()
+    query_customize.cache_clear()
+    return {"success": True, "message": "缓存已清除"}
 
 def main():
     import uvicorn

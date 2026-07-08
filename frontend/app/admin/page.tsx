@@ -2,9 +2,19 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import KnowledgeGraphAggregated from '@/components/KnowledgeGraphAggregated';
+import dynamic from 'next/dynamic';
+import useSWR from 'swr';
 import NavBar from '@/components/NavBar';
 import { useRole } from '@/context/RoleContext';
+import { fetcher } from '@/lib/swr';
+
+const KnowledgeGraphAggregated = dynamic(
+  () => import('@/components/KnowledgeGraphAggregated'),
+  {
+    loading: () => <div className="flex items-center justify-center h-full text-gray-400">加载图谱中...</div>,
+    ssr: false,
+  }
+);
 
 interface Complaint {
   id: number;
@@ -65,47 +75,44 @@ export default function AdminPage() {
     }
   }, [role, adminVerified, router]);
 
-  const [complaints, setComplaints] = useState<Complaint[]>([]);
-  const [candidates, setCandidates] = useState<Candidate[]>([]);
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [aggregatedNodes, setAggregatedNodes] = useState<GraphNode[]>([]);
-  const [aggregatedLinks, setAggregatedLinks] = useState<GraphLink[]>([]);
-  const [aggregatedStats, setAggregatedStats] = useState<{
-    total_complaint_types: number;
-    total_issues: number;
-    total_solutions: number;
-    total_compensations: number;
-  } | null>(null);
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
 
-  const loadData = useCallback(() => {
-    fetch('/api/admin/complaints', { cache: 'no-store' })
-      .then(res => res.json())
-      .then(data => setComplaints(data.complaints || []));
+  const { data: complaintsData, mutate: mutateComplaints } = useSWR<{ complaints: Complaint[] }>(
+    '/api/admin/complaints',
+    fetcher,
+    { refreshInterval: 15000, revalidateOnFocus: false }
+  );
+  const complaints = complaintsData?.complaints || [];
 
-    fetch('/api/admin/knowledge/graph/aggregated', { cache: 'no-store' })
-      .then(res => res.json())
-      .then(data => {
-        setAggregatedNodes(data.nodes || []);
-        setAggregatedLinks(data.links || []);
-        setAggregatedStats(data.statistics || null);
-      });
+  const { data: graphData, mutate: mutateGraph } = useSWR<{ nodes: GraphNode[]; links: GraphLink[]; statistics: any }>(
+    '/api/admin/knowledge/graph/aggregated',
+    fetcher,
+    { refreshInterval: 60000, revalidateOnFocus: false }
+  );
+  const aggregatedNodes = graphData?.nodes || [];
+  const aggregatedLinks = graphData?.links || [];
+  const aggregatedStats = graphData?.statistics || null;
 
-    fetch('/api/admin/candidates', { cache: 'no-store' })
-      .then(res => res.json())
-      .then(data => setCandidates(data.candidates || []));
+  const { data: candidatesData, mutate: mutateCandidates } = useSWR<{ candidates: Candidate[] }>(
+    '/api/admin/candidates',
+    fetcher,
+    { refreshInterval: 30000, revalidateOnFocus: false }
+  );
+  const candidates = candidatesData?.candidates || [];
 
-    fetch('/api/admin/stats', { cache: 'no-store' })
-      .then(res => res.json())
-      .then(data => setStats(data));
-  }, []);
+  const { data: stats, mutate: mutateStats } = useSWR<Stats>(
+    '/api/admin/stats',
+    fetcher,
+    { refreshInterval: 30000, revalidateOnFocus: false }
+  );
 
-  useEffect(() => {
-    if (role === 'admin' && adminVerified) {
-      loadData();
-    }
-  }, [role, adminVerified, loadData]);
+  const refreshData = () => {
+    mutateComplaints();
+    mutateGraph();
+    mutateCandidates();
+    mutateStats();
+  };
 
   const handleApproveCandidate = (id: number) => {
     fetch(`/api/admin/candidates/${id}/approve`, {
@@ -113,7 +120,7 @@ export default function AdminPage() {
       headers: { 'Content-Type': 'application/json' },
     }).then(() => {
       setSelectedCandidate(null);
-      loadData();
+      refreshData();
     });
   };
 
@@ -123,7 +130,7 @@ export default function AdminPage() {
       headers: { 'Content-Type': 'application/json' },
     }).then(() => {
       setSelectedCandidate(null);
-      loadData();
+      refreshData();
     });
   };
 
@@ -131,7 +138,7 @@ export default function AdminPage() {
     fetch(`/api/admin/knowledge/${id}`, { method: 'DELETE' })
       .then(() => {
         setSelectedNode(null);
-        loadData();
+        refreshData();
       });
   };
 
