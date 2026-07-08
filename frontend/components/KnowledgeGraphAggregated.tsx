@@ -10,6 +10,7 @@ interface GraphNode {
   content: string;
   children?: GraphNode[];
   complaint_count?: number;
+  original_id?: number;
 }
 
 interface GraphLink {
@@ -30,7 +31,43 @@ const NODE_COLORS: Record<string, string> = {
   solution: '#4ECDC4',
 };
 
-export default function KnowledgeGraphAggregated({ nodes, links, onNodeClick }: KnowledgeGraphAggregatedProps) {
+const NODE_SHAPES: Record<string, (group: d3.Selection<any, any, any, any>, color: string) => void> = {
+  complaint: (group, color) => {
+    group.append('polygon')
+      .attr('points', '0,-28 24,-14 24,14 0,28 -24,14 -24,-14')
+      .attr('fill', color)
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 2);
+  },
+  issue: (group, color) => {
+    group.append('rect')
+      .attr('width', 56)
+      .attr('height', 32)
+      .attr('x', -28)
+      .attr('y', -16)
+      .attr('rx', 8)
+      .attr('ry', 8)
+      .attr('fill', color)
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 2);
+  },
+  solution: (group, color) => {
+    group.append('circle')
+      .attr('r', 20)
+      .attr('fill', color)
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 2);
+  },
+  compensation: (group, color) => {
+    group.append('polygon')
+      .attr('points', '0,-22 22,0 0,22 -22,0')
+      .attr('fill', color)
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 2);
+  },
+};
+
+export default function KnowledgeGraphAggregated({ nodes, onNodeClick }: KnowledgeGraphAggregatedProps) {
   const svgRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
@@ -43,7 +80,7 @@ export default function KnowledgeGraphAggregated({ nodes, links, onNodeClick }: 
     const height = svgRef.current.clientHeight;
 
     const container = svg.append('g')
-      .attr('transform', `translate(${width / 2}, ${height / 2})`);
+      .attr('transform', 'translate(50, 30)');
 
     const zoom = d3.zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.5, 2])
@@ -53,31 +90,33 @@ export default function KnowledgeGraphAggregated({ nodes, links, onNodeClick }: 
 
     svg.call(zoom);
 
-    const rootData = { id: 'root', name: 'root', type: 'complaint' as const, content: 'root', children: nodes };
+    const rootData = { id: 'root', name: '', type: 'complaint' as GraphNode['type'], content: '', children: nodes };
 
-    const hierarchy = d3.hierarchy(rootData)
+    const hierarchy = d3.hierarchy<GraphNode>(rootData)
       .sort((a, b) => {
-        const aType = (a.data as GraphNode).type;
-        const bType = (b.data as GraphNode).type;
-        return aType === 'complaint' ? -1 : 0;
+        const typeOrder = { complaint: 0, issue: 1, solution: 2, compensation: 3 };
+        return typeOrder[a.data.type] - typeOrder[b.data.type];
       });
 
-    const treeLayout = d3.tree()
-      .size([width, height - 100])
-      .nodeSize([100, 150]);
+    const treeLayout = d3.tree<GraphNode>()
+      .size([height - 80, width - 100])
+      .nodeSize([50, 120]);
 
     const root = treeLayout(hierarchy);
-
-    const linkGenerator = d3.linkHorizontal<d3.HierarchyNode<GraphNode>>()
-      .x((d) => (d.x ?? 0) as number)
-      .y((d) => (d.y ?? 0) as number);
 
     container.append('g')
       .selectAll('path')
       .data(root.links())
       .join('path')
-      .attr('d', linkGenerator as unknown as d3.LinkHorizontal<d3.HierarchyNode<GraphNode>>)
-      .attr('stroke', '#ddd')
+      .attr('d', (d) => {
+        const sourceX = d.source.x ?? 0;
+        const sourceY = d.source.y ?? 0;
+        const targetX = d.target.x ?? 0;
+        const targetY = d.target.y ?? 0;
+        const midX = (sourceX + targetX) / 2;
+        return `M ${sourceX} ${sourceY} C ${midX} ${sourceY}, ${midX} ${targetY}, ${targetX} ${targetY}`;
+      })
+      .attr('stroke', '#9CA3AF')
       .attr('stroke-width', 2)
       .attr('fill', 'none');
 
@@ -93,37 +132,8 @@ export default function KnowledgeGraphAggregated({ nodes, links, onNodeClick }: 
       if (node.id === 'root') return;
       const group = d3.select(this);
       const color = NODE_COLORS[node.type];
-
-      if (node.type === 'complaint') {
-        group.append('polygon')
-          .attr('points', '0,-30 26,-15 26,15 0,30 -26,15 -26,-15')
-          .attr('fill', color)
-          .attr('stroke', '#fff')
-          .attr('stroke-width', 2);
-      } else if (node.type === 'issue') {
-        group.append('rect')
-          .attr('width', 60)
-          .attr('height', 36)
-          .attr('x', -30)
-          .attr('y', -18)
-          .attr('rx', 8)
-          .attr('ry', 8)
-          .attr('fill', color)
-          .attr('stroke', '#fff')
-          .attr('stroke-width', 2);
-      } else if (node.type === 'solution') {
-        group.append('circle')
-          .attr('r', 22)
-          .attr('fill', color)
-          .attr('stroke', '#fff')
-          .attr('stroke-width', 2);
-      } else if (node.type === 'compensation') {
-        group.append('polygon')
-          .attr('points', '0,-25 25,0 0,25 -25,0')
-          .attr('fill', color)
-          .attr('stroke', '#fff')
-          .attr('stroke-width', 2);
-      }
+      const drawShape = NODE_SHAPES[node.type];
+      drawShape(group, color);
     });
 
     nodeGroup.append('text')
@@ -136,7 +146,7 @@ export default function KnowledgeGraphAggregated({ nodes, links, onNodeClick }: 
       .text((d) => {
         const node = d.data as GraphNode;
         if (node.id === 'root') return '';
-        return node.name.length > 8 ? node.name.slice(0, 8) + '..' : node.name;
+        return node.name.length > 7 ? node.name.slice(0, 7) + '..' : node.name;
       });
 
     const tooltip = d3.select('body')
@@ -175,7 +185,7 @@ export default function KnowledgeGraphAggregated({ nodes, links, onNodeClick }: 
     return () => {
       tooltip.remove();
     };
-  }, [nodes, links, onNodeClick]);
+  }, [nodes, onNodeClick]);
 
   return (
     <svg

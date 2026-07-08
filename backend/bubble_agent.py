@@ -12,8 +12,7 @@ except:
     requests = None
 
 try:
-    from storage.database import save_session, get_user_by_session, save_user_preference, get_user_preferences, save_complaint, save_complaint_with_candidate
-    from storage.memory_store import get_knowledge_list, get_knowledge_graph, save_knowledge as _save_knowledge, save_complaint_db as _save_complaint_db, get_complaint_stats
+    from storage.database import save_session, get_user_by_session, save_user_preference, get_user_preferences, save_complaint, save_complaint_with_candidate, get_knowledge_graph, save_knowledge as _save_knowledge, save_complaint_db as _save_complaint_db, get_complaint_stats
 except:
     save_session = lambda s, u: None
     get_user_by_session = lambda s: None
@@ -21,7 +20,6 @@ except:
     get_user_preferences = lambda u: {}
     save_complaint = lambda u, d: None
     save_complaint_with_candidate = lambda u, ct, d: (None, None)
-    get_knowledge_list = lambda reviewed_only=False: []
     get_knowledge_graph = lambda: []
     _save_knowledge = lambda ct, s, c: None
     _save_complaint_db = lambda u, ct, d: None
@@ -139,17 +137,6 @@ DIRECT_RESPONSES = {
     "query_invoice": "支持电子发票，小程序申请。",
 }
 
-COMPLAINT_RESPONSES = {
-    "complaint_taste": "抱歉口感不符预期，核实后为您重做或退款。",
-    "complaint_quantity": "抱歉份量不足，已记录并安排补偿。",
-    "complaint_service": "抱歉服务不佳，已通知门店整改。",
-    "complaint_delivery": "抱歉配送超时，已申请超时赔付。",
-    "complaint_price": "抱歉价格问题，核实后提供优惠券补偿。",
-    "complaint_accessory": "抱歉配件缺失，我们会为您补发。",
-    "complaint_refund": "抱歉，我们会为您办理退款。",
-    "complaint_sarcasm": "抱歉给您带来不好的体验，请问具体是什么问题？",
-}
-
 INTENT_TO_CATEGORY = {
     "complaint_taste": "口味",
     "complaint_quantity": "份量",
@@ -161,13 +148,35 @@ INTENT_TO_CATEGORY = {
     "complaint_accessory": "配件",
 }
 
+DEFAULT_SOLUTIONS = {
+    "口味": "非常抱歉您对口味不满意，我们会尽快为您处理。",
+    "份量": "非常抱歉份量不足，我们会为您补发或补偿。",
+    "服务": "非常抱歉服务态度不佳，我们已通知门店整改。",
+    "配送": "非常抱歉配送超时，我们会申请超时赔付。",
+    "价格": "非常抱歉价格问题，核实后提供优惠券补偿。",
+    "退款": "非常抱歉，我们会为您办理退款。",
+    "讽刺": "非常抱歉给您带来不好的体验，请问具体是什么问题？",
+    "配件": "非常抱歉配件缺失，我们会为您补发。",
+}
+
+DEFAULT_COMPENSATIONS = {
+    "口味": "免费重做或退款",
+    "份量": "补发配料或5元优惠券",
+    "服务": "赠送饮品券",
+    "配送": "超时赔付或免单",
+    "价格": "优惠券补偿",
+    "退款": "全额退款",
+    "讽刺": "请告知具体问题",
+    "配件": "补发配件",
+}
+
 def get_knowledge_response(intent_name):
     category = INTENT_TO_CATEGORY.get(intent_name)
     if not category:
         return None, None
     graph = get_knowledge_graph()
     for node in graph:
-        if node.get("reviewed") and node.get("content") == category:
+        if node.get("is_active") and node.get("node_name") == category and node.get("node_type") == "complaint":
             solution = ""
             compensation = ""
             for child in node.get("children", []):
@@ -330,11 +339,11 @@ def log_complaint(user_id=None, complaint=None, severity="普通", category="口
         """, (user_id, category, complaint))
         db_id = c.lastrowid
         c.execute("""
-            SELECT id FROM knowledge WHERE node_type = ? AND content = ? AND reviewed = 1
-        """, (category, category))
+            SELECT id FROM knowledge_graph WHERE node_type = 'complaint' AND node_name = ? AND is_active = 1
+        """, (category,))
         row = c.fetchone()
         if row:
-            c.execute("UPDATE complaints SET knowledge_id = ? WHERE id = ?", (row[0], db_id))
+            c.execute("UPDATE complaints SET knowledge_id = ?, status = '已解决', resolved_at = CURRENT_TIMESTAMP WHERE id = ?", (row[0], db_id))
         conn.commit()
         conn.close()
         return {"success": True, "complaint_id": complaint_id, "db_id": db_id, "candidate_id": None}
@@ -344,7 +353,7 @@ def log_complaint(user_id=None, complaint=None, severity="普通", category="口
 
 def _auto_learn_knowledge(category, complaint):
     knowledge_list = get_knowledge_list(reviewed_only=False)
-    existing = [k for k in knowledge_list if k.get("content") == category and k.get("node_type") == category]
+    existing = [k for k in knowledge_list if k.get("node_name") == category and k.get("node_type") == "complaint"]
     if existing:
         _create_variant_node(category, complaint)
         return
@@ -354,7 +363,7 @@ def _auto_learn_knowledge(category, complaint):
 
 def _create_variant_node(parent_category, complaint):
     knowledge_list = get_knowledge_list(reviewed_only=False)
-    parent_node = next((k for k in knowledge_list if k.get("content") == parent_category and k.get("node_type") == parent_category), None)
+    parent_node = next((k for k in knowledge_list if k.get("node_name") == parent_category and k.get("node_type") == "complaint"), None)
     if not parent_node:
         return
     variant_keywords = ["太甜", "太酸", "太苦", "难喝", "冰块太多", "料少", "服务差", "超时", "太贵"]
@@ -362,17 +371,17 @@ def _create_variant_node(parent_category, complaint):
     if not matched:
         return
     variant_content = f"{parent_category}_{matched}"
-    existing_variant = [k for k in knowledge_list if k.get("content") == variant_content]
+    existing_variant = [k for k in knowledge_list if k.get("node_name") == variant_content]
     if existing_variant:
         return
     solution = _generate_solution(parent_category)
     compensation = _generate_compensation(parent_category)
     conn = sqlite3.connect(os.path.join(os.path.dirname(__file__), "../data/bubblemate.db"))
     c = conn.cursor()
-    c.execute("INSERT INTO knowledge (node_type, content, parent_id) VALUES (?, ?, ?)", (parent_category, variant_content, parent_node["id"]))
+    c.execute("INSERT INTO knowledge_graph (node_name, node_type, content, parent_id, level) VALUES (?, ?, ?, ?, 2)", (variant_content, 'issue', variant_content, parent_node["id"]))
     variant_id = c.lastrowid
-    c.execute("INSERT INTO knowledge (node_type, content, parent_id) VALUES ('solution', ?, ?)", (solution, variant_id))
-    c.execute("INSERT INTO knowledge (node_type, content, parent_id) VALUES ('compensation', ?, ?)", (compensation, variant_id))
+    c.execute("INSERT INTO knowledge_graph (node_name, node_type, content, parent_id, level) VALUES (?, ?, ?, ?, 3)", (solution[:50], 'solution', solution, variant_id))
+    c.execute("INSERT INTO knowledge_graph (node_name, node_type, content, parent_id, level) VALUES (?, ?, ?, ?, 3)", (compensation[:50], 'compensation', compensation, variant_id))
     conn.commit()
     conn.close()
 
@@ -502,10 +511,12 @@ def get_context(store, session_id):
 def build_response(intent, text, tool_result=None):
     if intent["name"].startswith("complaint"):
         solution, compensation = get_knowledge_response(intent["name"])
-        if solution and compensation:
-            reply = f"{solution} 补偿方案：{compensation}"
-        else:
-            reply = COMPLAINT_RESPONSES.get(intent["name"], "抱歉给您带来不好的体验。")
+        category = INTENT_TO_CATEGORY.get(intent["name"])
+        if not solution:
+            solution = DEFAULT_SOLUTIONS.get(category, "非常抱歉给您带来不好的体验，我们会尽快处理。")
+        if not compensation:
+            compensation = DEFAULT_COMPENSATIONS.get(category, "请联系客服处理")
+        reply = f"{solution} 补偿方案：{compensation}"
         if tool_result and tool_result["success"]:
             return f"【思考】{intent['name']}\n【行动】记录投诉\n【回复】{reply}"
         return f"【思考】{intent['name']}\n【回复】{reply}"

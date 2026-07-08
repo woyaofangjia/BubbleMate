@@ -29,18 +29,11 @@ export default function NavBar() {
         );
       case 'admin':
         return (
-          <>
-            <Link href="/admin">
-              <button className="px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg text-sm">
-                运营后台
-              </button>
-            </Link>
-            <Link href="/agent-dashboard">
-              <button className="px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg text-sm">
-                客服工作台
-              </button>
-            </Link>
-          </>
+          <Link href="/admin">
+            <button className="px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg text-sm">
+              运营后台
+            </button>
+          </Link>
         );
       case 'agent':
         return (

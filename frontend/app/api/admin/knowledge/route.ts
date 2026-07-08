@@ -29,3 +29,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false });
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  const url = new URL(request.url);
+  const id = url.pathname.split('/').pop();
+  try {
+    const response = await fetch(`${BACKEND_URL}/api/admin/knowledge/${id}`, {
+      method: 'DELETE',
+    });
+    const data = await response.json();
+    return NextResponse.json(data);
+  } catch {
+    return NextResponse.json({ success: false });
+  }
+}

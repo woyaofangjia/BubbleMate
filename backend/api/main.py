@@ -10,8 +10,7 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from bubble_agent import process_message, recognize_intent, create_memory_store, get_context, TOOLS, get_user_id
-from storage.database import init_db, get_user_preferences, get_complaint_history, get_user_stats, get_knowledge_candidates, approve_candidate, reject_candidate, get_complaint_knowledge, get_knowledge_complaints, update_knowledge_parent
-from storage.memory_store import get_all_complaints, get_knowledge_list, get_knowledge_graph, get_knowledge_graph_aggregated, review_knowledge, delete_knowledge, get_complaint_stats, resolve_complaint, add_knowledge_node
+from storage.database import init_db, get_user_preferences, get_complaint_history, get_user_stats, get_knowledge_candidates, approve_candidate, reject_candidate, get_complaint_knowledge, get_knowledge_complaints, update_knowledge_parent, get_all_complaints, get_knowledge_list, get_knowledge_graph, get_knowledge_graph_aggregated, review_knowledge, delete_knowledge, get_complaint_stats, resolve_complaint, add_knowledge_node
 
 init_db()
 
@@ -152,9 +151,23 @@ async def admin_get_stats():
     return stats
 
 @app.get("/api/admin/knowledge")
-async def admin_get_knowledge(reviewed_only: Optional[bool] = False):
-    knowledge = get_knowledge_list(reviewed_only)
-    return {"knowledge": knowledge}
+async def admin_get_knowledge():
+    graph = get_knowledge_graph()
+    all_nodes = []
+    def count_types(node):
+        all_nodes.append(node)
+        for child in node.get('children', []):
+            count_types(child)
+    for root in graph:
+        count_types(root)
+    stats = {
+        'total_nodes': len(all_nodes),
+        'by_type': {}
+    }
+    for node in all_nodes:
+        node_type = node.get('node_type', '')
+        stats['by_type'][node_type] = stats['by_type'].get(node_type, 0) + 1
+    return {"tree": graph, "statistics": stats}
 
 @app.get("/api/admin/knowledge/graph")
 async def admin_get_knowledge_graph():
@@ -174,7 +187,7 @@ async def admin_review_knowledge(request: ReviewRequest):
 @app.delete("/api/admin/knowledge/{id}")
 async def admin_delete_knowledge(id: int):
     delete_knowledge(id)
-    return {"success": True, "id": id}
+    return {"success": True, "id": id, "message": "已软删除该节点及其所有子节点"}
 
 @app.post("/api/admin/knowledge")
 async def admin_add_knowledge(request: AddKnowledgeRequest):
