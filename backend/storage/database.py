@@ -363,7 +363,8 @@ def get_knowledge_graph_aggregated():
                     'type': 'issue',
                     'content': k['content'],
                     'original_id': k['id'],
-                    'parent_id': k['parent_id']
+                    'parent_id': k['parent_id'],
+                    'children': []
                 }
                 node_id_counter += 1
         elif k['node_type'] == 'solution':
@@ -567,13 +568,35 @@ def approve_candidate(candidate_id):
         solution = candidate_dict["proposed_solution"]
         compensation = candidate_dict["proposed_compensation"]
         
-        c.execute("INSERT INTO knowledge_graph (node_name, node_type, content, parent_id, level) VALUES (?, ?, ?, NULL, 1)", (complaint_type, 'complaint', complaint_type))
-        parent_id = c.lastrowid
-        c.execute("INSERT INTO knowledge_graph (node_name, node_type, content, parent_id, level) VALUES (?, ?, ?, ?, 3)", (solution[:50], 'solution', solution, parent_id))
-        c.execute("INSERT INTO knowledge_graph (node_name, node_type, content, parent_id, level) VALUES (?, ?, ?, ?, 3)", (compensation[:50], 'compensation', compensation, parent_id))
+        c.execute("SELECT id FROM knowledge_graph WHERE node_name = ? AND node_type = 'complaint' AND is_active = 1", (complaint_type,))
+        complaint_row = c.fetchone()
+        if complaint_row:
+            complaint_id = complaint_row[0]
+        else:
+            c.execute("INSERT INTO knowledge_graph (node_name, node_type, content, parent_id, level, is_active) VALUES (?, ?, ?, NULL, 1, 1)", (complaint_type, 'complaint', complaint_type))
+            complaint_id = c.lastrowid
+        
+        issue_name = complaint_type + "问题"
+        c.execute("SELECT id FROM knowledge_graph WHERE node_name = ? AND node_type = 'issue' AND parent_id = ? AND is_active = 1", (issue_name, complaint_id))
+        issue_row = c.fetchone()
+        if issue_row:
+            issue_id = issue_row[0]
+        else:
+            c.execute("INSERT INTO knowledge_graph (node_name, node_type, content, parent_id, level, is_active) VALUES (?, ?, ?, ?, 2, 1)", (issue_name, 'issue', '用户反馈' + complaint_type + '相关问题', complaint_id))
+            issue_id = c.lastrowid
+        
+        c.execute("SELECT id FROM knowledge_graph WHERE node_name = ? AND node_type = 'solution' AND parent_id = ? AND is_active = 1", (solution[:50], issue_id))
+        sol_row = c.fetchone()
+        if not sol_row:
+            c.execute("INSERT INTO knowledge_graph (node_name, node_type, content, parent_id, level, is_active) VALUES (?, ?, ?, ?, 3, 1)", (solution[:50], 'solution', solution, issue_id))
+        
+        c.execute("SELECT id FROM knowledge_graph WHERE node_name = ? AND node_type = 'compensation' AND parent_id = ? AND is_active = 1", (compensation[:50], issue_id))
+        comp_row = c.fetchone()
+        if not comp_row:
+            c.execute("INSERT INTO knowledge_graph (node_name, node_type, content, parent_id, level, is_active) VALUES (?, ?, ?, ?, 3, 1)", (compensation[:50], 'compensation', compensation, issue_id))
         
         c.execute("UPDATE knowledge_candidates SET status = 'approved', reviewed_at = CURRENT_TIMESTAMP WHERE id = ?", (candidate_id,))
-        c.execute("UPDATE complaints SET knowledge_id = ?, candidate_id = NULL, status = '已解决', resolved_at = CURRENT_TIMESTAMP WHERE candidate_id = ?", (parent_id, candidate_id))
+        c.execute("UPDATE complaints SET knowledge_id = ?, candidate_id = NULL, status = '已解决', resolved_at = CURRENT_TIMESTAMP WHERE candidate_id = ?", (issue_id, candidate_id))
         
         conn.execute("COMMIT")
         conn.close()

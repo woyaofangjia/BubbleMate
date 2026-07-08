@@ -316,7 +316,39 @@ export default function AdminPage() {
                       </span>
                     </div>
                   )}
-                  {selectedNode.children && selectedNode.children.length > 0 && (
+                  {selectedNode.type === 'issue' && selectedNode.children && selectedNode.children.length > 0 && (
+                    <>
+                      <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-blue-600 font-medium text-sm">📋 解决方案</span>
+                          <span className="px-2 py-0.5 bg-blue-200 text-blue-700 rounded text-xs">必选</span>
+                        </div>
+                        {selectedNode.children.filter(c => c.type === 'solution').map(child => (
+                          <div key={child.id} className="text-sm text-gray-700">
+                            {child.content}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-2 text-center">
+                        在处理问题的同时，还可以为用户提供以下补偿方案：
+                      </div>
+                      <div className="mt-2 p-3 bg-green-50 rounded-lg border border-green-200">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-green-600 font-medium text-sm">🎁 可选补偿方案</span>
+                          <span className="px-2 py-0.5 bg-green-200 text-green-700 rounded text-xs">多选</span>
+                        </div>
+                        <div className="space-y-2">
+                          {selectedNode.children.filter(c => c.type === 'compensation').map(child => (
+                            <div key={child.id} className="flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                              <span className="text-sm text-gray-700">{child.content}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  {selectedNode.type !== 'issue' && selectedNode.children && selectedNode.children.length > 0 && (
                     <div>
                       <span className="text-gray-500">关联子节点</span>
                       <div className="space-y-2 mt-2">
