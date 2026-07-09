@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface PasswordModalProps {
   isOpen: boolean;
@@ -9,19 +9,65 @@ interface PasswordModalProps {
   title: string;
 }
 
-const ADMIN_KEY = 'bubble2026';
+const ADMIN_KEY = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'bubble2026';
+const MAX_ATTEMPTS = 3;
 
 export default function PasswordModal({ isOpen, onClose, onConfirm, title }: PasswordModalProps) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [attempts, setAttempts] = useState(0);
+  const [locked, setLocked] = useState(false);
+  const [lockTime, setLockTime] = useState(0);
+
+  useEffect(() => {
+    if (locked && Date.now() - lockTime >= 60000) {
+      setLocked(false);
+      setAttempts(0);
+    }
+  }, [locked, lockTime]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setPassword('');
+      setError('');
+    }
+  }, [isOpen]);
+
+  const validatePassword = (pwd: string) => {
+    if (pwd.length < 6) return '密码长度不能少于6位';
+    if (!/[a-zA-Z]/.test(pwd)) return '密码必须包含字母';
+    if (!/[0-9]/.test(pwd)) return '密码必须包含数字';
+    return null;
+  };
 
   const handleSubmit = () => {
+    if (locked) {
+      const remaining = Math.ceil((60000 - (Date.now() - lockTime)) / 1000);
+      setError(`账户已锁定，请${remaining}秒后再试`);
+      return;
+    }
+
+    const validationError = validatePassword(password);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
     if (password === ADMIN_KEY) {
       setError('');
+      setAttempts(0);
       onConfirm(password);
       setPassword('');
     } else {
-      setError('密码错误，请重试');
+      const newAttempts = attempts + 1;
+      setAttempts(newAttempts);
+      if (newAttempts >= MAX_ATTEMPTS) {
+        setLocked(true);
+        setLockTime(Date.now());
+        setError(`连续输错${MAX_ATTEMPTS}次，账户已锁定1分钟`);
+      } else {
+        setError(`密码错误，还剩${MAX_ATTEMPTS - newAttempts}次机会`);
+      }
     }
   };
 
@@ -52,9 +98,13 @@ export default function PasswordModal({ isOpen, onClose, onConfirm, title }: Pas
                 error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
               }`}
               autoFocus
+              disabled={locked}
             />
             {error && (
               <p className="text-red-500 text-sm mt-2">{error}</p>
+            )}
+            {!error && password.length > 0 && (
+              <p className="text-gray-400 text-xs mt-2">提示：密码需包含字母和数字，至少6位</p>
             )}
           </div>
           <div className="flex gap-3">
@@ -66,7 +116,8 @@ export default function PasswordModal({ isOpen, onClose, onConfirm, title }: Pas
             </button>
             <button
               onClick={handleSubmit}
-              className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm"
+              disabled={locked || password.length < 6}
+              className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               确认
             </button>

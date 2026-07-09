@@ -65,6 +65,26 @@ interface Stats {
   reviewed_knowledge: number;
 }
 
+interface EvalReport {
+  timestamp: string;
+  test_cases_count: number;
+  level1_component: {
+    intent_accuracy: number;
+    tool_accuracy: number;
+    clarification_rate: number;
+    avg_latency_ms: number;
+  };
+  level2_end_to_end: {
+    solved_rate: number;
+    failure_rate: number;
+  };
+  level3_adversarial: {
+    adversarial_pass_rate: number;
+  };
+  overall_pass_rate: number;
+  bad_cases: { case_id: string; category: string; difficulty: string }[];
+}
+
 export default function AdminPage() {
   const router = useRouter();
   const { role, adminVerified } = useRole();
@@ -107,11 +127,23 @@ export default function AdminPage() {
     { refreshInterval: 30000, revalidateOnFocus: false }
   );
 
+  const { data: evalReport, mutate: mutateEval } = useSWR<EvalReport>(
+    '/api/admin/eval-report',
+    fetcher,
+    { refreshInterval: 60000, revalidateOnFocus: false }
+  );
+
   const refreshData = () => {
     mutateComplaints();
     mutateGraph();
     mutateCandidates();
     mutateStats();
+    mutateEval();
+  };
+
+  const handleRunEval = () => {
+    fetch('/api/admin/run-eval', { method: 'POST' })
+      .then(() => mutateEval());
   };
 
   const handleApproveCandidate = (id: number) => {
@@ -181,6 +213,66 @@ export default function AdminPage() {
             <div className="text-3xl font-bold text-blue-500">{stats?.resolved_count || 0}</div>
           </div>
         </div>
+
+        {evalReport && (
+          <div className="bg-white rounded-xl p-4 border border-gray-200 mb-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold flex items-center gap-2">📊 Agent评测结果</h2>
+              <button
+                onClick={handleRunEval}
+                className="px-4 py-2 bg-purple-500 text-white rounded-lg text-sm hover:bg-purple-600 transition-colors"
+              >
+                重新评测
+              </button>
+            </div>
+            <div className="grid grid-cols-5 gap-4 mb-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600">{(evalReport.overall_pass_rate * 100).toFixed(0)}%</div>
+                <div className="text-xs text-gray-500 mt-1">综合通过率</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">{(evalReport.level1_component.intent_accuracy * 100).toFixed(0)}%</div>
+                <div className="text-xs text-gray-500 mt-1">意图识别准确率</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">{(evalReport.level1_component.tool_accuracy * 100).toFixed(0)}%</div>
+                <div className="text-xs text-gray-500 mt-1">工具选择准确率</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-orange-600">{(evalReport.level1_component.clarification_rate * 100).toFixed(0)}%</div>
+                <div className="text-xs text-gray-500 mt-1">反问准确率</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-600">{evalReport.level1_component.avg_latency_ms.toFixed(1)}ms</div>
+                <div className="text-xs text-gray-500 mt-1">平均响应时间</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <div className="text-xs text-gray-500 mb-1">端到端解决率</div>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="h-full bg-green-500 rounded-full" style={{ width: `${evalReport.level2_end_to_end.solved_rate * 100}%` }}></div>
+                  </div>
+                  <span className="text-sm font-medium">{(evalReport.level2_end_to_end.solved_rate * 100).toFixed(0)}%</span>
+                </div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-500 mb-1">对抗性通过率</div>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="h-full bg-purple-500 rounded-full" style={{ width: `${evalReport.level3_adversarial.adversarial_pass_rate * 100}%` }}></div>
+                  </div>
+                  <span className="text-sm font-medium">{(evalReport.level3_adversarial.adversarial_pass_rate * 100).toFixed(0)}%</span>
+                </div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-500 mb-1">Bad Case数</div>
+                <div className="text-xl font-bold text-red-500">{evalReport.bad_cases.length}</div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-12 gap-6">
           <div className="col-span-3">

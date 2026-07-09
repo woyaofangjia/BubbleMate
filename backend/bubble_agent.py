@@ -447,26 +447,68 @@ TOOLS = {
 
 def extract_params(text, intent_name, session_id=None):
     params = {}
+    missing_params = []
     tool_name = INTENT_TOOL.get(intent_name)
     if session_id:
         params["user_id"] = get_user_id(session_id)
     if tool_name == "query_stores":
         match = PARAM_EXTRACTORS["location"](text)
-        if match: params["location"] = match.group(2)
+        if match:
+            params["location"] = match.group(2)
+        else:
+            missing_params.append("位置信息")
     elif tool_name in ["query_order", "query_history"]:
         match = PARAM_EXTRACTORS["order_id"](text)
-        if match: params["order_id"] = match.group(1)
+        if match:
+            params["order_id"] = match.group(1)
+        else:
+            missing_params.append("订单号")
     elif tool_name == "log_complaint":
         params["complaint"] = PARAM_EXTRACTORS["complaint"](text)
         params["intent_name"] = intent_name
         params["category"] = INTENT_TO_CATEGORY.get(intent_name, "口味")
-    return params
+    return params, missing_params
+
+import threading
+
+class ToolTimeoutError(Exception):
+    pass
+
+def _run_with_timeout(func, args, timeout=3):
+    result = [None]
+    error = [None]
+    
+    def wrapper():
+        try:
+            result[0] = func(*args)
+        except Exception as e:
+            error[0] = e
+    
+    thread = threading.Thread(target=wrapper)
+    thread.daemon = True
+    thread.start()
+    thread.join(timeout=timeout)
+    
+    if thread.is_alive():
+        raise ToolTimeoutError(f"工具执行超时({timeout}s)")
+    if error[0]:
+        raise error[0]
+    return result[0]
 
 def get_tool_response(intent_name, text, tools=TOOLS, session_id=None):
     tool_name = INTENT_TOOL.get(intent_name)
-    if not tool_name or tool_name not in tools: return None
-    params = extract_params(text, intent_name, session_id)
-    return tools[tool_name](**params)
+    if not tool_name or tool_name not in tools:
+        return None, []
+    params, missing_params = extract_params(text, intent_name, session_id)
+    if missing_params:
+        return None, missing_params
+    try:
+        result = _run_with_timeout(tools[tool_name], (params,))
+        return result, []
+    except ToolTimeoutError:
+        return {"success": False, "data": [], "error": "工具执行超时"}, []
+    except Exception as e:
+        return {"success": False, "data": [], "error": str(e)}, []
 
 # ==================== 记忆管理 ====================
 
@@ -510,14 +552,26 @@ def _extract_prefs(text):
         if any(p in text for p in patterns): prefs["ice"] = level
     return prefs
 
+def _compress_history(history, window_size):
+    if len(history) <= window_size:
+        return history
+    to_compress = history[:-window_size + 1]
+    summary_parts = []
+    for msg in to_compress:
+        user_part = msg["user"][:30] + "..." if len(msg["user"]) > 30 else msg["user"]
+        agent_part = msg["agent"][:30] + "..." if len(msg["agent"]) > 30 else msg["agent"]
+        summary_parts.append(f"用户:{user_part} 客服:{agent_part}")
+    summary = f"[对话摘要] {'; '.join(summary_parts)}"
+    return [{"user": summary, "agent": "", "is_summary": True}] + history[-window_size + 1:]
+
 def save_message(store, session_id, user_msg, agent_msg):
     if isinstance(store, MemoryStore):
         sess = store._get_session(session_id)
         if not sess:
-            sess = {"history": [], "preferences": {}}
-        if len(sess["history"]) >= store._window_size:
-            sess["history"] = sess["history"][1:]
+            sess = {"history": [], "preferences": {}, "summary": ""}
         sess["history"].append({"user": user_msg, "agent": agent_msg})
+        if len(sess["history"]) > store._window_size:
+            sess["history"] = _compress_history(sess["history"], store._window_size)
         user_id = get_user_id(session_id)
         new_prefs = _extract_prefs(user_msg)
         for k, v in new_prefs.items():
@@ -526,8 +580,11 @@ def save_message(store, session_id, user_msg, agent_msg):
         store._save_session(session_id, sess)
     else:
         if session_id not in store["sessions"]:
-            store["sessions"][session_id] = {"history": deque(maxlen=store["window_size"]), "preferences": {}}
+            store["sessions"][session_id] = {"history": [], "preferences": {}, "window_size": store["window_size"]}
         store["sessions"][session_id]["history"].append({"user": user_msg, "agent": agent_msg})
+        window_size = store["sessions"][session_id]["window_size"]
+        if len(store["sessions"][session_id]["history"]) > window_size:
+            store["sessions"][session_id]["history"] = _compress_history(store["sessions"][session_id]["history"], window_size)
         user_id = get_user_id(session_id)
         new_prefs = _extract_prefs(user_msg)
         for k, v in new_prefs.items():
@@ -553,7 +610,13 @@ def get_context(store, session_id):
 
 # ==================== Agent核心 ====================
 
-def build_response(intent, text, tool_result=None):
+def build_response(intent, text, tool_result=None, missing_params=None):
+    if missing_params:
+        params_text = "、".join(missing_params)
+        return f"【思考】{intent['name']}\n【回复】请问您能提供一下{params_text}吗？这样我可以更好地帮助您。"
+    
+    tool_error = tool_result and not tool_result.get("success")
+    
     if intent["name"].startswith("complaint"):
         solution, compensation = get_knowledge_response(intent["name"])
         category = INTENT_TO_CATEGORY.get(intent["name"])
@@ -562,15 +625,24 @@ def build_response(intent, text, tool_result=None):
         if not compensation:
             compensation = DEFAULT_COMPENSATIONS.get(category, "请联系客服处理")
         reply = f"{solution} 补偿方案：{compensation}"
+        if tool_error:
+            reply = f"{reply}（投诉记录暂存中，稍后为您处理）"
+            return f"【思考】{intent['name']}\n【行动】记录投诉(降级)\n【回复】{reply}"
         if tool_result and tool_result["success"]:
             return f"【思考】{intent['name']}\n【行动】记录投诉\n【回复】{reply}"
         return f"【思考】{intent['name']}\n【回复】{reply}"
+    
     if intent["name"].startswith("query"):
+        if tool_error:
+            fallback = DIRECT_RESPONSES.get(intent["name"], "暂时无法查询，请稍后再试。")
+            return f"【思考】{intent['name']}\n【行动】调用工具(失败)\n【回复】{fallback}"
         if tool_result and tool_result["success"]:
             return f"【思考】{intent['name']}\n【行动】调用工具\n【回复】{_format_tool_result(intent['name'], tool_result)}"
         return f"【思考】{intent['name']}\n【回复】{DIRECT_RESPONSES.get(intent['name'], '请告诉我具体查询内容。')}"
+    
     if intent["name"] in ["place_order", "order_modify"]:
         return f"【思考】{intent['name']}\n【回复】请提供您想点的饮品名称。"
+    
     return f"【思考】{intent['name']}\n【回复】{DIRECT_RESPONSES.get(intent['name'], '您好，有什么可以帮助您的？')}"
 
 def _format_tool_result(intent_name, result):
@@ -591,12 +663,21 @@ def _format_tool_result(intent_name, result):
 
 def process_message(text, session_id="default", memory_store=None, llm_client=None):
     intent = recognize_intent(text, llm_client)
+    
+    if intent["confidence"] < 0.6 and intent["name"] not in ["general", "unclear"]:
+        reply = f"【思考】置信度低({intent['confidence']:.2f})\n【回复】抱歉，我不太确定您的意思。您是想咨询{intent.get('category', '')}相关的问题吗？还是有其他需求？"
+        if memory_store:
+            save_message(memory_store, session_id, text, reply)
+        return reply, intent
+    
     tool_name = INTENT_TOOL.get(intent["name"])
     if tool_name == "log_complaint":
         tool_result = None
+        missing_params = []
     else:
-        tool_result = get_tool_response(intent["name"], text, session_id=session_id)
-    response = build_response(intent, text, tool_result)
+        tool_result, missing_params = get_tool_response(intent["name"], text, session_id=session_id)
+    
+    response = build_response(intent, text, tool_result, missing_params)
     if memory_store:
         save_message(memory_store, session_id, text, response)
     return response, intent

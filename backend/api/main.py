@@ -321,6 +321,37 @@ async def admin_clear_cache():
     query_customize.cache_clear()
     return {"success": True, "message": "缓存已清除"}
 
+class FeedbackRequest(BaseModel):
+    message_id: str
+    feedback_type: str
+    session_id: str
+
+@app.post("/api/feedback")
+async def submit_feedback(request: FeedbackRequest):
+    user_id = get_user_id(request.session_id)
+    save_feedback(user_id, request.message_id, request.feedback_type)
+    return {"success": True, "message": "反馈已记录"}
+
+@app.get("/api/admin/eval-report")
+async def get_eval_report():
+    import json
+    import os
+    report_path = os.path.join(os.path.dirname(__file__), "../../data/eval_report.json")
+    if os.path.exists(report_path):
+        with open(report_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {"error": "评测报告不存在"}
+
+@app.post("/api/admin/run-eval")
+async def run_eval():
+    import subprocess
+    import sys
+    script_path = os.path.join(os.path.dirname(__file__), "../../scripts/bubble_eval_runner.py")
+    result = subprocess.run([sys.executable, script_path], capture_output=True, text=True)
+    if result.returncode == 0:
+        return {"success": True, "message": "评测完成"}
+    return {"success": False, "message": "评测失败", "error": result.stderr}
+
 def main():
     import uvicorn
     uvicorn.run("backend.api.main:app", host="0.0.0.0", port=8000, reload=True)

@@ -16,6 +16,8 @@ interface Message {
   content: string;
   thoughtChain?: string;
   toolCalls?: Array<{ name: string; status: string; result?: string }>;
+  messageId?: string;
+  feedback?: 'positive' | 'negative';
 }
 
 interface ChatInterfaceProps {
@@ -90,6 +92,7 @@ export default function ChatInterface({
         content: reply,
         thoughtChain: thought,
         toolCalls: tools,
+        messageId: `msg_${Date.now()}`,
       }]);
     } catch (error) {
       console.error('API调用失败:', error);
@@ -102,6 +105,26 @@ export default function ChatInterface({
     setIsStreaming(false);
   };
   
+  const handleFeedback = (msgIdx: number, type: 'positive' | 'negative') => {
+    setMessages(prev => {
+      const newMessages = [...prev];
+      const msg = newMessages[msgIdx];
+      if (msg.role === 'agent' && !msg.feedback) {
+        newMessages[msgIdx] = { ...msg, feedback: type };
+        fetch('/api/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message_id: msg.messageId || `msg_${msgIdx}`,
+            feedback_type: type,
+            session_id: getSessionId(),
+          }),
+        }).catch(() => {});
+      }
+      return newMessages;
+    });
+  };
+
   return (
     <div className="flex flex-col h-full bg-white rounded-xl shadow-sm border border-gray-200">
       {/* 消息列表 */}
@@ -130,6 +153,36 @@ export default function ChatInterface({
               
               {/* 消息内容 */}
               <p className="whitespace-pre-wrap">{msg.content}</p>
+              
+              {/* 反馈按钮 */}
+              {msg.role === 'agent' && !msg.feedback && (
+                <div className="flex gap-2 mt-3 pt-3 border-t border-gray-200">
+                  <button
+                    onClick={() => handleFeedback(idx, 'positive')}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-green-50 text-green-600 hover:bg-green-100 text-sm transition-colors"
+                  >
+                    <span>👍</span>
+                    <span>有帮助</span>
+                  </button>
+                  <button
+                    onClick={() => handleFeedback(idx, 'negative')}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-red-50 text-red-600 hover:bg-red-100 text-sm transition-colors"
+                  >
+                    <span>👎</span>
+                    <span>无帮助</span>
+                  </button>
+                </div>
+              )}
+              {msg.role === 'agent' && msg.feedback === 'positive' && (
+                <div className="mt-3 pt-3 border-t border-gray-200">
+                  <span className="text-sm text-green-600">👍 感谢您的反馈！</span>
+                </div>
+              )}
+              {msg.role === 'agent' && msg.feedback === 'negative' && (
+                <div className="mt-3 pt-3 border-t border-gray-200">
+                  <span className="text-sm text-red-600">👎 抱歉没能帮到您，我会继续努力！</span>
+                </div>
+              )}
             </div>
           </div>
         ))}
