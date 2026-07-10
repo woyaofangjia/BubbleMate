@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BubbleMate 评估报告</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; color: #1a1a2e; }
+.header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; }
+.header h1 { font-size: 2.5rem; margin-bottom: 10px; }
+.header p { opacity: 0.9; font-size: 1.1rem; }
+.container { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
+.card { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 24px; margin-bottom: 24px; }
+.card-title { font-size: 1.3rem; color: #333; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #f0f0f0; }
+.dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+.stat-box { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 8px; padding: 20px; text-align: center; }
+.stat-box .value { font-size: 2.5rem; font-weight: bold; color: #667eea; }
+.stat-box .label { font-size: 0.9rem; color: #666; margin-top: 5px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+th { background: #f8f9fa; font-weight: 600; }
+tr:hover { background: #f8f9fa; }
+.badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 500; }
+.badge-easy { background: #d4edda; color: #155724; }
+.badge-medium { background: #fff3cd; color: #856404; }
+.badge-hard { background: #f8d7da; color: #721c24; }
+.badge-correct { background: #d4edda; color: #155724; }
+.badge-wrong { background: #f8d7da; color: #721c24; }
+.progress-bar { height: 20px; background: #e9ecef; border-radius: 10px; overflow: hidden; margin: 8px 0; }
+.progress-fill { height: 100%; border-radius: 10px; transition: width 0.3s; }
+.progress-fill.v1 { background: #6c757d; }
+.progress-fill.v2 { background: #007bff; }
+.progress-fill.v3 { background: #28a745; }
+.confusion-matrix { overflow-x: auto; }
+.confusion-cell { min-width: 40px; text-align: center; font-size: 0.8rem; }
+.confusion-cell.diagonal { background: #d4edda; font-weight: bold; }
+.confusion-cell.error { background: #f8d7da; }
+.badge-warning { background: #fff3cd; color: #856404; }
+.section { margin-bottom: 30px; }
+</style>
+</head>
+<body>
+<div class="header">
+<h1>BubbleMate 离线评估报告</h1>
+<p>生成时间: 2026-07-10 22:28:52 | 样本总数: 500</p>
+</div>
+<div class="container"><div class="card">
+<h2 class="card-title">总体准确率仪表盘</h2>
+<div class="dashboard">
+<div class="stat-box"><div class="value">83.6%</div><div class="label">BubbleMate 准确率</div></div>
+<div class="stat-box"><div class="value">87.6%</div><div class="label">纯LLM 准确率</div></div>
+<div class="stat-box"><div class="value">22.4%</div><div class="label">纯关键词 准确率</div></div>
+<div class="stat-box"><div class="value">82</div><div class="label">Bad Case数量</div></div>
+</div>
+</div><div class="card">
+<h2 class="card-title">基线对比表格</h2>
+<table>
+<thead><tr><th>方案</th><th>准确率</th><th>平均耗时</th><th>最低耗时</th><th>最高耗时</th><th>预估成本/千次</th></tr></thead>
+<tbody>
+<tr><td><strong>Baseline_v1</strong><br>纯关键词匹配</td><td>22.4%</td><td>0.04ms</td><td>0.01ms</td><td>0.25ms</td><td>0元</td></tr>
+<tr><td><strong>Baseline_v2</strong><br>纯LLM (Zero-shot)</td><td>87.6%</td><td>562.86ms</td><td>229.15ms</td><td>3032.15ms</td><td>~15元</td></tr>
+<tr><td><strong>BubbleMate</strong><br>规则+关键词+LLM兜底</td><td>83.6%</td><td>274.06ms</td><td>0.02ms</td><td>3654.86ms</td><td>~3元</td></tr>
+</tbody>
+</table>
+</div><div class="card">
+<h2 class="card-title">分层准确率柱状图</h2>
+<div class="section">
+<h3>Easy (简单)</h3>
+<div class="progress-bar"><div class="progress-fill v1" style="width:22.4%">v1 22.4%</div></div>
+<div class="progress-bar"><div class="progress-fill v2" style="width:87.6%">v2 87.6%</div></div>
+<div class="progress-bar"><div class="progress-fill v3" style="width:83.6%">v3 83.6%</div></div>
+</div>
+<div class="section">
+<h3>Medium (中等)</h3>
+<div class="progress-bar"><div class="progress-fill v1" style="width:22.4%">v1 22.4%</div></div>
+<div class="progress-bar"><div class="progress-fill v2" style="width:87.6%">v2 87.6%</div></div>
+<div class="progress-bar"><div class="progress-fill v3" style="width:83.6%">v3 83.6%</div></div>
+</div>
+<div class="section">
+<h3>Hard (困难)</h3>
+<div class="progress-bar"><div class="progress-fill v1" style="width:22.4%">v1 22.4%</div></div>
+<div class="progress-bar"><div class="progress-fill v2" style="width:87.6%">v2 87.6%</div></div>
+<div class="progress-bar"><div class="progress-fill v3" style="width:83.6%">v3 83.6%</div></div>
+</div>
+</div><div class="card">
+<h2 class="card-title">混淆矩阵（Top 10意图）</h2>
+<div class="confusion-matrix">
+<table>
+<thead>
+<tr><th>真实\预测</th><th>complaint_ta...</th><th>complaint_sa...</th><th>unclear...</th><th>query_recomm...</th><th>complaint_qu...</th><th>complaint_de...</th><th>complaint_re...</th><th>query_order...</th><th>query_price...</th><th>query_menu...</th></tr></thead><tbody><tr><th>complaint_ta...</th><td class='confusion-cell diagonal'>42</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td></tr><tr><th>complaint_sa...</th><td class='confusion-cell '>0</td><td class='confusion-cell diagonal'>41</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td></tr><tr><th>unclear...</th><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell diagonal'>33</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td></tr><tr><th>query_recomm...</th><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell diagonal'>37</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td></tr><tr><th>complaint_qu...</th><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell diagonal'>27</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td></tr><tr><th>complaint_de...</th><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell diagonal'>14</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td></tr><tr><th>complaint_re...</th><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell diagonal'>26</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td></tr><tr><th>query_order...</th><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell diagonal'>13</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td></tr><tr><th>query_price...</th><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell diagonal'>26</td><td class='confusion-cell '>0</td></tr><tr><th>query_menu...</th><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell error'>2</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell '>0</td><td class='confusion-cell diagonal'>18</td></tr></tbody></table></div></div><div class="card">
+<h2 class="card-title">Bad Case 自动挖掘列表</h2>
+<p style="color:#666; margin-bottom:15px;">共发现 82 个潜在问题样本</p>
+<table>
+<thead><tr><th>样本ID</th><th>用户问题</th><th>预测意图</th><th>真实意图</th><th>置信度</th><th>难度</th><th>触发规则</th></tr></thead>
+<tbody><tr>
+<td>EVAL-0002</td>
+<td>帮我查一下我上次点的是什么</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">query_order</span></td>
+<td>0.20</td>
+<td><span class="badge badge-medium">medium</span></td>
+<td><span class="badge badge-warning">简单/中等难度样本被识别为通用意图</span></td>
+</tr><tr>
+<td>EVAL-0009</td>
+<td>上次买的声声乌龙这次怎么没了</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">query_menu</span></td>
+<td>0.20</td>
+<td><span class="badge badge-medium">medium</span></td>
+<td><span class="badge badge-warning">简单/中等难度样本被识别为通用意图</span></td>
+</tr><tr>
+<td>EVAL-0010</td>
+<td>一言难尽</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">complaint_sarcasm</span></td>
+<td>0.20</td>
+<td><span class="badge badge-hard">hard</span></td>
+<td><span class="badge badge-warning">意图识别错误</span></td>
+</tr><tr>
+<td>EVAL-0018</td>
+<td>还行吧</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">unclear</span></td>
+<td>0.20</td>
+<td><span class="badge badge-hard">hard</span></td>
+<td><span class="badge badge-warning">意图识别错误</span></td>
+</tr><tr>
+<td>EVAL-0023</td>
+<td>超时40分钟，打电话还没人接</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">complaint_delivery</span></td>
+<td>0.20</td>
+<td><span class="badge badge-medium">medium</span></td>
+<td><span class="badge badge-warning">简单/中等难度样本被识别为通用意图</span></td>
+</tr><tr>
+<td>EVAL-0028</td>
+<td>这味道跟上次差太多了</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">complaint_taste</span></td>
+<td>0.20</td>
+<td><span class="badge badge-hard">hard</span></td>
+<td><span class="badge badge-warning">意图识别错误</span></td>
+</tr><tr>
+<td>EVAL-0033</td>
+<td>这味道跟上次差太多了</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">complaint_taste</span></td>
+<td>0.20</td>
+<td><span class="badge badge-hard">hard</span></td>
+<td><span class="badge badge-warning">意图识别错误</span></td>
+</tr><tr>
+<td>EVAL-0042</td>
+<td>超时40分钟，打电话还没人接</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">complaint_delivery</span></td>
+<td>0.20</td>
+<td><span class="badge badge-medium">medium</span></td>
+<td><span class="badge badge-warning">简单/中等难度样本被识别为通用意图</span></td>
+</tr><tr>
+<td>EVAL-0056</td>
+<td>帮我查一下我上次点的是什么</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">query_order</span></td>
+<td>0.20</td>
+<td><span class="badge badge-medium">medium</span></td>
+<td><span class="badge badge-warning">简单/中等难度样本被识别为通用意图</span></td>
+</tr><tr>
+<td>EVAL-0058</td>
+<td>还行吧</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">unclear</span></td>
+<td>0.20</td>
+<td><span class="badge badge-hard">hard</span></td>
+<td><span class="badge badge-warning">意图识别错误</span></td>
+</tr><tr>
+<td>EVAL-0069</td>
+<td>超时40分钟，打电话还没人接</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">complaint_delivery</span></td>
+<td>0.20</td>
+<td><span class="badge badge-medium">medium</span></td>
+<td><span class="badge badge-warning">简单/中等难度样本被识别为通用意图</span></td>
+</tr><tr>
+<td>EVAL-0072</td>
+<td>上次买的芝芝莓莓这次怎么没了</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">query_menu</span></td>
+<td>0.20</td>
+<td><span class="badge badge-medium">medium</span></td>
+<td><span class="badge badge-warning">简单/中等难度样本被识别为通用意图</span></td>
+</tr><tr>
+<td>EVAL-0075</td>
+<td>超时40分钟，打电话还没人接</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">complaint_delivery</span></td>
+<td>0.20</td>
+<td><span class="badge badge-medium">medium</span></td>
+<td><span class="badge badge-warning">简单/中等难度样本被识别为通用意图</span></td>
+</tr><tr>
+<td>EVAL-0079</td>
+<td>一言难尽</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">complaint_sarcasm</span></td>
+<td>0.20</td>
+<td><span class="badge badge-hard">hard</span></td>
+<td><span class="badge badge-warning">意图识别错误</span></td>
+</tr><tr>
+<td>EVAL-0083</td>
+<td>你们是不是换配方了</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">complaint_taste</span></td>
+<td>0.20</td>
+<td><span class="badge badge-hard">hard</span></td>
+<td><span class="badge badge-warning">意图识别错误</span></td>
+</tr><tr>
+<td>EVAL-0091</td>
+<td>感觉被坑了</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">complaint_price</span></td>
+<td>0.20</td>
+<td><span class="badge badge-hard">hard</span></td>
+<td><span class="badge badge-warning">意图识别错误</span></td>
+</tr><tr>
+<td>EVAL-0097</td>
+<td>还行吧</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">unclear</span></td>
+<td>0.20</td>
+<td><span class="badge badge-hard">hard</span></td>
+<td><span class="badge badge-warning">意图识别错误</span></td>
+</tr><tr>
+<td>EVAL-0101</td>
+<td>感觉被坑了</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">complaint_price</span></td>
+<td>0.20</td>
+<td><span class="badge badge-hard">hard</span></td>
+<td><span class="badge badge-warning">意图识别错误</span></td>
+</tr><tr>
+<td>EVAL-0109</td>
+<td>帮我查一下我上次点的是什么</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">query_order</span></td>
+<td>0.20</td>
+<td><span class="badge badge-medium">medium</span></td>
+<td><span class="badge badge-warning">简单/中等难度样本被识别为通用意图</span></td>
+</tr><tr>
+<td>EVAL-0110</td>
+<td>感觉被坑了</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">complaint_price</span></td>
+<td>0.20</td>
+<td><span class="badge badge-hard">hard</span></td>
+<td><span class="badge badge-warning">意图识别错误</span></td>
+</tr><tr>
+<td>EVAL-0127</td>
+<td>上次买的声声乌龙这次怎么没了</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">query_menu</span></td>
+<td>0.20</td>
+<td><span class="badge badge-medium">medium</span></td>
+<td><span class="badge badge-warning">简单/中等难度样本被识别为通用意图</span></td>
+</tr><tr>
+<td>EVAL-0129</td>
+<td>一言难尽</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">complaint_sarcasm</span></td>
+<td>0.20</td>
+<td><span class="badge badge-hard">hard</span></td>
+<td><span class="badge badge-warning">意图识别错误</span></td>
+</tr><tr>
+<td>EVAL-0134</td>
+<td>帮我查一下我上次点的是什么</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">query_order</span></td>
+<td>0.20</td>
+<td><span class="badge badge-medium">medium</span></td>
+<td><span class="badge badge-warning">简单/中等难度样本被识别为通用意图</span></td>
+</tr><tr>
+<td>EVAL-0138</td>
+<td>你们是不是换配方了</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">complaint_taste</span></td>
+<td>0.20</td>
+<td><span class="badge badge-hard">hard</span></td>
+<td><span class="badge badge-warning">意图识别错误</span></td>
+</tr><tr>
+<td>EVAL-0139</td>
+<td>你们是不是换配方了</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">complaint_taste</span></td>
+<td>0.20</td>
+<td><span class="badge badge-hard">hard</span></td>
+<td><span class="badge badge-warning">意图识别错误</span></td>
+</tr><tr>
+<td>EVAL-0143</td>
+<td>超时40分钟，打电话还没人接</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">complaint_delivery</span></td>
+<td>0.20</td>
+<td><span class="badge badge-medium">medium</span></td>
+<td><span class="badge badge-warning">简单/中等难度样本被识别为通用意图</span></td>
+</tr><tr>
+<td>EVAL-0145</td>
+<td>还行吧</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">unclear</span></td>
+<td>0.20</td>
+<td><span class="badge badge-hard">hard</span></td>
+<td><span class="badge badge-warning">意图识别错误</span></td>
+</tr><tr>
+<td>EVAL-0162</td>
+<td>还行吧</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">unclear</span></td>
+<td>0.20</td>
+<td><span class="badge badge-hard">hard</span></td>
+<td><span class="badge badge-warning">意图识别错误</span></td>
+</tr><tr>
+<td>EVAL-0167</td>
+<td>感觉被坑了</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">complaint_price</span></td>
+<td>0.20</td>
+<td><span class="badge badge-hard">hard</span></td>
+<td><span class="badge badge-warning">意图识别错误</span></td>
+</tr><tr>
+<td>EVAL-0173</td>
+<td>你们是不是换配方了</td>
+<td><span class="badge badge-wrong">general</span></td>
+<td><span class="badge badge-correct">complaint_taste</span></td>
+<td>0.20</td>
+<td><span class="badge badge-hard">hard</span></td>
+<td><span class="badge badge-warning">意图识别错误</span></td>
+</tr></tbody></table></div><div class="card">
+<h2 class="card-title">改进建议</h2>
+<ul style="padding-left:20px; line-height:2;">
+<li><strong>低置信度问题</strong>: 对于置信度<0.6的样本，建议增加关键词覆盖或规则匹配</li>
+<li><strong>高置信度误判</strong>: 对于置信度>0.9但预测错误的样本，检查规则冲突</li>
+<li><strong>Hard样本优化</strong>: 增加讽刺、指代等对抗样本的规则处理</li>
+<li><strong>复合意图</strong>: 当前系统对复合意图支持有限，建议增加复合意图识别规则</li>
+<li><strong>数据增强</strong>: 将Bad Case样本加入训练集，持续迭代优化</li>
+</ul>
+</div>
+</div>
+</body>
+</html>

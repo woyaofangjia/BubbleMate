@@ -1,0 +1,1213 @@
+{
+  "total": 82,
+  "bad_cases": [
+    {
+      "sample_id": "EVAL-0002",
+      "user_query": "帮我查一下我上次点的是什么",
+      "predicted_intent": "general",
+      "true_intent": "query_order",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'帮我查一下我上次点的是什么'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0009",
+      "user_query": "上次买的声声乌龙这次怎么没了",
+      "predicted_intent": "general",
+      "true_intent": "query_menu",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'上次买的声声乌龙这次怎么没了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0010",
+      "user_query": "一言难尽",
+      "predicted_intent": "general",
+      "true_intent": "complaint_sarcasm",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'一言难尽'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0018",
+      "user_query": "还行吧",
+      "predicted_intent": "general",
+      "true_intent": "unclear",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'还行吧'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0023",
+      "user_query": "超时40分钟，打电话还没人接",
+      "predicted_intent": "general",
+      "true_intent": "complaint_delivery",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'超时40分钟，打电话还没人接'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0028",
+      "user_query": "这味道跟上次差太多了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_taste",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'这味道跟上次差太多了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0033",
+      "user_query": "这味道跟上次差太多了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_taste",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'这味道跟上次差太多了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0042",
+      "user_query": "超时40分钟，打电话还没人接",
+      "predicted_intent": "general",
+      "true_intent": "complaint_delivery",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'超时40分钟，打电话还没人接'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0056",
+      "user_query": "帮我查一下我上次点的是什么",
+      "predicted_intent": "general",
+      "true_intent": "query_order",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'帮我查一下我上次点的是什么'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0058",
+      "user_query": "还行吧",
+      "predicted_intent": "general",
+      "true_intent": "unclear",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'还行吧'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0069",
+      "user_query": "超时40分钟，打电话还没人接",
+      "predicted_intent": "general",
+      "true_intent": "complaint_delivery",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'超时40分钟，打电话还没人接'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0072",
+      "user_query": "上次买的芝芝莓莓这次怎么没了",
+      "predicted_intent": "general",
+      "true_intent": "query_menu",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'上次买的芝芝莓莓这次怎么没了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0075",
+      "user_query": "超时40分钟，打电话还没人接",
+      "predicted_intent": "general",
+      "true_intent": "complaint_delivery",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'超时40分钟，打电话还没人接'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0079",
+      "user_query": "一言难尽",
+      "predicted_intent": "general",
+      "true_intent": "complaint_sarcasm",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'一言难尽'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0083",
+      "user_query": "你们是不是换配方了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_taste",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'你们是不是换配方了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0091",
+      "user_query": "感觉被坑了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_price",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'感觉被坑了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0097",
+      "user_query": "还行吧",
+      "predicted_intent": "general",
+      "true_intent": "unclear",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'还行吧'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0101",
+      "user_query": "感觉被坑了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_price",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'感觉被坑了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0109",
+      "user_query": "帮我查一下我上次点的是什么",
+      "predicted_intent": "general",
+      "true_intent": "query_order",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'帮我查一下我上次点的是什么'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0110",
+      "user_query": "感觉被坑了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_price",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'感觉被坑了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0127",
+      "user_query": "上次买的声声乌龙这次怎么没了",
+      "predicted_intent": "general",
+      "true_intent": "query_menu",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'上次买的声声乌龙这次怎么没了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0129",
+      "user_query": "一言难尽",
+      "predicted_intent": "general",
+      "true_intent": "complaint_sarcasm",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'一言难尽'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0134",
+      "user_query": "帮我查一下我上次点的是什么",
+      "predicted_intent": "general",
+      "true_intent": "query_order",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'帮我查一下我上次点的是什么'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0138",
+      "user_query": "你们是不是换配方了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_taste",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'你们是不是换配方了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0139",
+      "user_query": "你们是不是换配方了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_taste",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'你们是不是换配方了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0143",
+      "user_query": "超时40分钟，打电话还没人接",
+      "predicted_intent": "general",
+      "true_intent": "complaint_delivery",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'超时40分钟，打电话还没人接'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0145",
+      "user_query": "还行吧",
+      "predicted_intent": "general",
+      "true_intent": "unclear",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'还行吧'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0162",
+      "user_query": "还行吧",
+      "predicted_intent": "general",
+      "true_intent": "unclear",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'还行吧'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0167",
+      "user_query": "感觉被坑了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_price",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'感觉被坑了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0173",
+      "user_query": "你们是不是换配方了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_taste",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'你们是不是换配方了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0184",
+      "user_query": "感觉被坑了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_price",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'感觉被坑了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0188",
+      "user_query": "你们是不是换配方了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_taste",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'你们是不是换配方了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0189",
+      "user_query": "超时40分钟，打电话还没人接",
+      "predicted_intent": "general",
+      "true_intent": "complaint_delivery",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'超时40分钟，打电话还没人接'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0194",
+      "user_query": "这味道跟上次差太多了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_taste",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'这味道跟上次差太多了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0205",
+      "user_query": "感觉被坑了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_price",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'感觉被坑了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0209",
+      "user_query": "一言难尽",
+      "predicted_intent": "general",
+      "true_intent": "complaint_sarcasm",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'一言难尽'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0216",
+      "user_query": "帮我查一下我上次点的是什么",
+      "predicted_intent": "general",
+      "true_intent": "query_order",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'帮我查一下我上次点的是什么'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0240",
+      "user_query": "这味道跟上次差太多了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_taste",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'这味道跟上次差太多了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0242",
+      "user_query": "帮我查一下我上次点的是什么",
+      "predicted_intent": "general",
+      "true_intent": "query_order",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'帮我查一下我上次点的是什么'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0254",
+      "user_query": "超时40分钟，打电话还没人接",
+      "predicted_intent": "general",
+      "true_intent": "complaint_delivery",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'超时40分钟，打电话还没人接'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0257",
+      "user_query": "还行吧",
+      "predicted_intent": "general",
+      "true_intent": "unclear",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'还行吧'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0260",
+      "user_query": "帮我查一下我上次点的是什么",
+      "predicted_intent": "general",
+      "true_intent": "query_order",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'帮我查一下我上次点的是什么'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0267",
+      "user_query": "一言难尽",
+      "predicted_intent": "general",
+      "true_intent": "complaint_sarcasm",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'一言难尽'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0275",
+      "user_query": "感觉被坑了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_price",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'感觉被坑了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0279",
+      "user_query": "感觉被坑了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_price",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'感觉被坑了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0281",
+      "user_query": "超时40分钟，打电话还没人接",
+      "predicted_intent": "general",
+      "true_intent": "complaint_delivery",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'超时40分钟，打电话还没人接'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0283",
+      "user_query": "还行吧",
+      "predicted_intent": "general",
+      "true_intent": "unclear",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'还行吧'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0290",
+      "user_query": "感觉被坑了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_price",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'感觉被坑了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0291",
+      "user_query": "帮我查一下我上次点的是什么",
+      "predicted_intent": "general",
+      "true_intent": "query_order",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'帮我查一下我上次点的是什么'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0293",
+      "user_query": "感觉被坑了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_price",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'感觉被坑了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0302",
+      "user_query": "这味道跟上次差太多了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_taste",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'这味道跟上次差太多了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0303",
+      "user_query": "你们是不是换配方了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_taste",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'你们是不是换配方了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0307",
+      "user_query": "你们是不是换配方了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_taste",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'你们是不是换配方了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0311",
+      "user_query": "这味道跟上次差太多了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_taste",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'这味道跟上次差太多了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0314",
+      "user_query": "超时40分钟，打电话还没人接",
+      "predicted_intent": "general",
+      "true_intent": "complaint_delivery",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'超时40分钟，打电话还没人接'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0315",
+      "user_query": "一言难尽",
+      "predicted_intent": "general",
+      "true_intent": "complaint_sarcasm",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'一言难尽'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0318",
+      "user_query": "超时40分钟，打电话还没人接",
+      "predicted_intent": "general",
+      "true_intent": "complaint_delivery",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'超时40分钟，打电话还没人接'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0332",
+      "user_query": "还行吧",
+      "predicted_intent": "general",
+      "true_intent": "unclear",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'还行吧'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0336",
+      "user_query": "超时40分钟，打电话还没人接",
+      "predicted_intent": "general",
+      "true_intent": "complaint_delivery",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'超时40分钟，打电话还没人接'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0344",
+      "user_query": "超时40分钟，打电话还没人接",
+      "predicted_intent": "general",
+      "true_intent": "complaint_delivery",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'超时40分钟，打电话还没人接'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0352",
+      "user_query": "帮我查一下我上次点的是什么",
+      "predicted_intent": "general",
+      "true_intent": "query_order",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'帮我查一下我上次点的是什么'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0353",
+      "user_query": "一言难尽",
+      "predicted_intent": "general",
+      "true_intent": "complaint_sarcasm",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'一言难尽'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0359",
+      "user_query": "一言难尽",
+      "predicted_intent": "general",
+      "true_intent": "complaint_sarcasm",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'一言难尽'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0367",
+      "user_query": "你们是不是换配方了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_taste",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'你们是不是换配方了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0389",
+      "user_query": "还行吧",
+      "predicted_intent": "general",
+      "true_intent": "unclear",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'还行吧'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0392",
+      "user_query": "你们是不是换配方了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_taste",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'你们是不是换配方了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0393",
+      "user_query": "上次买的声声乌龙这次怎么没了",
+      "predicted_intent": "general",
+      "true_intent": "query_menu",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'上次买的声声乌龙这次怎么没了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0410",
+      "user_query": "一言难尽",
+      "predicted_intent": "general",
+      "true_intent": "complaint_sarcasm",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'一言难尽'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0412",
+      "user_query": "这味道跟上次差太多了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_taste",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'这味道跟上次差太多了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0422",
+      "user_query": "还行吧",
+      "predicted_intent": "general",
+      "true_intent": "unclear",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'还行吧'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0440",
+      "user_query": "这味道跟上次差太多了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_taste",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'这味道跟上次差太多了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0441",
+      "user_query": "帮我查一下我上次点的是什么",
+      "predicted_intent": "general",
+      "true_intent": "query_order",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'帮我查一下我上次点的是什么'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0451",
+      "user_query": "一言难尽",
+      "predicted_intent": "general",
+      "true_intent": "complaint_sarcasm",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'一言难尽'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0465",
+      "user_query": "还行吧",
+      "predicted_intent": "general",
+      "true_intent": "unclear",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'还行吧'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0469",
+      "user_query": "帮我查一下我上次点的是什么",
+      "predicted_intent": "general",
+      "true_intent": "query_order",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'帮我查一下我上次点的是什么'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0471",
+      "user_query": "超时40分钟，打电话还没人接",
+      "predicted_intent": "general",
+      "true_intent": "complaint_delivery",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'超时40分钟，打电话还没人接'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0475",
+      "user_query": "帮我查一下我上次点的是什么",
+      "predicted_intent": "general",
+      "true_intent": "query_order",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'帮我查一下我上次点的是什么'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0488",
+      "user_query": "帮我查一下我上次点的是什么",
+      "predicted_intent": "general",
+      "true_intent": "query_order",
+      "confidence": 0.2,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "简单/中等难度样本被识别为通用意图",
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "增加该类意图的关键词覆盖",
+        "将'帮我查一下我上次点的是什么'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0492",
+      "user_query": "你们是不是换配方了",
+      "predicted_intent": "general",
+      "true_intent": "complaint_taste",
+      "confidence": 0.2,
+      "difficulty": "hard",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'你们是不是换配方了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0045",
+      "user_query": "上次买的冰沙这次怎么没了",
+      "predicted_intent": "complaint_quantity",
+      "true_intent": "query_menu",
+      "confidence": 0.6,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'上次买的冰沙这次怎么没了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0063",
+      "user_query": "上次买的冰沙这次怎么没了",
+      "predicted_intent": "complaint_quantity",
+      "true_intent": "query_menu",
+      "confidence": 0.6,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'上次买的冰沙这次怎么没了'添加到训练数据中"
+      ]
+    },
+    {
+      "sample_id": "EVAL-0011",
+      "user_query": "上次买的珍珠奶茶这次怎么没了",
+      "predicted_intent": "place_order",
+      "true_intent": "query_menu",
+      "confidence": 0.6000000000000001,
+      "difficulty": "medium",
+      "triggered_rules": [
+        "意图识别错误"
+      ],
+      "suggestions": [
+        "将'上次买的珍珠奶茶这次怎么没了'添加到训练数据中"
+      ]
+    }
+  ]
+}

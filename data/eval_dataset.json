@@ -1,0 +1,3519 @@
+{
+  "dataset_name": "BubbleMate_Eval_Dataset",
+  "total": 500,
+  "version": "2.0",
+  "generated_at": "2026-07-10 22:21:54",
+  "description": "BubbleMate奶茶店客服Agent评估数据集，500条，分层采样覆盖Easy/Medium/Hard",
+  "intent_distribution": {
+    "投诉": 241,
+    "查询": 202,
+    "其他": 57
+  },
+  "difficulty_distribution": {
+    "easy": 200,
+    "medium": 175,
+    "hard": 125
+  },
+  "samples": [
+    {
+      "id": "EVAL-0001",
+      "query": "几点关门",
+      "intent": "query_hours",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0002",
+      "query": "帮我查一下我上次点的是什么",
+      "intent": "query_order",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0003",
+      "query": "来一杯抹茶菩提",
+      "intent": "place_order",
+      "difficulty": "easy",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0004",
+      "query": "珍珠奶茶少糖少冰多少钱",
+      "intent": "query_price",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0005",
+      "query": "跟之前一样的",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0006",
+      "query": "这个珍珠奶茶也太甜了吧",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0007",
+      "query": "这个多肉葡萄也太甜了吧",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0008",
+      "query": "跟之前一样的",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0009",
+      "query": "上次买的声声乌龙这次怎么没了",
+      "intent": "query_menu",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0010",
+      "query": "一言难尽",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0011",
+      "query": "上次买的珍珠奶茶这次怎么没了",
+      "intent": "query_menu",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0012",
+      "query": "我要退款，单号75347",
+      "intent": "complaint_refund",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0013",
+      "query": "上次买的杨枝甘露这次怎么没了",
+      "intent": "query_menu",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0014",
+      "query": "你们家最推荐哪款",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0015",
+      "query": "这么贵还这么难喝",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0016",
+      "query": "你们家最推荐哪款",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0017",
+      "query": "冰沙给了细吸管怎么喝",
+      "intent": "complaint_accessory",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0018",
+      "query": "还行吧",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0019",
+      "query": "我要退款，单号16284",
+      "intent": "complaint_refund",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0020",
+      "query": "服务态度差",
+      "intent": "complaint_service",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0021",
+      "query": "杨枝甘露冰块太多了",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0022",
+      "query": "冰沙给了细吸管怎么喝",
+      "intent": "complaint_accessory",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0023",
+      "query": "超时40分钟，打电话还没人接",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0024",
+      "query": "给我推荐一款好喝的",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0025",
+      "query": "菜单发一下",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0026",
+      "query": "无糖的好喝吗",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0027",
+      "query": "徐东附近有店吗",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0028",
+      "query": "这味道跟上次差太多了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0029",
+      "query": "那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0030",
+      "query": "呵呵，你们这服务绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0031",
+      "query": "给我推荐一款好喝的",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0032",
+      "query": "多肉葡萄太酸了，跟上次喝的不一样",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0033",
+      "query": "这味道跟上次差太多了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0034",
+      "query": "冰沙给了细吸管怎么喝",
+      "intent": "complaint_accessory",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0035",
+      "query": "太坑了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0036",
+      "query": "那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0037",
+      "query": "太贵了",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0038",
+      "query": "冰沙给了细吸管怎么喝",
+      "intent": "complaint_accessory",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0039",
+      "query": "今天有什么优惠",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0040",
+      "query": "今天第二杯半价吗",
+      "intent": "query_promotion",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0041",
+      "query": "这么贵还这么难喝",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0042",
+      "query": "超时40分钟，打电话还没人接",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0043",
+      "query": "街道口附近有店吗",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0044",
+      "query": "来一杯抹茶菩提",
+      "intent": "place_order",
+      "difficulty": "easy",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0045",
+      "query": "上次买的冰沙这次怎么没了",
+      "intent": "query_menu",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0046",
+      "query": "我要退款",
+      "intent": "complaint_refund",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0047",
+      "query": "太坑了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0048",
+      "query": "服务态度差",
+      "intent": "complaint_service",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0049",
+      "query": "来一杯茉莉绿茶",
+      "intent": "place_order",
+      "difficulty": "easy",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0050",
+      "query": "这个芋泥波波也太甜了吧",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0051",
+      "query": "这味道跟上次差太多了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0052",
+      "query": "这也太离谱了吧",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0053",
+      "query": "茉莉绿茶冰块太多了",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0054",
+      "query": "服务态度差",
+      "intent": "complaint_service",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0055",
+      "query": "多肉葡萄冰块太多了",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0056",
+      "query": "帮我查一下我上次点的是什么",
+      "intent": "query_order",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0057",
+      "query": "可以开发票吗",
+      "intent": "query_invoice",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0058",
+      "query": "还行吧",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0059",
+      "query": "可以开发票吗",
+      "intent": "query_invoice",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0060",
+      "query": "这么贵还这么难喝",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0061",
+      "query": "珍珠奶茶料太少了，别的店都满满一碗",
+      "intent": "complaint_quantity",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0062",
+      "query": "你们家最推荐哪款",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0063",
+      "query": "上次买的冰沙这次怎么没了",
+      "intent": "query_menu",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0064",
+      "query": "声声乌龙料太少了，别的店都满满一碗",
+      "intent": "complaint_quantity",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0065",
+      "query": "多肉葡萄太酸了，跟上次喝的不一样",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0066",
+      "query": "服务态度差",
+      "intent": "complaint_service",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0067",
+      "query": "多肉葡萄多少钱",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0068",
+      "query": "冰沙给了细吸管怎么喝",
+      "intent": "complaint_accessory",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0069",
+      "query": "超时40分钟，打电话还没人接",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0070",
+      "query": "太贵了",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0071",
+      "query": "这也太离谱了吧",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0072",
+      "query": "上次买的芝芝莓莓这次怎么没了",
+      "intent": "query_menu",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0073",
+      "query": "芋泥波波料太少了，别的店都满满一碗",
+      "intent": "complaint_quantity",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0074",
+      "query": "我要退款，单号66390",
+      "intent": "complaint_refund",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0075",
+      "query": "超时40分钟，打电话还没人接",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0076",
+      "query": "来一杯多肉葡萄",
+      "intent": "place_order",
+      "difficulty": "easy",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0077",
+      "query": "太坑了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0078",
+      "query": "群光那家几点关门",
+      "intent": "query_hours",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0079",
+      "query": "一言难尽",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0080",
+      "query": "上次那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0081",
+      "query": "我要退款",
+      "intent": "complaint_refund",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0082",
+      "query": "呵呵，你们这服务绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0083",
+      "query": "你们是不是换配方了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0084",
+      "query": "配送超时了",
+      "intent": "complaint_delivery",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0085",
+      "query": "芋泥波波多少钱",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0086",
+      "query": "可以加珍珠吗",
+      "intent": "query_customize",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0087",
+      "query": "今天有什么优惠",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0088",
+      "query": "订单34435什么时候到",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0089",
+      "query": "配送超时了",
+      "intent": "complaint_delivery",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0090",
+      "query": "你们家最推荐哪款",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0091",
+      "query": "感觉被坑了",
+      "intent": "complaint_price",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0092",
+      "query": "芋泥波波料太少了，别的店都满满一碗",
+      "intent": "complaint_quantity",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0093",
+      "query": "我要退款",
+      "intent": "complaint_refund",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0094",
+      "query": "茉莉绿茶冰块太多了",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0095",
+      "query": "珍珠奶茶少糖少冰多少钱",
+      "intent": "query_price",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0096",
+      "query": "这也太离谱了吧",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0097",
+      "query": "还行吧",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0098",
+      "query": "给我推荐一款好喝的",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0099",
+      "query": "配送超时了",
+      "intent": "complaint_delivery",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0100",
+      "query": "你们家最推荐哪款",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0101",
+      "query": "感觉被坑了",
+      "intent": "complaint_price",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0102",
+      "query": "这个芝芝莓莓也太甜了吧",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0103",
+      "query": "配送超时了",
+      "intent": "complaint_delivery",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0104",
+      "query": "今天有什么优惠",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0105",
+      "query": "那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0106",
+      "query": "群光那家几点关门",
+      "intent": "query_hours",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0107",
+      "query": "今天第二杯半价吗",
+      "intent": "query_promotion",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0108",
+      "query": "江汉路那家几点关门",
+      "intent": "query_hours",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0109",
+      "query": "帮我查一下我上次点的是什么",
+      "intent": "query_order",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0110",
+      "query": "感觉被坑了",
+      "intent": "complaint_price",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0111",
+      "query": "服务态度差",
+      "intent": "complaint_service",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0112",
+      "query": "来一杯芝芝莓莓",
+      "intent": "place_order",
+      "difficulty": "easy",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0113",
+      "query": "声声乌龙少糖少冰多少钱",
+      "intent": "query_price",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0114",
+      "query": "多肉葡萄少糖少冰多少钱",
+      "intent": "query_price",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0115",
+      "query": "可以开发票吗",
+      "intent": "query_invoice",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0116",
+      "query": "幽兰拿铁料太少了，别的店都满满一碗",
+      "intent": "complaint_quantity",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0117",
+      "query": "这么贵还这么难喝",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0118",
+      "query": "服务态度差",
+      "intent": "complaint_service",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0119",
+      "query": "今天第二杯半价吗",
+      "intent": "query_promotion",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0120",
+      "query": "珍珠奶茶太酸了，跟上次喝的不一样",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0121",
+      "query": "珍珠奶茶太酸了，跟上次喝的不一样",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0122",
+      "query": "我要退款，单号55560",
+      "intent": "complaint_refund",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0123",
+      "query": "我要退款",
+      "intent": "complaint_refund",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0124",
+      "query": "上次那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0125",
+      "query": "抹茶菩提太酸了，跟上次喝的不一样",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0126",
+      "query": "声声乌龙多少钱",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0127",
+      "query": "上次买的声声乌龙这次怎么没了",
+      "intent": "query_menu",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0128",
+      "query": "上次那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0129",
+      "query": "一言难尽",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0130",
+      "query": "几点关门",
+      "intent": "query_hours",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0131",
+      "query": "今天第二杯半价吗",
+      "intent": "query_promotion",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0132",
+      "query": "多肉葡萄太酸了，跟上次喝的不一样",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0133",
+      "query": "可以开发票吗",
+      "intent": "query_invoice",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0134",
+      "query": "帮我查一下我上次点的是什么",
+      "intent": "query_order",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0135",
+      "query": "菜单发一下",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0136",
+      "query": "我要退款，单号84285",
+      "intent": "complaint_refund",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0137",
+      "query": "可以加珍珠吗",
+      "intent": "query_customize",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0138",
+      "query": "你们是不是换配方了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0139",
+      "query": "你们是不是换配方了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0140",
+      "query": "几点关门",
+      "intent": "query_hours",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0141",
+      "query": "呵呵，这包装也是绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0142",
+      "query": "光谷那家几点关门",
+      "intent": "query_hours",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0143",
+      "query": "超时40分钟，打电话还没人接",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0144",
+      "query": "那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0145",
+      "query": "还行吧",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0146",
+      "query": "订单12963什么时候到",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0147",
+      "query": "中南附近有店吗",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0148",
+      "query": "徐东附近有店吗",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0149",
+      "query": "杨枝甘露冰块太多了",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0150",
+      "query": "可以开发票吗",
+      "intent": "query_invoice",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0151",
+      "query": "太坑了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0152",
+      "query": "我要退款",
+      "intent": "complaint_refund",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0153",
+      "query": "汉街附近有店吗",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0154",
+      "query": "冰沙给了细吸管怎么喝",
+      "intent": "complaint_accessory",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0155",
+      "query": "上次那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0156",
+      "query": "可以开发票吗",
+      "intent": "query_invoice",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0157",
+      "query": "配送超时了",
+      "intent": "complaint_delivery",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0158",
+      "query": "菜单发一下",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0159",
+      "query": "太贵了",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0160",
+      "query": "跟之前一样的",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0161",
+      "query": "配送超时了",
+      "intent": "complaint_delivery",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0162",
+      "query": "还行吧",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0163",
+      "query": "今天有什么优惠",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0164",
+      "query": "我要退款，单号26351",
+      "intent": "complaint_refund",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0165",
+      "query": "我要退款",
+      "intent": "complaint_refund",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0166",
+      "query": "给我推荐一款好喝的",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0167",
+      "query": "感觉被坑了",
+      "intent": "complaint_price",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0168",
+      "query": "这个声声乌龙也太甜了吧",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0169",
+      "query": "呵呵，这包装也是绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0170",
+      "query": "配送超时了",
+      "intent": "complaint_delivery",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0171",
+      "query": "那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0172",
+      "query": "上次买的芋泥波波这次怎么没了",
+      "intent": "query_menu",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0173",
+      "query": "你们是不是换配方了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0174",
+      "query": "呵呵，你们这服务绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0175",
+      "query": "多肉葡萄太酸了，跟上次喝的不一样",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0176",
+      "query": "呵呵，你们这服务绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0177",
+      "query": "今天有什么优惠",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0178",
+      "query": "梦时代附近有店吗",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0179",
+      "query": "冰沙给了细吸管怎么喝",
+      "intent": "complaint_accessory",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0180",
+      "query": "我要退款，单号30608",
+      "intent": "complaint_refund",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0181",
+      "query": "芋泥波波少糖少冰多少钱",
+      "intent": "query_price",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0182",
+      "query": "跟之前一样的",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0183",
+      "query": "给我推荐一款好喝的",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0184",
+      "query": "感觉被坑了",
+      "intent": "complaint_price",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0185",
+      "query": "上次那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0186",
+      "query": "茉莉绿茶料太少了，别的店都满满一碗",
+      "intent": "complaint_quantity",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0187",
+      "query": "几点关门",
+      "intent": "query_hours",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0188",
+      "query": "你们是不是换配方了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0189",
+      "query": "超时40分钟，打电话还没人接",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0190",
+      "query": "芝芝莓莓少糖少冰多少钱",
+      "intent": "query_price",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0191",
+      "query": "跟之前一样的",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0192",
+      "query": "服务态度差",
+      "intent": "complaint_service",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0193",
+      "query": "几点关门",
+      "intent": "query_hours",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0194",
+      "query": "这味道跟上次差太多了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0195",
+      "query": "呵呵，这包装也是绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0196",
+      "query": "服务态度差",
+      "intent": "complaint_service",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0197",
+      "query": "无糖的好喝吗",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0198",
+      "query": "菜单发一下",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0199",
+      "query": "这么贵还这么难喝",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0200",
+      "query": "珍珠奶茶料太少了，别的店都满满一碗",
+      "intent": "complaint_quantity",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0201",
+      "query": "你们家最推荐哪款",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0202",
+      "query": "街道口那家几点关门",
+      "intent": "query_hours",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0203",
+      "query": "可以加珍珠吗",
+      "intent": "query_customize",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0204",
+      "query": "服务态度差",
+      "intent": "complaint_service",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0205",
+      "query": "感觉被坑了",
+      "intent": "complaint_price",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0206",
+      "query": "跟之前一样的",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0207",
+      "query": "冰沙给了细吸管怎么喝",
+      "intent": "complaint_accessory",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0208",
+      "query": "这么贵还这么难喝",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0209",
+      "query": "一言难尽",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0210",
+      "query": "今天第二杯半价吗",
+      "intent": "query_promotion",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0211",
+      "query": "可以开发票吗",
+      "intent": "query_invoice",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0212",
+      "query": "今天有什么优惠",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0213",
+      "query": "给我推荐一款好喝的",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0214",
+      "query": "抹茶菩提冰块太多了",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0215",
+      "query": "可以加珍珠吗",
+      "intent": "query_customize",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0216",
+      "query": "帮我查一下我上次点的是什么",
+      "intent": "query_order",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0217",
+      "query": "幽兰拿铁冰块太多了",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0218",
+      "query": "呵呵，这包装也是绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0219",
+      "query": "幽兰拿铁多少钱",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0220",
+      "query": "订单59817什么时候到",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0221",
+      "query": "呵呵，你们这服务绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0222",
+      "query": "订单57658什么时候到",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0223",
+      "query": "你们家最推荐哪款",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0224",
+      "query": "芝芝莓莓多少钱",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0225",
+      "query": "太贵了",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0226",
+      "query": "多肉葡萄料太少了，别的店都满满一碗",
+      "intent": "complaint_quantity",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0227",
+      "query": "杨枝甘露料太少了，别的店都满满一碗",
+      "intent": "complaint_quantity",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0228",
+      "query": "徐东那家几点关门",
+      "intent": "query_hours",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0229",
+      "query": "太坑了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0230",
+      "query": "你们家最推荐哪款",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0231",
+      "query": "给我推荐一款好喝的",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0232",
+      "query": "这么贵还这么难喝",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0233",
+      "query": "无糖的好喝吗",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0234",
+      "query": "几点关门",
+      "intent": "query_hours",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0235",
+      "query": "配送超时了",
+      "intent": "complaint_delivery",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0236",
+      "query": "武大附近有店吗",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0237",
+      "query": "给我推荐一款好喝的",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0238",
+      "query": "几点关门",
+      "intent": "query_hours",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0239",
+      "query": "今天第二杯半价吗",
+      "intent": "query_promotion",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0240",
+      "query": "这味道跟上次差太多了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0241",
+      "query": "可以开发票吗",
+      "intent": "query_invoice",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0242",
+      "query": "帮我查一下我上次点的是什么",
+      "intent": "query_order",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0243",
+      "query": "今天有什么优惠",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0244",
+      "query": "太贵了",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0245",
+      "query": "呵呵，这包装也是绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0246",
+      "query": "上次那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0247",
+      "query": "给我推荐一款好喝的",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0248",
+      "query": "来一杯珍珠奶茶",
+      "intent": "place_order",
+      "difficulty": "easy",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0249",
+      "query": "梦时代附近有店吗",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0250",
+      "query": "今天有什么优惠",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0251",
+      "query": "可以开发票吗",
+      "intent": "query_invoice",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0252",
+      "query": "这么贵还这么难喝",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0253",
+      "query": "声声乌龙冰块太多了",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0254",
+      "query": "超时40分钟，打电话还没人接",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0255",
+      "query": "上次那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0256",
+      "query": "菜单发一下",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0257",
+      "query": "还行吧",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0258",
+      "query": "菜单发一下",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0259",
+      "query": "茉莉绿茶太酸了，跟上次喝的不一样",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0260",
+      "query": "帮我查一下我上次点的是什么",
+      "intent": "query_order",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0261",
+      "query": "多肉葡萄冰块太多了",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0262",
+      "query": "你们家最推荐哪款",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0263",
+      "query": "几点关门",
+      "intent": "query_hours",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0264",
+      "query": "呵呵，这包装也是绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0265",
+      "query": "呵呵，这包装也是绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0266",
+      "query": "你们家最推荐哪款",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0267",
+      "query": "一言难尽",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0268",
+      "query": "今天有什么优惠",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0269",
+      "query": "太坑了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0270",
+      "query": "冰沙太酸了，跟上次喝的不一样",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0271",
+      "query": "可以开发票吗",
+      "intent": "query_invoice",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0272",
+      "query": "来一杯杨枝甘露",
+      "intent": "place_order",
+      "difficulty": "easy",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0273",
+      "query": "今天有什么优惠",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0274",
+      "query": "今天第二杯半价吗",
+      "intent": "query_promotion",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0275",
+      "query": "感觉被坑了",
+      "intent": "complaint_price",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0276",
+      "query": "订单60427什么时候到",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0277",
+      "query": "这么贵还这么难喝",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0278",
+      "query": "太贵了",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0279",
+      "query": "感觉被坑了",
+      "intent": "complaint_price",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0280",
+      "query": "订单45483什么时候到",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0281",
+      "query": "超时40分钟，打电话还没人接",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0282",
+      "query": "太贵了",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0283",
+      "query": "还行吧",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0284",
+      "query": "上次买的杨枝甘露这次怎么没了",
+      "intent": "query_menu",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0285",
+      "query": "可以加珍珠吗",
+      "intent": "query_customize",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0286",
+      "query": "几点关门",
+      "intent": "query_hours",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0287",
+      "query": "可以开发票吗",
+      "intent": "query_invoice",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0288",
+      "query": "珍珠奶茶冰块太多了",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0289",
+      "query": "这么贵还这么难喝",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0290",
+      "query": "感觉被坑了",
+      "intent": "complaint_price",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0291",
+      "query": "帮我查一下我上次点的是什么",
+      "intent": "query_order",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0292",
+      "query": "多肉葡萄多少钱",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0293",
+      "query": "感觉被坑了",
+      "intent": "complaint_price",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0294",
+      "query": "可以加珍珠吗",
+      "intent": "query_customize",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0295",
+      "query": "给我推荐一款好喝的",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0296",
+      "query": "订单42966什么时候到",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0297",
+      "query": "服务态度差",
+      "intent": "complaint_service",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0298",
+      "query": "可以加珍珠吗",
+      "intent": "query_customize",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0299",
+      "query": "菜单发一下",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0300",
+      "query": "呵呵，你们这服务绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0301",
+      "query": "上次那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0302",
+      "query": "这味道跟上次差太多了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0303",
+      "query": "你们是不是换配方了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0304",
+      "query": "抹茶菩提料太少了，别的店都满满一碗",
+      "intent": "complaint_quantity",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0305",
+      "query": "上次那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0306",
+      "query": "今天第二杯半价吗",
+      "intent": "query_promotion",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0307",
+      "query": "你们是不是换配方了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0308",
+      "query": "可以开发票吗",
+      "intent": "query_invoice",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0309",
+      "query": "来一杯芝芝莓莓",
+      "intent": "place_order",
+      "difficulty": "easy",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0310",
+      "query": "我要退款，单号49984",
+      "intent": "complaint_refund",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0311",
+      "query": "这味道跟上次差太多了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0312",
+      "query": "那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0313",
+      "query": "今天有什么优惠",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0314",
+      "query": "超时40分钟，打电话还没人接",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0315",
+      "query": "一言难尽",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0316",
+      "query": "无糖的好喝吗",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0317",
+      "query": "配送超时了",
+      "intent": "complaint_delivery",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0318",
+      "query": "超时40分钟，打电话还没人接",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0319",
+      "query": "多肉葡萄多少钱",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0320",
+      "query": "可以开发票吗",
+      "intent": "query_invoice",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0321",
+      "query": "呵呵，这包装也是绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0322",
+      "query": "这个杨枝甘露也太甜了吧",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0323",
+      "query": "这也太离谱了吧",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0324",
+      "query": "太坑了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0325",
+      "query": "江汉路附近有店吗",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0326",
+      "query": "可以加珍珠吗",
+      "intent": "query_customize",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0327",
+      "query": "来一杯声声乌龙",
+      "intent": "place_order",
+      "difficulty": "easy",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0328",
+      "query": "这个茉莉绿茶也太甜了吧",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0329",
+      "query": "上次那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0330",
+      "query": "无糖的好喝吗",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0331",
+      "query": "这个冰沙也太甜了吧",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0332",
+      "query": "还行吧",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0333",
+      "query": "这么贵还这么难喝",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0334",
+      "query": "这也太离谱了吧",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0335",
+      "query": "无糖的好喝吗",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0336",
+      "query": "超时40分钟，打电话还没人接",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0337",
+      "query": "江汉路那家几点关门",
+      "intent": "query_hours",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0338",
+      "query": "今天有什么优惠",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0339",
+      "query": "太贵了",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0340",
+      "query": "那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0341",
+      "query": "我要退款",
+      "intent": "complaint_refund",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0342",
+      "query": "银泰那家几点关门",
+      "intent": "query_hours",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0343",
+      "query": "可以加珍珠吗",
+      "intent": "query_customize",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0344",
+      "query": "超时40分钟，打电话还没人接",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0345",
+      "query": "这个杨枝甘露也太甜了吧",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0346",
+      "query": "菜单发一下",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0347",
+      "query": "冰沙料太少了，别的店都满满一碗",
+      "intent": "complaint_quantity",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0348",
+      "query": "江汉路附近有店吗",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0349",
+      "query": "汉街那家几点关门",
+      "intent": "query_hours",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0350",
+      "query": "幽兰拿铁冰块太多了",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0351",
+      "query": "这也太离谱了吧",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0352",
+      "query": "帮我查一下我上次点的是什么",
+      "intent": "query_order",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0353",
+      "query": "一言难尽",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0354",
+      "query": "几点关门",
+      "intent": "query_hours",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0355",
+      "query": "跟之前一样的",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0356",
+      "query": "无糖的好喝吗",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0357",
+      "query": "菜单发一下",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0358",
+      "query": "冰沙少糖少冰多少钱",
+      "intent": "query_price",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0359",
+      "query": "一言难尽",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0360",
+      "query": "这也太离谱了吧",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0361",
+      "query": "这个杨枝甘露也太甜了吧",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0362",
+      "query": "芝芝莓莓太酸了，跟上次喝的不一样",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0363",
+      "query": "冰沙少糖少冰多少钱",
+      "intent": "query_price",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0364",
+      "query": "上次那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0365",
+      "query": "幽兰拿铁少糖少冰多少钱",
+      "intent": "query_price",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0366",
+      "query": "上次买的幽兰拿铁这次怎么没了",
+      "intent": "query_menu",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0367",
+      "query": "你们是不是换配方了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0368",
+      "query": "冰沙给了细吸管怎么喝",
+      "intent": "complaint_accessory",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0369",
+      "query": "无糖的好喝吗",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0370",
+      "query": "抹茶菩提多少钱",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0371",
+      "query": "这个抹茶菩提也太甜了吧",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0372",
+      "query": "来一杯茉莉绿茶",
+      "intent": "place_order",
+      "difficulty": "easy",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0373",
+      "query": "配送超时了",
+      "intent": "complaint_delivery",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0374",
+      "query": "我要退款",
+      "intent": "complaint_refund",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0375",
+      "query": "这也太离谱了吧",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0376",
+      "query": "珍珠奶茶多少钱",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0377",
+      "query": "杨枝甘露少糖少冰多少钱",
+      "intent": "query_price",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0378",
+      "query": "我要退款",
+      "intent": "complaint_refund",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0379",
+      "query": "这么贵还这么难喝",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0380",
+      "query": "珍珠奶茶料太少了，别的店都满满一碗",
+      "intent": "complaint_quantity",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0381",
+      "query": "来一杯声声乌龙",
+      "intent": "place_order",
+      "difficulty": "easy",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0382",
+      "query": "街道口附近有店吗",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0383",
+      "query": "那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0384",
+      "query": "菜单发一下",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0385",
+      "query": "无糖的好喝吗",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0386",
+      "query": "这也太离谱了吧",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0387",
+      "query": "芋泥波波少糖少冰多少钱",
+      "intent": "query_price",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0388",
+      "query": "给我推荐一款好喝的",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0389",
+      "query": "还行吧",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0390",
+      "query": "几点关门",
+      "intent": "query_hours",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0391",
+      "query": "今天第二杯半价吗",
+      "intent": "query_promotion",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0392",
+      "query": "你们是不是换配方了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0393",
+      "query": "上次买的声声乌龙这次怎么没了",
+      "intent": "query_menu",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0394",
+      "query": "茉莉绿茶多少钱",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0395",
+      "query": "我要退款，单号80491",
+      "intent": "complaint_refund",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0396",
+      "query": "菜单发一下",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0397",
+      "query": "太坑了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0398",
+      "query": "冰沙给了细吸管怎么喝",
+      "intent": "complaint_accessory",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0399",
+      "query": "我要退款，单号46806",
+      "intent": "complaint_refund",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0400",
+      "query": "太贵了",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0401",
+      "query": "抹茶菩提多少钱",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0402",
+      "query": "抹茶菩提太酸了，跟上次喝的不一样",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0403",
+      "query": "可以加珍珠吗",
+      "intent": "query_customize",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0404",
+      "query": "这个冰沙也太甜了吧",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0405",
+      "query": "几点关门",
+      "intent": "query_hours",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0406",
+      "query": "梦时代那家几点关门",
+      "intent": "query_hours",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0407",
+      "query": "这么贵还这么难喝",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0408",
+      "query": "今天第二杯半价吗",
+      "intent": "query_promotion",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0409",
+      "query": "今天有什么优惠",
+      "intent": "query_promotion",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0410",
+      "query": "一言难尽",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0411",
+      "query": "我要退款，单号84637",
+      "intent": "complaint_refund",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0412",
+      "query": "这味道跟上次差太多了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0413",
+      "query": "订单75650什么时候到",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0414",
+      "query": "太贵了",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0415",
+      "query": "给我推荐一款好喝的",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0416",
+      "query": "服务态度差",
+      "intent": "complaint_service",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0417",
+      "query": "配送超时了",
+      "intent": "complaint_delivery",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0418",
+      "query": "茉莉绿茶冰块太多了",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0419",
+      "query": "我要退款",
+      "intent": "complaint_refund",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0420",
+      "query": "我要退款，单号99438",
+      "intent": "complaint_refund",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0421",
+      "query": "我要退款",
+      "intent": "complaint_refund",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0422",
+      "query": "还行吧",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0423",
+      "query": "冰沙给了细吸管怎么喝",
+      "intent": "complaint_accessory",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0424",
+      "query": "跟之前一样的",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0425",
+      "query": "跟之前一样的",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0426",
+      "query": "这味道跟上次差太多了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0427",
+      "query": "订单43465什么时候到",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0428",
+      "query": "太贵了",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0429",
+      "query": "太坑了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0430",
+      "query": "无糖的好喝吗",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0431",
+      "query": "上次买的杨枝甘露这次怎么没了",
+      "intent": "query_menu",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0432",
+      "query": "订单82760什么时候到",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0433",
+      "query": "今天第二杯半价吗",
+      "intent": "query_promotion",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0434",
+      "query": "呵呵，你们这服务绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0435",
+      "query": "芋泥波波冰块太多了",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0436",
+      "query": "这也太离谱了吧",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0437",
+      "query": "我要退款",
+      "intent": "complaint_refund",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0438",
+      "query": "冰沙少糖少冰多少钱",
+      "intent": "query_price",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0439",
+      "query": "冰沙给了细吸管怎么喝",
+      "intent": "complaint_accessory",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0440",
+      "query": "这味道跟上次差太多了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0441",
+      "query": "帮我查一下我上次点的是什么",
+      "intent": "query_order",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0442",
+      "query": "你们家最推荐哪款",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0443",
+      "query": "多肉葡萄少糖少冰多少钱",
+      "intent": "query_price",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0444",
+      "query": "芋泥波波多少钱",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0445",
+      "query": "我要退款，单号77380",
+      "intent": "complaint_refund",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0446",
+      "query": "你们家最推荐哪款",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0447",
+      "query": "订单74115什么时候到",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0448",
+      "query": "中南那家几点关门",
+      "intent": "query_hours",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0449",
+      "query": "服务态度差",
+      "intent": "complaint_service",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0450",
+      "query": "服务态度差",
+      "intent": "complaint_service",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0451",
+      "query": "一言难尽",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0452",
+      "query": "来一杯杨枝甘露",
+      "intent": "place_order",
+      "difficulty": "easy",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0453",
+      "query": "武广附近有店吗",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0454",
+      "query": "幽兰拿铁冰块太多了",
+      "intent": "complaint_quantity",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0455",
+      "query": "多肉葡萄多少钱",
+      "intent": "query_price",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0456",
+      "query": "跟之前一样的",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0457",
+      "query": "无糖的好喝吗",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0458",
+      "query": "武广附近有店吗",
+      "intent": "query_store",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0459",
+      "query": "太坑了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0460",
+      "query": "今天第二杯半价吗",
+      "intent": "query_promotion",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0461",
+      "query": "给我推荐一款好喝的",
+      "intent": "query_recommend",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0462",
+      "query": "几点关门",
+      "intent": "query_hours",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0463",
+      "query": "配送超时了",
+      "intent": "complaint_delivery",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0464",
+      "query": "来一杯冰沙",
+      "intent": "place_order",
+      "difficulty": "easy",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0465",
+      "query": "还行吧",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0466",
+      "query": "这个茉莉绿茶也太甜了吧",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0467",
+      "query": "配送超时了",
+      "intent": "complaint_delivery",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0468",
+      "query": "订单79659什么时候到",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0469",
+      "query": "帮我查一下我上次点的是什么",
+      "intent": "query_order",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0470",
+      "query": "呵呵，你们这服务绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0471",
+      "query": "超时40分钟，打电话还没人接",
+      "intent": "complaint_delivery",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0472",
+      "query": "芋泥波波料太少了，别的店都满满一碗",
+      "intent": "complaint_quantity",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0473",
+      "query": "订单50241什么时候到",
+      "intent": "query_order",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0474",
+      "query": "中南那家几点关门",
+      "intent": "query_hours",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0475",
+      "query": "帮我查一下我上次点的是什么",
+      "intent": "query_order",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0476",
+      "query": "呵呵，这包装也是绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0477",
+      "query": "可以加珍珠吗",
+      "intent": "query_customize",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0478",
+      "query": "菜单发一下",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0479",
+      "query": "呵呵，你们这服务绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0480",
+      "query": "杨枝甘露太酸了，跟上次喝的不一样",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0481",
+      "query": "菜单发一下",
+      "intent": "query_menu",
+      "difficulty": "easy",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0482",
+      "query": "太贵了",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0483",
+      "query": "呵呵，你们这服务绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0484",
+      "query": "跟之前一样的",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0485",
+      "query": "配送超时了",
+      "intent": "complaint_delivery",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0486",
+      "query": "呵呵，你们这服务绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0487",
+      "query": "服务态度差",
+      "intent": "complaint_service",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0488",
+      "query": "帮我查一下我上次点的是什么",
+      "intent": "query_order",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0489",
+      "query": "我要退款",
+      "intent": "complaint_refund",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0490",
+      "query": "太贵了",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0491",
+      "query": "那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0492",
+      "query": "你们是不是换配方了",
+      "intent": "complaint_taste",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0493",
+      "query": "幽兰拿铁太酸了，跟上次喝的不一样",
+      "intent": "complaint_taste",
+      "difficulty": "medium",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0494",
+      "query": "可以加珍珠吗",
+      "intent": "query_customize",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0495",
+      "query": "无糖的好喝吗",
+      "intent": "query_recommend",
+      "difficulty": "medium",
+      "category": "查询"
+    },
+    {
+      "id": "EVAL-0496",
+      "query": "那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0497",
+      "query": "呵呵，这包装也是绝了",
+      "intent": "complaint_sarcasm",
+      "difficulty": "hard",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0498",
+      "query": "那个",
+      "intent": "unclear",
+      "difficulty": "hard",
+      "category": "其他"
+    },
+    {
+      "id": "EVAL-0499",
+      "query": "太贵了",
+      "intent": "complaint_price",
+      "difficulty": "easy",
+      "category": "投诉"
+    },
+    {
+      "id": "EVAL-0500",
+      "query": "这个茉莉绿茶也太甜了吧",
+      "intent": "complaint_taste",
+      "difficulty": "easy",
+      "category": "投诉"
+    }
+  ]
+}
