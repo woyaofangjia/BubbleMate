@@ -1,0 +1,25 @@
+{
+  "session_id": "eval-TC-045",
+  "steps": [
+    {
+      "type": "intent",
+      "timestamp": 1783697173.7016888,
+      "data": {
+        "name": "unknown",
+        "confidence": 0.9,
+        "category": "未知"
+      },
+      "retry_count": 0
+    },
+    {
+      "type": "response",
+      "timestamp": 1783697173.7016993,
+      "data": {
+        "text": "【思考】unknown\n【回复】您好，请问您有什么需要帮助的？"
+      },
+      "retry_count": 0
+    }
+  ],
+  "retry_count": 0,
+  "total_steps": 2
+}

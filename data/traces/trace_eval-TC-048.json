@@ -1,0 +1,25 @@
+{
+  "session_id": "eval-TC-048",
+  "steps": [
+    {
+      "type": "intent",
+      "timestamp": 1783697173.7030506,
+      "data": {
+        "name": "general",
+        "confidence": 0.2,
+        "category": "通用"
+      },
+      "retry_count": 0
+    },
+    {
+      "type": "response",
+      "timestamp": 1783697173.7030602,
+      "data": {
+        "text": "【思考】general\n【回复】您好，有什么可以帮助您的？"
+      },
+      "retry_count": 0
+    }
+  ],
+  "retry_count": 0,
+  "total_steps": 2
+}

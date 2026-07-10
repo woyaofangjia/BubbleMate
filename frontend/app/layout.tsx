@@ -5,6 +5,9 @@ import { RoleProvider } from '@/context/RoleContext';
 export const metadata: Metadata = {
   title: 'BubbleMate - 智能奶茶店客服',
   description: '武汉大学周边奶茶店智能客服Agent',
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({

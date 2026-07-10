@@ -1,0 +1,25 @@
+{
+  "session_id": "eval-TC-034",
+  "steps": [
+    {
+      "type": "intent",
+      "timestamp": 1783697173.700328,
+      "data": {
+        "name": "complaint_sarcasm",
+        "confidence": 0.8500000000000001,
+        "category": "讽刺投诉"
+      },
+      "retry_count": 0
+    },
+    {
+      "type": "response",
+      "timestamp": 1783697173.7003365,
+      "data": {
+        "text": "【思考】complaint_sarcasm\n【回复】非常抱歉给您带来不好的体验，请问具体是什么问题？ 补偿方案：请告知具体问题"
+      },
+      "retry_count": 0
+    }
+  ],
+  "retry_count": 0,
+  "total_steps": 2
+}

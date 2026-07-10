@@ -1,0 +1,25 @@
+{
+  "session_id": "eval-TC-017",
+  "steps": [
+    {
+      "type": "intent",
+      "timestamp": 1783697173.6922493,
+      "data": {
+        "name": "complaint_taste_service",
+        "confidence": 0.6000000000000001,
+        "category": "口感+服务"
+      },
+      "retry_count": 0
+    },
+    {
+      "type": "response",
+      "timestamp": 1783697173.692262,
+      "data": {
+        "text": "【思考】complaint_taste_service\n【回复】非常抱歉您对口味和服务都不满意，我们会全面整改。 补偿方案：免费重做+优惠券"
+      },
+      "retry_count": 0
+    }
+  ],
+  "retry_count": 0,
+  "total_steps": 2
+}

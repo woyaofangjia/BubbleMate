@@ -173,6 +173,7 @@ class BubbleMateEvaluator:
                 "query_menu": ["query_menu"],
                 "query_recommend": ["query_menu"],
                 "query_order": ["query_order"],
+                "query_refund": ["query_order"],
                 "complaint_taste": ["log_complaint"],
                 "complaint_quantity": ["log_complaint"],
                 "complaint_taste_service": ["log_complaint"],

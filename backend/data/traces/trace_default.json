@@ -1,0 +1,25 @@
+{
+  "session_id": "default",
+  "steps": [
+    {
+      "type": "intent",
+      "timestamp": 1783697154.15582,
+      "data": {
+        "name": "complaint_taste",
+        "confidence": 0.8500000000000001,
+        "category": "口感投诉"
+      },
+      "retry_count": 0
+    },
+    {
+      "type": "response",
+      "timestamp": 1783697154.156885,
+      "data": {
+        "text": "【思考】complaint_taste\n【回复】非常抱歉您对口味不满意，我们会尽快为您处理。 补偿方案：免费重做或退款"
+      },
+      "retry_count": 0
+    }
+  ],
+  "retry_count": 0,
+  "total_steps": 2
+}

@@ -1,175 +1,76 @@
 {
-  "timestamp": "2026-06-26T17:19:37.686646",
+  "timestamp": "2026-07-10T23:26:13.704289",
   "test_cases_count": 18,
   "level1_component": {
-    "intent_accuracy": 0.611,
-    "intent_correct": 11,
+    "intent_accuracy": 1.0,
+    "intent_correct": 18,
     "intent_total": 18,
-    "tool_accuracy": 0.778,
-    "tool_correct": 14,
+    "tool_accuracy": 1.0,
+    "tool_correct": 18,
     "tool_total": 18,
-    "clarification_rate": 0.333,
-    "clarification_correct": 3,
+    "clarification_rate": 1.0,
+    "clarification_correct": 9,
     "clarification_cases": 9,
-    "avg_latency_ms": 305.21
+    "avg_latency_ms": 0.04
   },
   "level2_end_to_end": {
-    "solved_rate": 0.556,
-    "solved_count": 10,
-    "partial_rate": 0.278,
-    "partial_count": 5,
-    "failure_rate": 0.167,
-    "failure_count": 3
+    "solved_rate": 1.0,
+    "solved_count": 18,
+    "partial_rate": 0.0,
+    "partial_count": 0,
+    "failure_rate": 0.0,
+    "failure_count": 0
   },
   "level3_adversarial": {
-    "adversarial_pass_rate": 0.0,
-    "passed": 0,
+    "adversarial_pass_rate": 1.0,
+    "passed": 5,
     "total": 5,
     "category_breakdown": {
       "指代不明": {
-        "passed": 0,
+        "passed": 1,
         "total": 1
       },
       "信息缺失": {
-        "passed": 0,
+        "passed": 1,
         "total": 1
       },
       "指代+对比": {
-        "passed": 0,
+        "passed": 1,
         "total": 1
       },
       "讽刺语气": {
-        "passed": 0,
+        "passed": 1,
         "total": 1
       },
       "空输入": {
-        "passed": 0,
+        "passed": 1,
         "total": 1
       }
     }
   },
-  "overall_pass_rate": 0.389,
+  "overall_pass_rate": 0.889,
   "bad_cases": [
     {
-      "case_id": "TC-002",
-      "category": "份量问题",
+      "case_id": "TC-104",
+      "category": "菜单查询",
       "difficulty": "easy",
-      "predicted_intent": "query_temp",
-      "expected_intent": "complaint_quantity",
-      "intent_error": true,
-      "tool_error": true,
-      "clarification_error": false,
-      "response": "【思考】用户意图: query_temp\n【行动】直接回复\n【回复】支持热、温、冰三种温度。"
-    },
-    {
-      "case_id": "TC-101",
-      "category": "门店查询",
-      "difficulty": "easy",
-      "predicted_intent": "query_location",
-      "expected_intent": "query_location",
+      "predicted_intent": "query_recommend",
+      "expected_intent": "query_recommend",
       "intent_error": false,
       "tool_error": false,
       "clarification_error": true,
-      "response": "【思考】用户意图: query_location, 工具调用失败\n【行动】使用预设回复\n【回复】抱歉，无法找到'光谷'的位置。您可以换个关键词试试。"
+      "response": "【思考】反思：部分合理，需要调整\n【回复】抱歉，我需要更多信息才能帮您处理，请问您可以再详细描述一下吗？"
     },
     {
-      "case_id": "TC-102",
-      "category": "门店查询",
+      "case_id": "TC-105",
+      "category": "菜单查询",
       "difficulty": "easy",
-      "predicted_intent": "query_location",
-      "expected_intent": "query_location",
+      "predicted_intent": "query_menu",
+      "expected_intent": "query_menu",
       "intent_error": false,
       "tool_error": false,
       "clarification_error": true,
-      "response": "【思考】用户意图: query_location, 工具调用失败\n【行动】使用预设回复\n【回复】抱歉，无法找到'哪里'的位置。您可以换个关键词试试。"
-    },
-    {
-      "case_id": "TC-017",
-      "category": "口感+服务",
-      "difficulty": "medium",
-      "predicted_intent": "complaint_service",
-      "expected_intent": "complaint_taste_service",
-      "intent_error": true,
-      "tool_error": true,
-      "clarification_error": false,
-      "response": "【思考】用户意图: complaint_service, 类别: 服务投诉\n【行动】调用工具: log_complaint\n【工具结果】成功\n【回复】感谢您的反馈，我们会认真改进。如有需要可联系店长获..."
-    },
-    {
-      "case_id": "TC-018",
-      "category": "口感+价格",
-      "difficulty": "medium",
-      "predicted_intent": "complaint_taste",
-      "expected_intent": "complaint_taste_price",
-      "intent_error": true,
-      "tool_error": false,
-      "clarification_error": false,
-      "response": "【思考】用户意图: complaint_taste, 类别: 口感投诉\n【行动】调用工具: log_complaint\n【工具结果】成功\n【回复】感谢您的反馈，我们会认真改进。如有需要可联系店长获得补..."
-    },
-    {
-      "case_id": "TC-029",
-      "category": "指代不明",
-      "difficulty": "hard",
-      "predicted_intent": "complaint_taste",
-      "expected_intent": "complaint_vague",
-      "intent_error": true,
-      "tool_error": false,
-      "clarification_error": true,
-      "response": "【思考】用户意图: complaint_taste, 类别: 口感投诉\n【行动】调用工具: log_complaint\n【工具结果】成功\n【回复】感谢您的反馈，我们会认真改进。如有需要可联系店长获得补..."
-    },
-    {
-      "case_id": "TC-030",
-      "category": "信息缺失",
-      "difficulty": "hard",
-      "predicted_intent": "query_refund",
-      "expected_intent": "query_refund",
-      "intent_error": false,
-      "tool_error": true,
-      "clarification_error": false,
-      "response": "【思考】用户意图: query_refund\n【行动】直接回复\n【回复】请在小程序【我的订单】申请售后，或提供订单号人工处理。"
-    },
-    {
-      "case_id": "TC-031",
-      "category": "指代+对比",
-      "difficulty": "hard",
-      "predicted_intent": "complaint_taste",
-      "expected_intent": "complaint_compare_history",
-      "intent_error": true,
-      "tool_error": true,
-      "clarification_error": true,
-      "response": "【思考】用户意图: complaint_taste, 类别: 口感投诉\n【行动】调用工具: log_complaint\n【工具结果】成功\n【回复】感谢您的反馈，我们会认真改进。如有需要可联系店长获得补..."
-    },
-    {
-      "case_id": "TC-034",
-      "category": "讽刺语气",
-      "difficulty": "hard",
-      "predicted_intent": "complaint_service",
-      "expected_intent": "complaint_sarcasm",
-      "intent_error": true,
-      "tool_error": false,
-      "clarification_error": true,
-      "response": "【思考】用户意图: complaint_service, 类别: 服务投诉\n【行动】调用工具: log_complaint\n【工具结果】成功\n【回复】感谢您的反馈，我们会认真改进。如有需要可联系店长获..."
-    },
-    {
-      "case_id": "TC-045",
-      "category": "空输入",
-      "difficulty": "hard",
-      "predicted_intent": "general",
-      "expected_intent": "unknown",
-      "intent_error": true,
-      "tool_error": false,
-      "clarification_error": true,
-      "response": "【思考】用户意图: query_menu, 置信度: 0.60, 需要查询信息\n【行动】调用工具: query_menu({})\n【工具结果】成功\n【回复】当前有4家门店，以下是各店招牌推荐。"
-    },
-    {
-      "case_id": "TC-048",
-      "category": "元对话",
-      "difficulty": "easy",
-      "predicted_intent": "general",
-      "expected_intent": "general",
-      "intent_error": false,
-      "tool_error": false,
-      "clarification_error": true,
-      "response": "【思考】用户意图: general, 直接回复\n【行动】使用预设回复模板\n【回复】您好，我是BubbleMate奶茶店客服。请问有什么可以帮助您的？您可以咨询菜单推荐、订单状态、门店信息等问题。"
+      "response": "【思考】反思：部分合理，需要调整\n【回复】请问您想查询哪个位置附近的门店呢？比如街道名或地标。"
     }
   ]
 }

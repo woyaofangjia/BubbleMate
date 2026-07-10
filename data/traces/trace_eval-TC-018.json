@@ -1,0 +1,25 @@
+{
+  "session_id": "eval-TC-018",
+  "steps": [
+    {
+      "type": "intent",
+      "timestamp": 1783697173.6945667,
+      "data": {
+        "name": "complaint_taste_price",
+        "confidence": 0.55,
+        "category": "口感+价格"
+      },
+      "retry_count": 0
+    },
+    {
+      "type": "response",
+      "timestamp": 1783697173.694575,
+      "data": {
+        "text": "【思考】complaint_taste_price\n【回复】非常抱歉您对口味和价格都不满意，我们会核实处理。 补偿方案：退款或折扣"
+      },
+      "retry_count": 0
+    }
+  ],
+  "retry_count": 0,
+  "total_steps": 2
+}

@@ -1,0 +1,25 @@
+{
+  "session_id": "eval-TC-029",
+  "steps": [
+    {
+      "type": "intent",
+      "timestamp": 1783697173.6966064,
+      "data": {
+        "name": "complaint_vague",
+        "confidence": 0.8,
+        "category": "指代不明"
+      },
+      "retry_count": 0
+    },
+    {
+      "type": "response",
+      "timestamp": 1783697173.6966145,
+      "data": {
+        "text": "【思考】complaint_vague\n【回复】抱歉，我不太理解您的意思，请问可以再详细描述一下吗？"
+      },
+      "retry_count": 0
+    }
+  ],
+  "retry_count": 0,
+  "total_steps": 2
+}

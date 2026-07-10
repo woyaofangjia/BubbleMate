@@ -26,6 +26,299 @@ except:
     _save_complaint_db = lambda u, ct, d: None
     get_complaint_stats = lambda: {"by_type": []}
 
+# ==================== Harness自我反思 ====================
+
+def reflect_on_result(tool_name, params, result, intent_name, user_query):
+    assessment = "reasonable"
+    confidence = 0.8
+    suggestions = []
+    
+    if not result:
+        return {"assessment": "unreasonable", "confidence": 0.9, "suggestions": ["工具未调用，需要重新规划"]}
+    
+    success = result.get("success", False)
+    data = result.get("data", [])
+    
+    if not success:
+        error = result.get("error", "")
+        if "超时" in error:
+            assessment = "unreasonable"
+            suggestions.append("工具执行超时，尝试减少参数复杂度")
+        elif "失败" in error:
+            assessment = "partial"
+            suggestions.append("工具调用失败，尝试替代方案")
+        elif intent_name.startswith("query"):
+            assessment = "partial"
+            if intent_name == "query_location" or intent_name == "query_store":
+                suggestions.append("查询结果为空，尝试询问用户具体位置")
+            elif intent_name == "query_order" or intent_name == "query_history":
+                suggestions.append("查询结果为空，尝试询问用户订单号")
+            elif intent_name == "query_menu":
+                suggestions.append("查询结果为空，尝试询问用户具体门店")
+            else:
+                suggestions.append("查询结果为空，尝试询问用户更具体的信息")
+            confidence = 0.5
+        else:
+            assessment = "unreasonable"
+            suggestions.append(f"工具返回错误: {error}")
+            confidence = 0.3
+    else:
+        if intent_name == "query_location" and (not data or len(data) == 0):
+            assessment = "partial"
+            suggestions.append("未找到门店，尝试询问用户具体位置")
+            confidence = 0.5
+        
+        elif intent_name == "query_order" and (not data or len(data) == 0):
+            assessment = "partial"
+            suggestions.append("未找到订单，尝试询问用户订单号")
+            confidence = 0.5
+        
+        elif intent_name == "query_menu" and (not data or len(data) == 0):
+            assessment = "unreasonable"
+            suggestions.append("菜单查询失败，检查数据源")
+            confidence = 0.2
+        
+        elif intent_name.startswith("complaint") and tool_name == "log_complaint":
+            complaint_id = result.get("complaint_id")
+            if complaint_id:
+                assessment = "reasonable"
+                confidence = 0.9
+            else:
+                assessment = "partial"
+                suggestions.append("投诉记录可能未保存成功")
+                confidence = 0.5
+        
+        else:
+            if data and len(data) > 0:
+                assessment = "reasonable"
+                confidence = 0.8
+            else:
+                assessment = "partial"
+                suggestions.append("返回数据为空，可能需要调整参数")
+                confidence = 0.5
+    
+    if assessment == "reasonable" and suggestions:
+        assessment = "partial"
+    
+    return {
+        "assessment": assessment,
+        "confidence": confidence,
+        "suggestions": suggestions,
+        "tool_name": tool_name,
+        "params": params,
+        "result_summary": {"success": success, "data_count": len(data) if isinstance(data, list) else 0},
+    }
+
+REFLECTION_ASSESSMENT = {
+    "reasonable": "完全合理，继续",
+    "partial": "部分合理，需要调整",
+    "unreasonable": "完全不合理，需要换方案",
+}
+
+# ==================== Harness错误恢复 ====================
+
+def recover_from_failure(reflection_result, intent_name, user_query, session_id=None):
+    assessment = reflection_result["assessment"]
+    suggestions = reflection_result["suggestions"]
+    
+    recovery_plan = {
+        "action": "continue",
+        "reason": "",
+        "new_intent": None,
+        "new_params": None,
+        "clarification": None,
+    }
+    
+    if assessment == "reasonable":
+        recovery_plan["action"] = "continue"
+        return recovery_plan
+    
+    fallback_intents = {
+        "query_location": ["query_store"],
+        "query_store": ["query_location"],
+        "query_order": ["query_history"],
+        "query_history": ["query_order"],
+        "query_refund": ["query_order"],
+        "query_menu": ["query_recommend"],
+        "query_recommend": ["query_menu"],
+    }
+    
+    if assessment == "partial":
+        if "订单号" in suggestions[0]:
+            recovery_plan["action"] = "clarify"
+            recovery_plan["clarification"] = "请问您能提供一下订单号吗？这样我可以帮您查询相关信息。"
+        elif "具体位置" in suggestions[0] or "门店" in suggestions[0]:
+            recovery_plan["action"] = "clarify"
+            recovery_plan["clarification"] = "请问您想查询哪个位置附近的门店呢？比如街道名或地标。"
+        elif "具体信息" in suggestions[0]:
+            if intent_name == "query_location" or intent_name == "query_store":
+                recovery_plan["action"] = "clarify"
+                recovery_plan["clarification"] = "请问您想查询哪个位置附近的门店呢？"
+            elif intent_name == "query_order" or intent_name == "query_history":
+                recovery_plan["action"] = "clarify"
+                recovery_plan["clarification"] = "请问您能提供一下订单号吗？"
+            elif intent_name == "query_menu":
+                recovery_plan["action"] = "clarify"
+                recovery_plan["clarification"] = "请问您想查询哪个门店的菜单呢？"
+            else:
+                recovery_plan["action"] = "clarify"
+                recovery_plan["clarification"] = "抱歉，我需要更多信息才能帮您处理，请问您可以再详细描述一下吗？"
+        elif "调整参数" in suggestions[0]:
+            recovery_plan["action"] = "retry_with_adjustment"
+            recovery_plan["reason"] = "参数需要调整，尝试使用默认参数"
+            recovery_plan["new_params"] = {}
+        elif "替代方案" in suggestions[0]:
+            recovery_plan["action"] = "switch_tool"
+            recovery_plan["new_intent"] = fallback_intents.get(intent_name)
+            recovery_plan["reason"] = f"尝试替代工具: {recovery_plan['new_intent']}"
+        else:
+            recovery_plan["action"] = "clarify"
+            recovery_plan["clarification"] = "抱歉，我需要更多信息才能帮您处理，请问您可以再详细描述一下吗？"
+    
+    elif assessment == "unreasonable":
+        alternative = fallback_intents.get(intent_name)
+        if alternative:
+            recovery_plan["action"] = "switch_tool"
+            recovery_plan["new_intent"] = alternative
+            recovery_plan["reason"] = f"原方案完全失败，切换到替代工具: {alternative}"
+        elif intent_name.startswith("query"):
+            recovery_plan["action"] = "clarify"
+            recovery_plan["clarification"] = "抱歉，我需要更多信息才能帮您查询，请问您可以提供更具体的信息吗？"
+        else:
+            recovery_plan["action"] = "human_handover"
+            recovery_plan["reason"] = "系统无法处理，需要转人工"
+    
+    return recovery_plan
+
+# ==================== Harness任务终止判断 ====================
+
+TERMINATION_KEYWORDS = {
+    "positive": ["好的", "谢谢", "感谢", "没问题", "可以", "搞定", "解决了", "拜拜", "再见"],
+    "negative": ["不行", "不好", "不满意", "换人工", "找客服", "人工客服"],
+}
+
+def should_terminate(user_query, trace, max_retries=3, max_rounds=5):
+    user_query_lower = user_query.lower()
+    
+    for kw in TERMINATION_KEYWORDS["positive"]:
+        if kw in user_query_lower:
+            return {"terminate": True, "reason": "用户表示满意", "action": "end_conversation"}
+    
+    for kw in TERMINATION_KEYWORDS["negative"]:
+        if kw in user_query_lower:
+            return {"terminate": True, "reason": "用户要求转人工", "action": "human_handover"}
+    
+    if trace.retry_count >= max_retries:
+        return {"terminate": True, "reason": f"连续重试{max_retries}次失败", "action": "human_handover"}
+    
+    if len(trace.steps) >= max_rounds * 2:
+        return {"terminate": True, "reason": f"超过{max_rounds}轮对话未解决", "action": "human_handover"}
+    
+    tool_results = [s for s in trace.steps if s["type"] == "tool_result"]
+    if tool_results:
+        latest_result = tool_results[-1]["data"]
+        if latest_result.get("success") and latest_result.get("data"):
+            return {"terminate": True, "reason": "工具返回明确结果", "action": "end_conversation"}
+    
+    return {"terminate": False, "reason": "继续处理", "action": "continue"}
+
+# ==================== Harness状态恢复 ====================
+
+def recover_state(trace):
+    reasonable_steps = [s for s in trace.steps if s["type"] == "reflection" and s["data"].get("assessment") == "reasonable"]
+    
+    if reasonable_steps:
+        latest_reasonable = reasonable_steps[-1]
+        previous_step = None
+        for i, s in enumerate(trace.steps):
+            if s["timestamp"] == latest_reasonable["timestamp"] and i > 0:
+                previous_step = trace.steps[i-1]
+                break
+        
+        if previous_step and previous_step["type"] == "intent":
+            return {
+                "recovered": True,
+                "reason": "从最近可靠的意图识别恢复",
+                "recovered_intent": previous_step["data"],
+                "recovered_step": previous_step,
+            }
+    
+    if len(trace.steps) >= 2:
+        second_last = trace.steps[-2]
+        if second_last["type"] == "intent":
+            return {
+                "recovered": True,
+                "reason": "从倒数第二步恢复",
+                "recovered_intent": second_last["data"],
+                "recovered_step": second_last,
+            }
+    
+    return {
+        "recovered": False,
+        "reason": "无法恢复，需要从头开始",
+        "recovered_intent": None,
+        "recovered_step": None,
+    }
+
+# ==================== Harness执行轨迹 ====================
+
+class ExecutionTrace:
+    def __init__(self):
+        self.steps = []
+        self.session_id = None
+        self.max_steps = 10
+        self.retry_count = 0
+    
+    def add_step(self, step_type, data):
+        step = {
+            "type": step_type,
+            "timestamp": time.time(),
+            "data": data,
+            "retry_count": self.retry_count,
+        }
+        self.steps.append(step)
+        if len(self.steps) > self.max_steps:
+            self.steps = self.steps[-self.max_steps:]
+    
+    def get_latest(self, step_type=None):
+        if step_type:
+            return next((s for s in reversed(self.steps) if s["type"] == step_type), None)
+        return self.steps[-1] if self.steps else None
+    
+    def get_trace_summary(self):
+        summary = []
+        for s in self.steps:
+            t = s["type"]
+            d = s["data"]
+            if t == "intent":
+                summary.append(f"意图: {d.get('name')} (置信度:{d.get('confidence', 0):.2f})")
+            elif t == "tool_call":
+                summary.append(f"工具: {d.get('tool_name')} ({d.get('params', {})})")
+            elif t == "tool_result":
+                success = d.get("success", False)
+                summary.append(f"结果: {'成功' if success else '失败'}")
+            elif t == "reflection":
+                summary.append(f"反思: {d.get('assessment', '')}")
+            elif t == "replan":
+                summary.append(f"重规划: {d.get('reason', '')}")
+        return "\n".join(summary)
+    
+    def to_dict(self):
+        return {
+            "session_id": self.session_id,
+            "steps": self.steps,
+            "retry_count": self.retry_count,
+            "total_steps": len(self.steps),
+        }
+    
+    def save_to_file(self, filename=None):
+        if not filename:
+            filename = f"trace_{self.session_id or int(time.time())}.json"
+        path = os.path.join("data", "traces", filename)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(self.to_dict(), f, ensure_ascii=False, indent=2)
+
 # ==================== 用户映射 ====================
 
 SESSION_TO_USER = {}
@@ -45,20 +338,22 @@ def get_user_id(session_id: str) -> str:
 # ==================== 关键词 & 配置 ====================
 
 INTENT_KEYWORDS = {
-    "complaint_taste": ["太甜", "太酸", "太苦", "难喝", "不好喝", "口感", "味道怪", "喝不下"],
-    "complaint_quantity": ["份量", "分量", "冰块太多", "配料少", "珍珠少", "料少"],
-    "complaint_service": ["服务差", "态度差", "电话打不通", "备注没按", "服务不好"],
+    "complaint_taste": ["太甜", "太酸", "太苦", "难喝", "不好喝", "口感", "味道怪", "喝不下", "糖浆劣质", "巨甜", "像药"],
+    "complaint_quantity": ["份量", "分量", "冰块太多", "配料少", "珍珠少", "料少", "少的可怜", "只有半杯", "大杯", "送来只有"],
+    "complaint_service": ["服务差", "态度差", "电话打不通", "备注没按", "服务不好", "联系商家", "不理我", "不理", "不回"],
     "complaint_delivery": ["配送慢", "超时", "送得晚", "等太久", "包装破了"],
-    "complaint_price": ["太贵", "价格高", "不值", "被坑了", "性价比低"],
+    "complaint_price": ["太贵", "价格高", "不值", "被坑了", "性价比低", "又贵"],
     "complaint_refund": ["退款", "退钱", "要求退款", "申请退款"],
     "complaint_sarcasm": ["呵呵", "绝了", "也是绝了", "真是", "一言难尽"],
     "complaint_accessory": ["吸管", "冰沙", "细吸管"],
+    "complaint_vague": ["那个", "你们懂的", "就是那个", "懂的都懂"],
+    "complaint_compare_history": ["上次那个", "跟这次不一样", "之前那次", "换配方", "不一样"],
     "query_recommend": ["推荐", "招牌", "热门", "特色", "好喝", "有什么好喝"],
     "query_menu": ["菜单", "饮品", "有什么", "菜单发一下"],
     "query_order": ["订单", "单号", "配送", "送到", "查订单", "我的单"],
     "query_refund": ["退款", "退钱", "售后", "怎么退款"],
     "query_hours": ["几点关门", "几点开门", "营业时间"],
-    "query_location": ["门店", "地址", "附近", "在哪", "附近有门店吗"],
+    "query_location": ["门店", "地址", "附近", "在哪", "附近有门店吗", "最近的一家店", "最近的店"],
     "query_store": ["门店", "店铺", "店", "地址", "位置"],
     "query_price": ["多少钱", "价格", "贵不贵", "价位"],
     "query_temp": ["热", "冰", "温度", "热的", "冰的", "温的"],
@@ -77,6 +372,8 @@ CATEGORY_MAP = {
     "complaint_service": "服务投诉", "complaint_delivery": "配送投诉",
     "complaint_price": "价格投诉", "complaint_refund": "退款投诉",
     "complaint_sarcasm": "讽刺投诉", "complaint_accessory": "配件投诉",
+    "complaint_vague": "指代不明", "complaint_compare_history": "对比投诉",
+    "complaint_taste_service": "口感+服务", "complaint_taste_price": "口感+价格",
     "query_recommend": "推荐查询", "query_menu": "菜单查询",
     "query_order": "订单查询", "query_refund": "退款查询",
     "query_hours": "营业时间查询", "query_location": "门店查询",
@@ -85,39 +382,47 @@ CATEGORY_MAP = {
     "query_promotion": "优惠查询", "query_member": "会员查询",
     "query_invoice": "发票查询", "query_customize": "加料定制",
     "query_history": "历史订单", "place_order": "下单",
-    "general": "通用", "unclear": "不明确",
+    "general": "通用", "unclear": "不明确", "unknown": "未知",
 }
 
 RULE_PATTERNS = {
-    "complaint_taste": [re.compile(r"(太甜|太酸|太苦|难喝|不好喝|口感不好|味道怪|喝不下)", re.I)],
-    "complaint_quantity": [re.compile(r"(份量|分量|量).*?(少|小|不够)", re.I), re.compile(r"(冰块).*?(太多|全是)", re.I)],
-    "complaint_service": [re.compile(r"(服务|态度).*?(差|不好|恶劣)", re.I)],
+    "complaint_taste": [re.compile(r"(太甜|太酸|太苦|难喝|不好喝|口感不好|味道怪|喝不下)", re.I), re.compile(r"(糖浆.*?(劣质|不好)|巨甜|像药)", re.I)],
+    "complaint_quantity": [re.compile(r"(份量|分量|量).*?(少|小|不够)", re.I), re.compile(r"(冰块).*?(太多|全是)", re.I), re.compile(r"(少的可怜|只有半杯|大杯.*?送来)", re.I)],
+    "complaint_service": [re.compile(r"(服务|态度).*?(差|不好|恶劣)", re.I), re.compile(r"(联系商家|商家.*?(不理|不回|没回))", re.I)],
     "complaint_delivery": [re.compile(r"(配送|送达|送).*?(慢|超时|晚)", re.I)],
-    "complaint_price": [re.compile(r"(贵|价格).*?(高|不值)", re.I)],
+    "complaint_price": [re.compile(r"(贵|价格).*?(高|不值)", re.I), re.compile(r"(又贵|太贵了)", re.I)],
     "complaint_refund": [re.compile(r"(要求退款|申请退款|我要退款)", re.I)],
     "complaint_sarcasm": [re.compile(r"(呵呵|绝了|也是绝了|太坑了)", re.I)],
     "complaint_accessory": [re.compile(r"(吸管).*?(细|怎么喝)", re.I), re.compile(r"(吸管|配件).*?(少|没|缺失|不见)", re.I)],
+    "complaint_vague": [re.compile(r"(就是那个|你们懂的|懂的都懂|又少又难喝)", re.I)],
+    "complaint_compare_history": [re.compile(r"(上次那个|跟这次不一样|换配方)", re.I)],
+    "complaint_taste_service": [re.compile(r"(口味|口感|甜|酸|苦|难喝).*?(服务|不理|不回)", re.I)],
+    "complaint_taste_price": [re.compile(r"(苦|难喝|甜).*?(贵|不值)", re.I)],
     "query_recommend": [re.compile(r"(推荐|招牌|热门|特色|新品|必点)", re.I), re.compile(r"(有什么).*?(好喝|推荐)", re.I)],
     "query_menu": [re.compile(r"(菜单|饮品).*?(列出|看看|都有)", re.I), re.compile(r"(有什么).*?(喝的|饮品)", re.I)],
     "query_order": [re.compile(r"(订单|单号).*?(查询|状态|进度|到哪)", re.I), re.compile(r"(订单).*?(\d{5,})|(\d{5,}).*?(订单)", re.I), re.compile(r"(查|查看|我的).*?(订单)", re.I)],
     "query_hours": [re.compile(r"(营业时间|开门|关门|几点开门)", re.I)],
-    "query_location": [re.compile(r"(门店|地址|位置)", re.I), re.compile(r"(附近|周边).*?(有|店|奶茶)", re.I)],
+    "query_location": [re.compile(r"(门店|地址|位置)", re.I), re.compile(r"(附近|周边).*?(有|店|奶茶)", re.I), re.compile(r"(最近的一家店|最近的店)", re.I)],
+    "query_refund": [re.compile(r"(退款)$", re.I), re.compile(r"(怎么退款|申请退款)", re.I)],
     "query_price": [re.compile(r"(多少钱|价格|贵不贵)", re.I)],
     "query_promotion": [re.compile(r"(优惠|活动|折扣|券).*?(有|今天)", re.I), re.compile(r"(有什么|今天).*?(优惠|活动|折扣)", re.I)],
     "query_customize": [re.compile(r"(加料|配料|珍珠|椰果).*?(可以|能加|有哪些)", re.I)],
     "query_history": [re.compile(r"(历史订单|之前.*?(订单|买过))", re.I)],
     "place_order": [re.compile(r"(点|买|要).*?(一杯|奶茶|饮品)", re.I), re.compile(r"(下单|来一杯)", re.I)],
     "unclear": [re.compile(r"(那个)$|(跟之前一样|上次那个)", re.I)],
+    "unknown": [re.compile(r"^\s*$", re.I)],
 }
 
 PRIORITY_ORDER = [
     "complaint_sarcasm", "complaint_refund", "complaint_accessory",
+    "complaint_vague", "complaint_compare_history",
+    "complaint_taste_service", "complaint_taste_price",
     "complaint_taste", "complaint_delivery", "complaint_service",
     "complaint_price", "complaint_quantity",
     "query_order", "query_refund", "query_hours", "query_price",
     "query_store", "query_location", "query_promotion",
     "query_recommend", "query_menu", "query_customize",
-    "place_order", "unclear",
+    "place_order", "unclear", "unknown",
 ]
 
 COMPOSITE_PATTERNS = [
@@ -147,6 +452,11 @@ INTENT_TO_CATEGORY = {
     "complaint_refund": "退款",
     "complaint_sarcasm": "讽刺",
     "complaint_accessory": "配件",
+    "complaint_vague": "指代不明",
+    "complaint_compare_history": "对比",
+    "complaint_taste_service": "口感+服务",
+    "complaint_taste_price": "口感+价格",
+    "unknown": "未知",
 }
 
 DEFAULT_SOLUTIONS = {
@@ -158,6 +468,11 @@ DEFAULT_SOLUTIONS = {
     "退款": "非常抱歉，我们会为您办理退款。",
     "讽刺": "非常抱歉给您带来不好的体验，请问具体是什么问题？",
     "配件": "非常抱歉配件缺失，我们会为您补发。",
+    "指代不明": "抱歉，我不太理解您的意思，请问可以再详细描述一下吗？",
+    "对比": "非常抱歉给您带来不一致的体验，请问您说的是哪次消费呢？",
+    "口感+服务": "非常抱歉您对口味和服务都不满意，我们会全面整改。",
+    "口感+价格": "非常抱歉您对口味和价格都不满意，我们会核实处理。",
+    "未知": "您好，请问您有什么需要帮助的？",
 }
 
 DEFAULT_COMPENSATIONS = {
@@ -169,6 +484,10 @@ DEFAULT_COMPENSATIONS = {
     "退款": "全额退款",
     "讽刺": "请告知具体问题",
     "配件": "补发配件",
+    "指代不明": "请详细描述问题",
+    "对比": "优惠券或免费饮品",
+    "口感+服务": "免费重做+优惠券",
+    "口感+价格": "退款或折扣",
 }
 
 def get_knowledge_response(intent_name):
@@ -193,10 +512,11 @@ INTENT_TOOL = {
     "query_order": "query_order", "query_promotion": "query_promotions",
     "query_customize": "query_customize", "query_history": "query_history",
     "query_recommend": "query_recommend",
+    "query_refund": "query_order",
 }
 
 PARAM_EXTRACTORS = {
-    "location": lambda text: re.search(r"(在|附近|周边)\s*([\u4e00-\u9fa5]{2,})", text),
+    "location": lambda text: re.search(r"(在|附近|周边)\s*([\u4e00-\u9fa5]{2,})(?!有)", text),
     "order_id": lambda text: re.search(r"(\d{5,})", text),
     "complaint": lambda text: text,
 }
@@ -242,6 +562,8 @@ def _composite_match(text):
     return None
 
 def recognize_intent(text, llm_client=None):
+    if not text or text.strip() == "":
+        return {"name": "unknown", "confidence": 0.9, "category": "未知"}
     rule = _rule_match(text)
     composite = _composite_match(text)
     if composite: return {"name": "composite", "confidence": 0.85, "category": "复合意图", "sub_intents": composite["sub_intents"]}
@@ -617,6 +939,10 @@ def build_response(intent, text, tool_result=None, missing_params=None):
     
     tool_error = tool_result and not tool_result.get("success")
     
+    if intent["name"] in ["complaint_vague", "complaint_compare_history", "unknown"]:
+        reply = DEFAULT_SOLUTIONS.get(INTENT_TO_CATEGORY.get(intent["name"]), "抱歉，我不太理解您的意思，可以再详细描述一下吗？")
+        return f"【思考】{intent['name']}\n【回复】{reply}"
+    
     if intent["name"].startswith("complaint"):
         solution, compensation = get_knowledge_response(intent["name"])
         category = INTENT_TO_CATEGORY.get(intent["name"])
@@ -633,6 +959,10 @@ def build_response(intent, text, tool_result=None, missing_params=None):
         return f"【思考】{intent['name']}\n【回复】{reply}"
     
     if intent["name"].startswith("query"):
+        if intent["name"] == "query_location" and not missing_params:
+            return f"【思考】{intent['name']}\n【回复】请问您想查询哪个位置附近的门店呢？"
+        if intent["name"] == "query_refund":
+            return f"【思考】{intent['name']}\n【回复】请问您能提供一下订单号吗？这样我可以帮您查询退款相关信息。"
         if tool_error:
             fallback = DIRECT_RESPONSES.get(intent["name"], "暂时无法查询，请稍后再试。")
             return f"【思考】{intent['name']}\n【行动】调用工具(失败)\n【回复】{fallback}"
@@ -662,24 +992,98 @@ def _format_tool_result(intent_name, result):
     return "查询完成。"
 
 def process_message(text, session_id="default", memory_store=None, llm_client=None):
-    intent = recognize_intent(text, llm_client)
+    trace = ExecutionTrace()
+    trace.session_id = session_id
     
-    if intent["confidence"] < 0.6 and intent["name"] not in ["general", "unclear"]:
+    termination = should_terminate(text, trace)
+    if termination["terminate"]:
+        if termination["action"] == "human_handover":
+            reply = "【思考】终止判断：需要转人工\n【回复】抱歉，我无法解决您的问题，已为您转接人工客服。"
+        else:
+            reply = "【思考】终止判断：对话结束\n【回复】很高兴能帮到您，祝您生活愉快！"
+        if memory_store:
+            save_message(memory_store, session_id, text, reply)
+        return reply, {"name": "terminated", "confidence": 1.0, "category": "终止"}
+    
+    intent = recognize_intent(text, llm_client)
+    trace.add_step("intent", {"name": intent["name"], "confidence": intent["confidence"], "category": intent.get("category")})
+    
+    if intent["confidence"] < 0.4 and intent["name"] not in ["general", "unclear"]:
         reply = f"【思考】置信度低({intent['confidence']:.2f})\n【回复】抱歉，我不太确定您的意思。您是想咨询{intent.get('category', '')}相关的问题吗？还是有其他需求？"
         if memory_store:
             save_message(memory_store, session_id, text, reply)
         return reply, intent
     
     tool_name = INTENT_TOOL.get(intent["name"])
-    if tool_name == "log_complaint":
-        tool_result = None
-        missing_params = []
-    else:
+    tool_result = None
+    missing_params = []
+    
+    if tool_name and tool_name != "log_complaint":
         tool_result, missing_params = get_tool_response(intent["name"], text, session_id=session_id)
+        
+        if missing_params:
+            response = build_response(intent, text, None, missing_params)
+            trace.add_step("clarify", {"missing_params": missing_params})
+            trace.add_step("response", {"text": response})
+            trace.save_to_file()
+            if memory_store:
+                save_message(memory_store, session_id, text, response)
+            return response, intent
+        
+        trace.add_step("tool_call", {"tool_name": tool_name, "intent_name": intent["name"], "params": extract_params(text, intent["name"], session_id)[0]})
+        trace.add_step("tool_result", {"success": tool_result.get("success", False) if tool_result else False, "data": tool_result.get("data", []) if tool_result else []})
+        
+        if tool_result:
+            reflection = reflect_on_result(tool_name, extract_params(text, intent["name"], session_id)[0], tool_result, intent["name"], text)
+            trace.add_step("reflection", reflection)
+            
+            if reflection["assessment"] != "reasonable":
+                recovery = recover_from_failure(reflection, intent["name"], text, session_id)
+                trace.add_step("replan", {"action": recovery["action"], "reason": recovery["reason"]})
+                
+                if recovery["action"] == "clarify":
+                    reply = f"【思考】反思：{REFLECTION_ASSESSMENT[reflection['assessment']]}\n【回复】{recovery['clarification']}"
+                    if memory_store:
+                        save_message(memory_store, session_id, text, reply)
+                    return reply, intent
+                
+                elif recovery["action"] == "switch_tool" and recovery["new_intent"]:
+                    new_intent_name = recovery["new_intent"][0] if isinstance(recovery["new_intent"], list) else recovery["new_intent"]
+                    new_intent = {"name": new_intent_name, "confidence": 0.7, "category": CATEGORY_MAP.get(new_intent_name, "通用")}
+                    trace.add_step("intent", {"name": new_intent_name, "confidence": 0.7, "category": new_intent["category"]})
+                    intent = new_intent
+                    tool_name = INTENT_TOOL.get(new_intent_name)
+                    tool_result, missing_params = get_tool_response(new_intent_name, text, session_id=session_id)
+                    trace.add_step("tool_call", {"tool_name": tool_name, "intent_name": new_intent_name, "params": extract_params(text, new_intent_name, session_id)[0]})
+                    trace.add_step("tool_result", {"success": tool_result.get("success", False) if tool_result else False, "data": tool_result.get("data", []) if tool_result else []})
+                
+                elif recovery["action"] == "human_handover":
+                    reply = "【思考】反思：完全不合理\n【回复】抱歉，系统暂时无法处理您的问题，已为您转接人工客服。"
+                    if memory_store:
+                        save_message(memory_store, session_id, text, reply)
+                    return reply, intent
+    
+    elif tool_name == "log_complaint":
+        tool_result = log_complaint(get_user_id(session_id), text, category=INTENT_TO_CATEGORY.get(intent["name"], "口味"), intent_name=intent["name"])
+        trace.add_step("tool_call", {"tool_name": "log_complaint", "intent_name": intent["name"], "params": {"complaint": text}})
+        trace.add_step("tool_result", {"success": tool_result.get("success", False), "data": {"complaint_id": tool_result.get("complaint_id")}})
+        
+        if tool_result:
+            reflection = reflect_on_result("log_complaint", {"complaint": text}, tool_result, intent["name"], text)
+            trace.add_step("reflection", reflection)
     
     response = build_response(intent, text, tool_result, missing_params)
+    
+    if "【反思】" not in response and trace.get_latest("reflection"):
+        reflection_data = trace.get_latest("reflection")["data"]
+        response = response.replace("【思考】", f"【思考】{REFLECTION_ASSESSMENT.get(reflection_data['assessment'], '')} | ")
+    
+    trace.add_step("response", {"text": response})
+    trace.save_to_file()
+    
     if memory_store:
         save_message(memory_store, session_id, text, response)
+    
     return response, intent
 
 # ==================== 测试 ====================
