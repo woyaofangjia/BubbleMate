@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-07-10T23:26:13.704289",
+  "timestamp": "2026-07-11T00:05:38.789143",
   "test_cases_count": 18,
   "level1_component": {
     "intent_accuracy": 1.0,
@@ -9,9 +9,9 @@
     "tool_correct": 18,
     "tool_total": 18,
     "clarification_rate": 1.0,
-    "clarification_correct": 9,
-    "clarification_cases": 9,
-    "avg_latency_ms": 0.04
+    "clarification_correct": 6,
+    "clarification_cases": 6,
+    "avg_latency_ms": 0.05
   },
   "level2_end_to_end": {
     "solved_rate": 1.0,
@@ -48,29 +48,6 @@
       }
     }
   },
-  "overall_pass_rate": 0.889,
-  "bad_cases": [
-    {
-      "case_id": "TC-104",
-      "category": "菜单查询",
-      "difficulty": "easy",
-      "predicted_intent": "query_recommend",
-      "expected_intent": "query_recommend",
-      "intent_error": false,
-      "tool_error": false,
-      "clarification_error": true,
-      "response": "【思考】反思：部分合理，需要调整\n【回复】抱歉，我需要更多信息才能帮您处理，请问您可以再详细描述一下吗？"
-    },
-    {
-      "case_id": "TC-105",
-      "category": "菜单查询",
-      "difficulty": "easy",
-      "predicted_intent": "query_menu",
-      "expected_intent": "query_menu",
-      "intent_error": false,
-      "tool_error": false,
-      "clarification_error": true,
-      "response": "【思考】反思：部分合理，需要调整\n【回复】请问您想查询哪个位置附近的门店呢？比如街道名或地标。"
-    }
-  ]
+  "overall_pass_rate": 1.0,
+  "bad_cases": []
 }

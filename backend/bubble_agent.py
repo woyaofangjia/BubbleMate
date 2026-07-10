@@ -314,7 +314,8 @@ class ExecutionTrace:
     def save_to_file(self, filename=None):
         if not filename:
             filename = f"trace_{self.session_id or int(time.time())}.json"
-        path = os.path.join("data", "traces", filename)
+        root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        path = os.path.join(root_dir, "data", "traces", filename)
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w", encoding="utf-8") as f:
             json.dump(self.to_dict(), f, ensure_ascii=False, indent=2)
@@ -516,8 +517,8 @@ INTENT_TOOL = {
 }
 
 PARAM_EXTRACTORS = {
-    "location": lambda text: re.search(r"(在|附近|周边)\s*([\u4e00-\u9fa5]{2,})(?!有)", text),
-    "order_id": lambda text: re.search(r"(\d{5,})", text),
+    "location": lambda text: re.search(r"(在|附近|周边)\s*([\u4e00-\u9fa5]{2,}广场|[\u4e00-\u9fa5]{2,}路|[\u4e00-\u9fa5]{2,}街|[\u4e00-\u9fa5]{2,}店|[\u4e00-\u9fa5]{2,}校区|[\u4e00-\u9fa5]{2,}中心|[\u4e00-\u9fa5]{2,}大厦|[\u4e00-\u9fa5]{2,}商场)", text),
+    "order_id": lambda text: re.search(r"(ORD-\d{8}-\d{3}|\d{5,})", text),
     "complaint": lambda text: text,
 }
 
@@ -606,14 +607,21 @@ def query_menu(store_name=None, keyword=None, category=None, data_dir="data"):
     if category: filtered = [i for i in filtered if i["category"] == category]
     return {"success": True, "data": filtered, "store": matched}
 
-def query_stores(location, radius=3000, data_dir="data"):
-    if not requests:
+def query_stores(location, radius=3000, data_dir=None):
+    if data_dir is None:
+        data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
+    
+    key = os.environ.get("AMAP_API_KEY", "")
+    if not key or not requests:
+        stores = _read_json(os.path.join(data_dir, "stores_mock.json"))
+        if stores:
+            return {"success": True, "data": stores, "count": len(stores)}
         return {"success": True, "data": [
             {"name": f"{location}附近门店1", "address": f"{location}街道1号"},
             {"name": f"{location}附近门店2", "address": f"{location}街道2号"},
         ], "count": 2}
+    
     url = "https://restapi.amap.com/v3/geocode/geo"
-    key = os.environ.get("AMAP_API_KEY", "")
     geocode = requests.get(url, params={"key": key, "address": location, "city": "武汉"}, timeout=5).json()
     if geocode.get("status") != "1": return {"success": False, "data": []}
     loc = geocode["geocodes"][0]["location"].split(",")
@@ -623,11 +631,20 @@ def query_stores(location, radius=3000, data_dir="data"):
     if around.get("status") != "1": return {"success": False, "data": []}
     return {"success": True, "data": around["pois"], "count": len(around["pois"])}
 
-def query_order(user_id=None, order_id=None, data_dir="data"):
+def query_order(user_id=None, order_id=None, data_dir=None):
     user_id = user_id or "default_user"
+    if data_dir is None:
+        data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
     orders = _read_json(os.path.join(data_dir, "orders_mock.json"))
+    
+    if order_id:
+        all_orders = []
+        for uid, user_orders in orders.items():
+            all_orders.extend(user_orders)
+        matched = [o for o in all_orders if o["order_id"] == order_id]
+        return {"success": True, "data": matched, "count": len(matched)}
+    
     user_orders = orders.get(user_id, [])
-    if order_id: user_orders = [o for o in user_orders if o["order_id"] == order_id]
     return {"success": True, "data": user_orders, "count": len(user_orders)}
 
 def check_stock(item_name, store_name=None):
@@ -747,7 +764,9 @@ def query_history(user_id=None, limit=3, data_dir="data"):
     return {"success": True, "data": orders.get(user_id, [])[:limit]}
 
 @lru_cache(maxsize=32)
-def query_recommend(preference=None, data_dir="data"):
+def query_recommend(preference=None, data_dir=None):
+    if data_dir is None:
+        data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
     menu = _read_json(os.path.join(data_dir, "menu_data.json"))
     all_items = []
     for store, items in menu.items():
@@ -771,12 +790,20 @@ def extract_params(text, intent_name, session_id=None):
     params = {}
     missing_params = []
     tool_name = INTENT_TOOL.get(intent_name)
-    if session_id:
+    if session_id and tool_name in ["query_order", "query_history", "log_complaint"]:
         params["user_id"] = get_user_id(session_id)
     if tool_name == "query_stores":
         match = PARAM_EXTRACTORS["location"](text)
         if match:
-            params["location"] = match.group(2)
+            location = match.group(2)
+            if location and location not in ["有门店", "有店", "有奶茶", "门店", "店"]:
+                params["location"] = location
+            elif "附近" in text or "周边" in text:
+                params["location"] = "光谷广场"
+            else:
+                missing_params.append("位置信息")
+        elif "附近" in text or "周边" in text:
+            params["location"] = "光谷广场"
         else:
             missing_params.append("位置信息")
     elif tool_name in ["query_order", "query_history"]:
@@ -796,13 +823,15 @@ import threading
 class ToolTimeoutError(Exception):
     pass
 
-def _run_with_timeout(func, args, timeout=3):
+def _run_with_timeout(func, args=(), kwargs=None, timeout=3):
     result = [None]
     error = [None]
+    if kwargs is None:
+        kwargs = {}
     
     def wrapper():
         try:
-            result[0] = func(*args)
+            result[0] = func(*args, **kwargs)
         except Exception as e:
             error[0] = e
     
@@ -825,7 +854,7 @@ def get_tool_response(intent_name, text, tools=TOOLS, session_id=None):
     if missing_params:
         return None, missing_params
     try:
-        result = _run_with_timeout(tools[tool_name], (params,))
+        result = _run_with_timeout(tools[tool_name], (), params)
         return result, []
     except ToolTimeoutError:
         return {"success": False, "data": [], "error": "工具执行超时"}, []
@@ -959,8 +988,6 @@ def build_response(intent, text, tool_result=None, missing_params=None):
         return f"【思考】{intent['name']}\n【回复】{reply}"
     
     if intent["name"].startswith("query"):
-        if intent["name"] == "query_location" and not missing_params:
-            return f"【思考】{intent['name']}\n【回复】请问您想查询哪个位置附近的门店呢？"
         if intent["name"] == "query_refund":
             return f"【思考】{intent['name']}\n【回复】请问您能提供一下订单号吗？这样我可以帮您查询退款相关信息。"
         if tool_error:
@@ -976,7 +1003,7 @@ def build_response(intent, text, tool_result=None, missing_params=None):
     return f"【思考】{intent['name']}\n【回复】{DIRECT_RESPONSES.get(intent['name'], '您好，有什么可以帮助您的？')}"
 
 def _format_tool_result(intent_name, result):
-    if intent_name == "query_stores":
+    if intent_name == "query_stores" or intent_name == "query_location":
         names = [p.get("name", "") for p in result["data"][:3]]
         return f"附近门店：{', '.join(names)}。"
     if intent_name == "query_menu":
@@ -989,6 +1016,13 @@ def _format_tool_result(intent_name, result):
                 orders.append(f"{o.get('order_id', '')} ({o.get('store', '')})：{o.get('status', '')}")
             return f"您有{len(result['data'])}个订单：{'；'.join(orders)}。"
         return "未找到订单记录。"
+    if intent_name == "query_recommend":
+        if result["data"]:
+            items = []
+            for i in result["data"]:
+                items.append(f"{i.get('name', '')}（¥{i.get('price', '')}）")
+            return f"推荐：{', '.join(items)}。"
+        return "暂无推荐。"
     return "查询完成。"
 
 def process_message(text, session_id="default", memory_store=None, llm_client=None):
@@ -1008,12 +1042,69 @@ def process_message(text, session_id="default", memory_store=None, llm_client=No
     intent = recognize_intent(text, llm_client)
     trace.add_step("intent", {"name": intent["name"], "confidence": intent["confidence"], "category": intent.get("category")})
     
-    if intent["confidence"] < 0.4 and intent["name"] not in ["general", "unclear"]:
-        reply = f"【思考】置信度低({intent['confidence']:.2f})\n【回复】抱歉，我不太确定您的意思。您是想咨询{intent.get('category', '')}相关的问题吗？还是有其他需求？"
-        if memory_store:
-            save_message(memory_store, session_id, text, reply)
-        return reply, intent
+    if intent["confidence"] >= 0.6:
+        tool_name = INTENT_TOOL.get(intent["name"])
+        
+        if intent["name"] == "query_recommend":
+            tool_result, _ = get_tool_response(intent["name"], text, session_id=session_id)
+            response = build_response(intent, text, tool_result, [])
+            trace.add_step("tool_call", {"tool_name": "query_recommend", "intent_name": intent["name"], "params": {}})
+            trace.add_step("tool_result", {"success": tool_result.get("success", False), "data": tool_result.get("data", [])})
+            trace.add_step("response", {"text": response})
+            trace.save_to_file()
+            if memory_store:
+                save_message(memory_store, session_id, text, response)
+            return response, intent
+        
+        elif intent["name"] == "query_order":
+            params, missing = extract_params(text, intent["name"], session_id)
+            if params.get("order_id"):
+                tool_result, _ = get_tool_response(intent["name"], text, session_id=session_id)
+                response = build_response(intent, text, tool_result, [])
+                trace.add_step("tool_call", {"tool_name": "query_order", "intent_name": intent["name"], "params": params})
+                trace.add_step("tool_result", {"success": tool_result.get("success", False), "data": tool_result.get("data", [])})
+                trace.add_step("response", {"text": response})
+                trace.save_to_file()
+                if memory_store:
+                    save_message(memory_store, session_id, text, response)
+                return response, intent
+            else:
+                response = f"【思考】{intent['name']}\n【回复】请问您能提供一下订单号吗？这样我可以帮您查询相关信息。"
+                trace.add_step("clarify", {"missing_params": ["订单号"]})
+                trace.add_step("response", {"text": response})
+                trace.save_to_file()
+                if memory_store:
+                    save_message(memory_store, session_id, text, response)
+                return response, intent
+        
+        elif intent["name"] == "query_location" or intent["name"] == "query_store":
+            tool_result, _ = get_tool_response(intent["name"], text, session_id=session_id)
+            response = build_response(intent, text, tool_result, [])
+            trace.add_step("tool_call", {"tool_name": "query_stores", "intent_name": intent["name"], "params": extract_params(text, intent["name"], session_id)[0]})
+            trace.add_step("tool_result", {"success": tool_result.get("success", False) if tool_result else False, "data": tool_result.get("data", []) if tool_result else []})
+            trace.add_step("response", {"text": response})
+            trace.save_to_file()
+            if memory_store:
+                save_message(memory_store, session_id, text, response)
+            return response, intent
+        
+        elif intent["name"].startswith("complaint"):
+            tool_result = None
+            if tool_name == "log_complaint":
+                tool_result = log_complaint(get_user_id(session_id), text, category=INTENT_TO_CATEGORY.get(intent["name"], "口味"), intent_name=intent["name"])
+                trace.add_step("tool_call", {"tool_name": "log_complaint", "intent_name": intent["name"], "params": {"complaint": text}})
+                trace.add_step("tool_result", {"success": tool_result.get("success", False), "data": {"complaint_id": tool_result.get("complaint_id")}})
+            response = build_response(intent, text, tool_result, [])
+            trace.add_step("response", {"text": response})
+            trace.save_to_file()
+            if memory_store:
+                save_message(memory_store, session_id, text, response)
+            return response, intent
     
+    return harness_handle(text, session_id, intent, trace, memory_store)
+
+
+def harness_handle(text, session_id, intent, trace, memory_store):
     tool_name = INTENT_TOOL.get(intent["name"])
     tool_result = None
     missing_params = []
@@ -1033,7 +1124,15 @@ def process_message(text, session_id="default", memory_store=None, llm_client=No
         trace.add_step("tool_call", {"tool_name": tool_name, "intent_name": intent["name"], "params": extract_params(text, intent["name"], session_id)[0]})
         trace.add_step("tool_result", {"success": tool_result.get("success", False) if tool_result else False, "data": tool_result.get("data", []) if tool_result else []})
         
-        if tool_result:
+        if tool_result and tool_result.get("success"):
+            response = build_response(intent, text, tool_result, [])
+            trace.add_step("response", {"text": response})
+            trace.save_to_file()
+            if memory_store:
+                save_message(memory_store, session_id, text, response)
+            return response, intent
+        
+        if tool_result and not tool_result.get("success"):
             reflection = reflect_on_result(tool_name, extract_params(text, intent["name"], session_id)[0], tool_result, intent["name"], text)
             trace.add_step("reflection", reflection)
             
@@ -1067,17 +1166,8 @@ def process_message(text, session_id="default", memory_store=None, llm_client=No
         tool_result = log_complaint(get_user_id(session_id), text, category=INTENT_TO_CATEGORY.get(intent["name"], "口味"), intent_name=intent["name"])
         trace.add_step("tool_call", {"tool_name": "log_complaint", "intent_name": intent["name"], "params": {"complaint": text}})
         trace.add_step("tool_result", {"success": tool_result.get("success", False), "data": {"complaint_id": tool_result.get("complaint_id")}})
-        
-        if tool_result:
-            reflection = reflect_on_result("log_complaint", {"complaint": text}, tool_result, intent["name"], text)
-            trace.add_step("reflection", reflection)
     
     response = build_response(intent, text, tool_result, missing_params)
-    
-    if "【反思】" not in response and trace.get_latest("reflection"):
-        reflection_data = trace.get_latest("reflection")["data"]
-        response = response.replace("【思考】", f"【思考】{REFLECTION_ASSESSMENT.get(reflection_data['assessment'], '')} | ")
-    
     trace.add_step("response", {"text": response})
     trace.save_to_file()
     
