@@ -15,6 +15,7 @@ from bubble_agent import process_message, process_message_async, recognize_inten
 from storage.database import init_db, get_user_preferences, get_complaint_history, get_user_stats, get_knowledge_candidates, approve_candidate, reject_candidate, get_complaint_knowledge, get_knowledge_complaints, update_knowledge_parent, get_all_complaints, get_knowledge_list, get_knowledge_graph, get_knowledge_graph_aggregated, review_knowledge, delete_knowledge, get_complaint_stats, resolve_complaint, add_knowledge_node
 from storage.data_access import get_shops, get_menu_items, get_orders, get_shop_by_name
 from storage.redis_store import session_store
+from core.cache import cache
 
 init_db()
 
@@ -386,7 +387,12 @@ async def admin_clear_cache():
     get_knowledge_graph.cache_clear()
     clear_intent_cache()
     clear_response_cache()
+    cache.reset_stats()
     return {"success": True, "message": "缓存已清除"}
+
+@app.get("/api/cache/stats")
+async def get_cache_stats():
+    return cache.get_stats()
 
 class FeedbackRequest(BaseModel):
     message_id: str

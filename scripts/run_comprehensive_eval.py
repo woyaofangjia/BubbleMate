@@ -41,6 +41,146 @@ def run_intent_eval(dataset_path):
         'total': total
     }
 
+def run_classification_report(dataset_path):
+    if not os.path.exists(dataset_path):
+        return None
+    
+    with open(dataset_path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    
+    if isinstance(data, dict):
+        samples = data.get('samples', [])
+    else:
+        samples = data
+    
+    from collections import defaultdict
+    
+    y_true = []
+    y_pred = []
+    
+    for sample in samples:
+        text = sample.get('user_query', sample.get('query', sample.get('text', '')))
+        expected = sample.get('intent', '')
+        
+        if not text or not expected:
+            continue
+        
+        result = recognize_intent(text)
+        predicted = result['name']
+        
+        y_true.append(expected)
+        y_pred.append(predicted)
+    
+    all_intents = sorted(set(y_true + y_pred))
+    
+    tp = defaultdict(int)
+    fp = defaultdict(int)
+    fn = defaultdict(int)
+    
+    for true, pred in zip(y_true, y_pred):
+        if true == pred:
+            tp[true] += 1
+        else:
+            fp[pred] += 1
+            fn[true] += 1
+    
+    intent_stats = {}
+    for intent in all_intents:
+        precision = tp[intent] / (tp[intent] + fp[intent]) if (tp[intent] + fp[intent]) > 0 else 0
+        recall = tp[intent] / (tp[intent] + fn[intent]) if (tp[intent] + fn[intent]) > 0 else 0
+        f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
+        support = tp[intent] + fn[intent]
+        
+        intent_stats[intent] = {
+            'precision': round(precision, 4),
+            'recall': round(recall, 4),
+            'f1_score': round(f1, 4),
+            'support': support,
+            'tp': tp[intent],
+            'fp': fp[intent],
+            'fn': fn[intent]
+        }
+    
+    macro_precision = sum(v['precision'] for v in intent_stats.values()) / len(intent_stats) if intent_stats else 0
+    macro_recall = sum(v['recall'] for v in intent_stats.values()) / len(intent_stats) if intent_stats else 0
+    macro_f1 = sum(v['f1_score'] for v in intent_stats.values()) / len(intent_stats) if intent_stats else 0
+    
+    weighted_precision = sum(v['precision'] * v['support'] for v in intent_stats.values()) / len(y_true) if y_true else 0
+    weighted_recall = sum(v['recall'] * v['support'] for v in intent_stats.values()) / len(y_true) if y_true else 0
+    weighted_f1 = sum(v['f1_score'] * v['support'] for v in intent_stats.values()) / len(y_true) if y_true else 0
+    
+    worst_intents = sorted(intent_stats.items(), key=lambda x: x[1]['f1_score'])[:3]
+    
+    confusion_matrix = []
+    for true_intent in all_intents:
+        row = []
+        for pred_intent in all_intents:
+            count = sum(1 for t, p in zip(y_true, y_pred) if t == true_intent and p == pred_intent)
+            row.append(count)
+        confusion_matrix.append(row)
+    
+    return {
+        'intent_stats': intent_stats,
+        'macro_avg': {
+            'precision': round(macro_precision, 4),
+            'recall': round(macro_recall, 4),
+            'f1_score': round(macro_f1, 4),
+            'support': len(y_true)
+        },
+        'weighted_avg': {
+            'precision': round(weighted_precision, 4),
+            'recall': round(weighted_recall, 4),
+            'f1_score': round(weighted_f1, 4),
+            'support': len(y_true)
+        },
+        'worst_intents': [{'intent': k, **v} for k, v in worst_intents],
+        'confusion_matrix': {
+            'labels': all_intents,
+            'matrix': confusion_matrix
+        },
+        'total_samples': len(y_true)
+    }
+
+def run_rule_coverage(dataset_path):
+    if not os.path.exists(dataset_path):
+        return None
+    
+    with open(dataset_path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    
+    if isinstance(data, dict):
+        samples = data.get('samples', [])
+    else:
+        samples = data
+    
+    rule_hits = 0
+    llm_fallback = 0
+    cache_hits = 0
+    total = 0
+    
+    for sample in samples:
+        text = sample.get('user_query', sample.get('query', sample.get('text', '')))
+        
+        if not text:
+            continue
+        
+        result = recognize_intent(text)
+        confidence = result['confidence']
+        
+        if confidence >= 0.5:
+            rule_hits += 1
+        else:
+            llm_fallback += 1
+        total += 1
+    
+    return {
+        'total_requests': total,
+        'rule_hits': rule_hits,
+        'llm_fallback': llm_fallback,
+        'rule_coverage': round(rule_hits / total * 100, 2) if total > 0 else 0,
+        'llm_fallback_rate': round(llm_fallback / total * 100, 2) if total > 0 else 0
+    }
+
 def run_tool_eval():
     test_cases = [
         {'query': '订单12345', 'expected_tool': 'query_order', 'expected_clarify': False},
@@ -422,6 +562,14 @@ def main():
     results['bad_cases'] = run_bad_case_mining('data/test_set_200.json')
     print(f"   ✓ 发现 {len(results['bad_cases'])} 个Bad Case")
     
+    print("5. 分类报告(Precision/Recall/F1)...")
+    results['classification_report'] = run_classification_report('data/test_set_200.json')
+    print(f"   ✓ 加权F1-Score: {results['classification_report']['weighted_avg']['f1_score']}")
+    
+    print("6. 规则覆盖率统计...")
+    results['rule_coverage'] = run_rule_coverage('data/test_set_200.json')
+    print(f"   ✓ 规则覆盖率: {results['rule_coverage']['rule_coverage']}%")
+    
     print("\n【第二层：泛化评测】")
     print("1. Held-out验证...")
     results['heldout_eval'] = run_intent_eval('data/heldout_test_set_v4.json')
@@ -455,7 +603,9 @@ def main():
             'intent_accuracy_200': results['intent_eval_200'],
             'tool_accuracy': results['tool_eval'],
             'confidence_calibration': results['confidence_calibration'],
-            'bad_cases_count': len(results['bad_cases'])
+            'bad_cases_count': len(results['bad_cases']),
+            'classification_report': results['classification_report'],
+            'rule_coverage': results['rule_coverage']
         },
         'level2_generalization': {
             'heldout_eval': results['heldout_eval'],

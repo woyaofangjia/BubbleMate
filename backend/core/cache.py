@@ -23,6 +23,9 @@ class RedisCache:
                     cls._instance._redis = None
                     cls._instance._init_redis()
                     cls._instance._fallback_cache = defaultdict(dict)
+                    cls._instance._cache_hits = 0
+                    cls._instance._cache_misses = 0
+                    cls._instance._stats_lock = __import__('threading').Lock()
         return cls._instance
     
     def _init_redis(self):
@@ -61,6 +64,8 @@ class RedisCache:
             try:
                 value = self._redis.get(cache_key)
                 if value is not None:
+                    with self._stats_lock:
+                        self._cache_hits += 1
                     return json.loads(value)
             except Exception:
                 pass
@@ -68,8 +73,12 @@ class RedisCache:
         if cache_key in self._fallback_cache:
             cached = self._fallback_cache[cache_key]
             if time.time() - cached.get("timestamp", 0) < cached.get("ttl", 3600):
+                with self._stats_lock:
+                    self._cache_hits += 1
                 return cached.get("value")
         
+        with self._stats_lock:
+            self._cache_misses += 1
         return None
     
     def set(self, prefix, key, value, ttl=3600):
@@ -141,7 +150,20 @@ class RedisCache:
                 pass
         
         stats["fallback_keys"] = len(self._fallback_cache)
+        
+        with self._stats_lock:
+            total = self._cache_hits + self._cache_misses
+            hit_rate = self._cache_hits / total * 100 if total > 0 else 0
+            stats["cache_hits"] = self._cache_hits
+            stats["cache_misses"] = self._cache_misses
+            stats["cache_hit_rate"] = round(hit_rate, 2)
+        
         return stats
+    
+    def reset_stats(self):
+        with self._stats_lock:
+            self._cache_hits = 0
+            self._cache_misses = 0
 
 cache = RedisCache()
 

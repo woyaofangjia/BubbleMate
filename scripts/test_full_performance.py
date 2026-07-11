@@ -134,12 +134,21 @@ def worker(worker_id):
                     "status": response.status_code,
                     "latency": latency,
                     "label": label,
-                    "intent": response.json().get("intent", {}).get("name", "unknown")
+                    "intent": response.json().get("intent", {}).get("name", "unknown"),
+                    "error_type": None
                 })
-        except:
+        except requests.exceptions.Timeout:
             latency = (time.time() - start) * 1000
             with lock:
-                results.append({"status": 0, "latency": latency, "label": label, "intent": "error"})
+                results.append({"status": 0, "latency": latency, "label": label, "intent": "error", "error_type": "timeout"})
+        except requests.exceptions.ConnectionError:
+            latency = (time.time() - start) * 1000
+            with lock:
+                results.append({"status": 0, "latency": latency, "label": label, "intent": "error", "error_type": "connection_error"})
+        except Exception:
+            latency = (time.time() - start) * 1000
+            with lock:
+                results.append({"status": 0, "latency": latency, "label": label, "intent": "error", "error_type": "other"})
 
 threads = []
 for i in range(30):
@@ -173,10 +182,34 @@ n = len(latencies)
 print(f"  P50延迟: {latencies[int(n*0.5)]:.2f}ms")
 print(f"  P95延迟: {latencies[int(n*0.95)]:.2f}ms")
 print(f"  P99延迟: {latencies[int(n*0.99)]:.2f}ms")
+if n >= 1000:
+    print(f"  P99.9延迟: {latencies[int(n*0.999)]:.2f}ms")
 
 print("\n  意图分布:")
 for intent, count in sorted(intent_counts.items(), key=lambda x: -x[1]):
     print(f"    {intent}: {count}")
+
+print("\n  错误率分布:")
+error_counts = defaultdict(int)
+status_counts = defaultdict(int)
+for r in results:
+    if r["status"] == 0:
+        error_counts[r["error_type"] or "unknown"] += 1
+    else:
+        status_counts[r["status"]] += 1
+
+total_errors = total_requests - success_requests
+if total_errors > 0:
+    print(f"    总错误数: {total_errors}")
+    for error_type, count in error_counts.items():
+        print(f"    {error_type}: {count} ({count/total_errors*100:.2f}%)")
+else:
+    print("    无错误")
+
+print("\n  HTTP状态码分布:")
+for status, count in sorted(status_counts.items()):
+    category = "4xx" if 400 <= status < 500 else "5xx" if 500 <= status < 600 else "success" if status == 200 else "other"
+    print(f"    {status} ({category}): {count}")
 
 print("\n" + "=" * 60)
 print("全链路性能测试完成")

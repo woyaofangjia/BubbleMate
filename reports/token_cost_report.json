@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-07-11 17:51:36",
+  "dataset": "data/test_set_200.json",
+  "sample_count": 200,
+  "pure_llm": {
+    "accuracy": 68.0,
+    "correct": 136,
+    "total": 200,
+    "total_prompt_tokens": 23258,
+    "total_completion_tokens": 397,
+    "total_tokens": 23655,
+    "avg_tokens_per_request": 118.28,
+    "avg_prompt_tokens": 116.29,
+    "avg_completion_tokens": 1.99
+  },
+  "bubblemate": {
+    "accuracy": 88.5,
+    "correct": 177,
+    "total": 200,
+    "total_prompt_tokens": 0,
+    "total_completion_tokens": 0,
+    "total_tokens": 0,
+    "avg_tokens_per_request": 0.0,
+    "avg_prompt_tokens": 0.0,
+    "avg_completion_tokens": 0.0,
+    "llm_calls": 0,
+    "rule_hits": 200,
+    "rule_coverage": 100.0
+  },
+  "savings": {
+    "token_saving_percent": 100.0,
+    "cost_saving_percent": 100.0,
+    "llm_call_reduction": 100.0
+  },
+  "price_per_1k_tokens": 0.002
+}
