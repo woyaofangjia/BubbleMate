@@ -1,14 +1,14 @@
 {
-  "timestamp": "2026-07-11 17:49:06",
+  "timestamp": "2026-07-11 18:32:29",
   "level1_offline": {
     "intent_accuracy_200": {
-      "accuracy": 88.5,
-      "correct": 177,
+      "accuracy": 86.0,
+      "correct": 172,
       "total": 200
     },
     "tool_accuracy": {
-      "accuracy": 55.56,
-      "passed": 5,
+      "accuracy": 100.0,
+      "passed": 9,
       "total": 9
     },
     "confidence_calibration": [
@@ -19,7 +19,7 @@
       },
       {
         "confidence_bucket": 0.7,
-        "accuracy": 90.91,
+        "accuracy": 79.55,
         "samples": 44
       },
       {
@@ -38,7 +38,7 @@
         "samples": 17
       }
     ],
-    "bad_cases_count": 46,
+    "bad_cases_count": 51,
     "classification_report": {
       "intent_stats": {
         "complaint_accessory": {
@@ -88,12 +88,12 @@
         },
         "complaint_refund": {
           "precision": 1.0,
-          "recall": 1.0,
-          "f1_score": 1.0,
+          "recall": 0.4444,
+          "f1_score": 0.6154,
           "support": 9,
-          "tp": 9,
+          "tp": 4,
           "fp": 0,
-          "fn": 0
+          "fn": 5
         },
         "complaint_sarcasm": {
           "precision": 0.6667,
@@ -221,6 +221,15 @@
           "fp": 0,
           "fn": 0
         },
+        "query_refund": {
+          "precision": 0.0,
+          "recall": 0,
+          "f1_score": 0,
+          "support": 0,
+          "tp": 0,
+          "fp": 5,
+          "fn": 0
+        },
         "query_store": {
           "precision": 0,
           "recall": 0.0,
@@ -241,15 +250,15 @@
         }
       },
       "macro_avg": {
-        "precision": 0.8365,
-        "recall": 0.8112,
-        "f1_score": 0.8134,
+        "precision": 0.8002,
+        "recall": 0.7518,
+        "f1_score": 0.7613,
         "support": 200
       },
       "weighted_avg": {
         "precision": 0.9182,
-        "recall": 0.885,
-        "f1_score": 0.8904,
+        "recall": 0.86,
+        "f1_score": 0.8731,
         "support": 200
       },
       "worst_intents": [
@@ -274,14 +283,14 @@
           "fn": 0
         },
         {
-          "intent": "query_store",
-          "precision": 0,
-          "recall": 0.0,
+          "intent": "query_refund",
+          "precision": 0.0,
+          "recall": 0,
           "f1_score": 0,
-          "support": 10,
+          "support": 0,
           "tp": 0,
-          "fp": 0,
-          "fn": 10
+          "fp": 5,
+          "fn": 0
         }
       ],
       "confusion_matrix": {
@@ -306,6 +315,7 @@
           "query_price",
           "query_promotion",
           "query_recommend",
+          "query_refund",
           "query_store",
           "unclear"
         ],
@@ -332,9 +342,11 @@
             0,
             0,
             0,
+            0,
             0
           ],
           [
+            0,
             0,
             0,
             0,
@@ -380,6 +392,7 @@
             0,
             0,
             0,
+            0,
             0
           ],
           [
@@ -387,6 +400,7 @@
             0,
             0,
             9,
+            0,
             0,
             0,
             0,
@@ -428,6 +442,7 @@
             0,
             0,
             0,
+            0,
             0
           ],
           [
@@ -436,7 +451,7 @@
             0,
             0,
             0,
-            9,
+            4,
             0,
             0,
             0,
@@ -451,6 +466,7 @@
             0,
             0,
             0,
+            5,
             0,
             0
           ],
@@ -476,6 +492,7 @@
             0,
             0,
             0,
+            0,
             0
           ],
           [
@@ -487,6 +504,7 @@
             0,
             4,
             5,
+            0,
             0,
             0,
             0,
@@ -524,6 +542,7 @@
             0,
             0,
             0,
+            0,
             0
           ],
           [
@@ -537,6 +556,7 @@
             0,
             0,
             5,
+            0,
             0,
             0,
             0,
@@ -572,6 +592,7 @@
             0,
             0,
             0,
+            0,
             0
           ],
           [
@@ -587,6 +608,7 @@
             0,
             0,
             9,
+            0,
             0,
             0,
             0,
@@ -620,9 +642,11 @@
             0,
             0,
             0,
+            0,
             0
           ],
           [
+            0,
             0,
             0,
             0,
@@ -668,6 +692,7 @@
             0,
             0,
             0,
+            0,
             0
           ],
           [
@@ -687,6 +712,7 @@
             0,
             0,
             9,
+            0,
             0,
             0,
             0,
@@ -716,6 +742,7 @@
             0,
             0,
             0,
+            0,
             0
           ],
           [
@@ -740,6 +767,7 @@
             0,
             0,
             0,
+            0,
             0
           ],
           [
@@ -762,6 +790,7 @@
             0,
             0,
             9,
+            0,
             0,
             0,
             0
@@ -788,6 +817,32 @@
             0,
             13,
             0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0
           ],
           [
@@ -812,9 +867,11 @@
             0,
             0,
             0,
+            0,
             0
           ],
           [
+            0,
             0,
             0,
             0,
@@ -852,16 +909,16 @@
   },
   "level2_generalization": {
     "heldout_eval": {
-      "accuracy": 96.67,
-      "correct": 29,
+      "accuracy": 93.33,
+      "correct": 28,
       "total": 30
     },
     "five_fold_cv": {
       "fold_results": [
         {
           "fold": 1,
-          "accuracy": 90.0,
-          "correct": 36,
+          "accuracy": 77.5,
+          "correct": 31,
           "total": 40
         },
         {
@@ -872,24 +929,24 @@
         },
         {
           "fold": 3,
-          "accuracy": 85.0,
-          "correct": 34,
+          "accuracy": 90.0,
+          "correct": 36,
           "total": 40
         },
         {
           "fold": 4,
-          "accuracy": 87.5,
-          "correct": 35,
+          "accuracy": 90.0,
+          "correct": 36,
           "total": 40
         },
         {
           "fold": 5,
-          "accuracy": 90.0,
-          "correct": 36,
+          "accuracy": 82.5,
+          "correct": 33,
           "total": 40
         }
       ],
-      "avg_accuracy": 88.5
+      "avg_accuracy": 86.0
     },
     "adversarial_eval": {
       "accuracy": 91.67,

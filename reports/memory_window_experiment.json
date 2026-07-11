@@ -1,0 +1,282 @@
+{
+  "1": {
+    "accuracy": 37.5,
+    "correct": 3,
+    "total": 8,
+    "avg_time_ms": 89.52915668487549,
+    "scenario_results": [
+      {
+        "scenario": "糖度记忆",
+        "correct": false,
+        "response": "【思考】general\n【回复】您好，有什么可以帮助您的？",
+        "time_ms": 640.0291919708252
+      },
+      {
+        "scenario": "温度记忆",
+        "correct": true,
+        "response": "【思考】query_temp\n【回复】支持热、温、冰三种温度。",
+        "time_ms": 8.835077285766602
+      },
+      {
+        "scenario": "订单号记忆",
+        "correct": true,
+        "response": "【思考】query_order\n【回复】请问您能提供一下订单号吗？这样我可以帮您查询相关信息。",
+        "time_ms": 6.768941879272461
+      },
+      {
+        "scenario": "位置记忆",
+        "correct": false,
+        "response": "【思考】general\n【回复】您好，有什么可以帮助您的？",
+        "time_ms": 13.108015060424805
+      },
+      {
+        "scenario": "复杂指代记忆",
+        "correct": false,
+        "response": "【思考】general\n【回复】您好，有什么可以帮助您的？",
+        "time_ms": 5.743503570556641
+      },
+      {
+        "scenario": "多轮偏好记忆",
+        "correct": false,
+        "response": "【思考】complaint_quantity\n【回复】非常抱歉份量不足，我们会为您补发或补偿。 补偿方案：补发配料或5元优惠券",
+        "time_ms": 6.739377975463867
+      },
+      {
+        "scenario": "5轮指代记忆",
+        "correct": false,
+        "response": "【思考】general\n【回复】您好，有什么可以帮助您的？",
+        "time_ms": 12.531757354736328
+      },
+      {
+        "scenario": "7轮上下文记忆",
+        "correct": true,
+        "response": "【思考】query_store\n【回复】请问您当前的位置在哪里？这样我可以帮您查询附近的门店。",
+        "time_ms": 22.477388381958008
+      }
+    ]
+  },
+  "3": {
+    "accuracy": 37.5,
+    "correct": 3,
+    "total": 8,
+    "avg_time_ms": 9.494692087173462,
+    "scenario_results": [
+      {
+        "scenario": "糖度记忆",
+        "correct": false,
+        "response": "【思考】general\n【回复】您好，有什么可以帮助您的？",
+        "time_ms": 5.894184112548828
+      },
+      {
+        "scenario": "温度记忆",
+        "correct": true,
+        "response": "【思考】query_temp\n【回复】支持热、温、冰三种温度。",
+        "time_ms": 6.488323211669922
+      },
+      {
+        "scenario": "订单号记忆",
+        "correct": true,
+        "response": "【思考】query_order\n【回复】请问您能提供一下订单号吗？这样我可以帮您查询相关信息。",
+        "time_ms": 5.836009979248047
+      },
+      {
+        "scenario": "位置记忆",
+        "correct": false,
+        "response": "【思考】general\n【回复】您好，有什么可以帮助您的？",
+        "time_ms": 5.988121032714844
+      },
+      {
+        "scenario": "复杂指代记忆",
+        "correct": false,
+        "response": "【思考】general\n【回复】您好，有什么可以帮助您的？",
+        "time_ms": 7.253885269165039
+      },
+      {
+        "scenario": "多轮偏好记忆",
+        "correct": false,
+        "response": "【思考】complaint_quantity\n【回复】非常抱歉份量不足，我们会为您补发或补偿。 补偿方案：补发配料或5元优惠券",
+        "time_ms": 6.1550140380859375
+      },
+      {
+        "scenario": "5轮指代记忆",
+        "correct": false,
+        "response": "【思考】general\n【回复】您好，有什么可以帮助您的？",
+        "time_ms": 17.05193519592285
+      },
+      {
+        "scenario": "7轮上下文记忆",
+        "correct": true,
+        "response": "【思考】query_store\n【回复】请问您当前的位置在哪里？这样我可以帮您查询附近的门店。",
+        "time_ms": 21.290063858032227
+      }
+    ]
+  },
+  "5": {
+    "accuracy": 37.5,
+    "correct": 3,
+    "total": 8,
+    "avg_time_ms": 9.930074214935303,
+    "scenario_results": [
+      {
+        "scenario": "糖度记忆",
+        "correct": false,
+        "response": "【思考】general\n【回复】您好，有什么可以帮助您的？",
+        "time_ms": 7.984161376953125
+      },
+      {
+        "scenario": "温度记忆",
+        "correct": true,
+        "response": "【思考】query_temp\n【回复】支持热、温、冰三种温度。",
+        "time_ms": 5.222797393798828
+      },
+      {
+        "scenario": "订单号记忆",
+        "correct": true,
+        "response": "【思考】query_order\n【回复】请问您能提供一下订单号吗？这样我可以帮您查询相关信息。",
+        "time_ms": 6.178617477416992
+      },
+      {
+        "scenario": "位置记忆",
+        "correct": false,
+        "response": "【思考】general\n【回复】您好，有什么可以帮助您的？",
+        "time_ms": 7.021427154541016
+      },
+      {
+        "scenario": "复杂指代记忆",
+        "correct": false,
+        "response": "【思考】general\n【回复】您好，有什么可以帮助您的？",
+        "time_ms": 5.357027053833008
+      },
+      {
+        "scenario": "多轮偏好记忆",
+        "correct": false,
+        "response": "【思考】complaint_quantity\n【回复】非常抱歉份量不足，我们会为您补发或补偿。 补偿方案：补发配料或5元优惠券",
+        "time_ms": 7.124900817871094
+      },
+      {
+        "scenario": "5轮指代记忆",
+        "correct": false,
+        "response": "【思考】general\n【回复】您好，有什么可以帮助您的？",
+        "time_ms": 13.871431350708008
+      },
+      {
+        "scenario": "7轮上下文记忆",
+        "correct": true,
+        "response": "【思考】query_store\n【回复】请问您当前的位置在哪里？这样我可以帮您查询附近的门店。",
+        "time_ms": 26.68023109436035
+      }
+    ]
+  },
+  "7": {
+    "accuracy": 37.5,
+    "correct": 3,
+    "total": 8,
+    "avg_time_ms": 10.125935077667236,
+    "scenario_results": [
+      {
+        "scenario": "糖度记忆",
+        "correct": false,
+        "response": "【思考】general\n【回复】您好，有什么可以帮助您的？",
+        "time_ms": 6.90150260925293
+      },
+      {
+        "scenario": "温度记忆",
+        "correct": true,
+        "response": "【思考】query_temp\n【回复】支持热、温、冰三种温度。",
+        "time_ms": 7.58051872253418
+      },
+      {
+        "scenario": "订单号记忆",
+        "correct": true,
+        "response": "【思考】query_order\n【回复】请问您能提供一下订单号吗？这样我可以帮您查询相关信息。",
+        "time_ms": 6.536722183227539
+      },
+      {
+        "scenario": "位置记忆",
+        "correct": false,
+        "response": "【思考】general\n【回复】您好，有什么可以帮助您的？",
+        "time_ms": 9.920120239257812
+      },
+      {
+        "scenario": "复杂指代记忆",
+        "correct": false,
+        "response": "【思考】general\n【回复】您好，有什么可以帮助您的？",
+        "time_ms": 6.492137908935547
+      },
+      {
+        "scenario": "多轮偏好记忆",
+        "correct": false,
+        "response": "【思考】complaint_quantity\n【回复】非常抱歉份量不足，我们会为您补发或补偿。 补偿方案：补发配料或5元优惠券",
+        "time_ms": 7.964849472045898
+      },
+      {
+        "scenario": "5轮指代记忆",
+        "correct": false,
+        "response": "【思考】general\n【回复】您好，有什么可以帮助您的？",
+        "time_ms": 12.578487396240234
+      },
+      {
+        "scenario": "7轮上下文记忆",
+        "correct": true,
+        "response": "【思考】query_store\n【回复】请问您当前的位置在哪里？这样我可以帮您查询附近的门店。",
+        "time_ms": 23.03314208984375
+      }
+    ]
+  },
+  "10": {
+    "accuracy": 37.5,
+    "correct": 3,
+    "total": 8,
+    "avg_time_ms": 9.612858295440674,
+    "scenario_results": [
+      {
+        "scenario": "糖度记忆",
+        "correct": false,
+        "response": "【思考】general\n【回复】您好，有什么可以帮助您的？",
+        "time_ms": 5.407810211181641
+      },
+      {
+        "scenario": "温度记忆",
+        "correct": true,
+        "response": "【思考】query_temp\n【回复】支持热、温、冰三种温度。",
+        "time_ms": 7.603645324707031
+      },
+      {
+        "scenario": "订单号记忆",
+        "correct": true,
+        "response": "【思考】query_order\n【回复】请问您能提供一下订单号吗？这样我可以帮您查询相关信息。",
+        "time_ms": 4.991292953491211
+      },
+      {
+        "scenario": "位置记忆",
+        "correct": false,
+        "response": "【思考】general\n【回复】您好，有什么可以帮助您的？",
+        "time_ms": 5.321025848388672
+      },
+      {
+        "scenario": "复杂指代记忆",
+        "correct": false,
+        "response": "【思考】general\n【回复】您好，有什么可以帮助您的？",
+        "time_ms": 6.6699981689453125
+      },
+      {
+        "scenario": "多轮偏好记忆",
+        "correct": false,
+        "response": "【思考】complaint_quantity\n【回复】非常抱歉份量不足，我们会为您补发或补偿。 补偿方案：补发配料或5元优惠券",
+        "time_ms": 6.641864776611328
+      },
+      {
+        "scenario": "5轮指代记忆",
+        "correct": false,
+        "response": "【思考】general\n【回复】您好，有什么可以帮助您的？",
+        "time_ms": 14.815568923950195
+      },
+      {
+        "scenario": "7轮上下文记忆",
+        "correct": true,
+        "response": "【思考】query_store\n【回复】请问您当前的位置在哪里？这样我可以帮您查询附近的门店。",
+        "time_ms": 25.45166015625
+      }
+    ]
+  }
+}

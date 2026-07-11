@@ -16,7 +16,7 @@ except:
 
 try:
     from storage.database import save_session, get_user_by_session, save_user_preference, get_user_preferences, save_complaint, save_complaint_with_candidate, get_knowledge_graph, save_knowledge as _save_knowledge, save_complaint_db as _save_complaint_db, get_complaint_stats
-    from storage.data_access import get_shops, get_menu_items, get_orders, get_inventory, get_shop_by_name
+    from storage.data_access import get_shops, get_menu_items, get_orders, get_inventory, get_shop_by_name, get_hot_menu_items
     from core.cache import cache
 except:
     save_session = lambda s, u: None
@@ -354,7 +354,7 @@ INTENT_KEYWORDS = {
     "complaint_service": ["服务差", "态度差", "电话打不通", "备注没按", "服务不好", "联系商家", "不理我", "不理", "不回", "态度恶劣", "不耐烦", "服务态度", "客服态度", "没人理"],
     "complaint_delivery": ["配送慢", "超时", "送得晚", "等太久", "包装破了", "等了", "还没到", "送错", "漏送", "破损", "撒了", "等了多久", "预计到达", "什么时候到", "还在路上", "一直没到", "送达时间"],
     "complaint_price": ["太贵", "价格高", "不值", "被坑了", "性价比低", "又贵"],
-    "complaint_refund": ["退款", "退钱", "要求退款", "申请退款"],
+    "complaint_refund": ["要求退款", "申请退款"],
     "complaint_sarcasm": ["呵呵", "绝了", "也是绝了", "真是", "太坑了"],
     "complaint_accessory": ["吸管", "冰沙", "细吸管"],
     "complaint_vague": ["那个", "你们懂的", "就是那个", "懂的都懂"],
@@ -532,7 +532,7 @@ INTENT_TOOL = {
 }
 
 PARAM_EXTRACTORS = {
-    "location": lambda text: re.search(r"(在|附近|周边)\s*([\u4e00-\u9fa5]{2,}广场|[\u4e00-\u9fa5]{2,}路|[\u4e00-\u9fa5]{2,}街|[\u4e00-\u9fa5]{2,}店|[\u4e00-\u9fa5]{2,}校区|[\u4e00-\u9fa5]{2,}中心|[\u4e00-\u9fa5]{2,}大厦|[\u4e00-\u9fa5]{2,}商场)", text),
+    "location": lambda text: re.search(r"([\u4e00-\u9fa5]{2,})(附近|周边)|(在|附近|周边)\s*([\u4e00-\u9fa5]{2,}广场|[\u4e00-\u9fa5]{2,}路|[\u4e00-\u9fa5]{2,}街|[\u4e00-\u9fa5]{2,}校区|[\u4e00-\u9fa5]{2,}中心|[\u4e00-\u9fa5]{2,}大厦|[\u4e00-\u9fa5]{2,}商场)", text),
     "order_id": lambda text: re.search(r"(ORD-\d{8}-\d{3}|\d{5,})", text),
     "complaint": lambda text: text,
 }
@@ -755,6 +755,7 @@ def query_menu(store_name=None, keyword=None, category=None, data_dir=None):
         items = get_menu_items(shop_id=shop['id'], keyword=keyword, category=category)
         return {"success": True, "data": items, "store": shop['name']}
     
+    from storage.data_access import get_hot_menu_items
     hot_items = get_hot_menu_items(limit=5)
     hot = []
     for item in hot_items:
@@ -986,15 +987,13 @@ def extract_params(text, intent_name, session_id=None):
     if tool_name == "query_stores":
         match = PARAM_EXTRACTORS["location"](text)
         if match:
-            location = match.group(2)
+            location = match.group(1) or match.group(4)
             if location and location not in ["有门店", "有店", "有奶茶", "门店", "店"]:
                 params["location"] = location
-            elif "附近" in text or "周边" in text:
-                params["location"] = "光谷广场"
             else:
                 missing_params.append("位置信息")
         elif "附近" in text or "周边" in text:
-            params["location"] = "光谷广场"
+            missing_params.append("位置信息")
         else:
             missing_params.append("位置信息")
     elif tool_name in ["query_order", "query_history"]:
@@ -1206,7 +1205,7 @@ def _format_tool_result(intent_name, result):
             for o in result["data"]:
                 orders.append(f"{o.get('order_id', '')} ({o.get('store', '')})：{o.get('status', '')}")
             return f"您有{len(result['data'])}个订单：{'；'.join(orders)}。"
-        return "抱歉，没有找到相关的订单记录呢。请问您提供的订单号是否正确？或者您可以稍后再试。"
+        return "抱歉，没有找到相关的订单记录。请确认订单号是否正确，或稍后再试。"
     if intent_name == "query_recommend":
         if result["data"]:
             items = []
@@ -1219,6 +1218,15 @@ def _format_tool_result(intent_name, result):
 async def process_message_async(text, session_id="default", memory_store=None, llm_client=None):
     trace = ExecutionTrace()
     trace.session_id = session_id
+    
+    if not text or not text.strip():
+        response = "【思考】空输入\n【回复】您好，请问有什么可以帮助您的？"
+        trace.add_step("clarify", {"missing_params": ["用户意图"]})
+        trace.add_step("response", {"text": response})
+        trace.save_to_file()
+        if memory_store:
+            save_message(memory_store, session_id, text or "", response)
+        return response, {"name": "unclear", "confidence": 0.0, "category": "通用"}
     
     cached_response = _get_cached_response(text)
     if cached_response:
@@ -1270,7 +1278,21 @@ async def process_message_async(text, session_id="default", memory_store=None, l
             _cache_response(text, response)
             return response, intent
         
-        elif intent["name"] == "query_order":
+        elif intent["name"] == "query_menu":
+            def _call_tool():
+                return get_tool_response(intent["name"], text, TOOLS, session_id)
+            tool_result, _ = await asyncio.to_thread(_call_tool)
+            response = build_response(intent, text, tool_result, [])
+            trace.add_step("tool_call", {"tool_name": "query_menu", "intent_name": intent["name"], "params": {}})
+            trace.add_step("tool_result", {"success": tool_result.get("success", False) if tool_result else False, "data": tool_result.get("data", []) if tool_result else []})
+            trace.add_step("response", {"text": response})
+            trace.save_to_file()
+            if memory_store:
+                save_message(memory_store, session_id, text, response)
+            _cache_response(text, response)
+            return response, intent
+        
+        elif intent["name"] == "query_order" or intent["name"] == "query_refund":
             params, missing = extract_params(text, intent["name"], session_id)
             if params.get("order_id"):
                 def _call_tool():
@@ -1296,18 +1318,29 @@ async def process_message_async(text, session_id="default", memory_store=None, l
                 return response, intent
         
         elif intent["name"] == "query_location" or intent["name"] == "query_store":
-            def _call_tool():
-                return get_tool_response(intent["name"], text, TOOLS, session_id)
-            tool_result, _ = await asyncio.to_thread(_call_tool)
-            response = build_response(intent, text, tool_result, [])
-            trace.add_step("tool_call", {"tool_name": "query_stores", "intent_name": intent["name"], "params": extract_params(text, intent["name"], session_id)[0]})
-            trace.add_step("tool_result", {"success": tool_result.get("success", False) if tool_result else False, "data": tool_result.get("data", []) if tool_result else []})
-            trace.add_step("response", {"text": response})
-            trace.save_to_file()
-            if memory_store:
-                save_message(memory_store, session_id, text, response)
-            _cache_response(text, response)
-            return response, intent
+            params, missing = extract_params(text, intent["name"], session_id)
+            if params.get("location"):
+                def _call_tool():
+                    return get_tool_response(intent["name"], text, TOOLS, session_id)
+                tool_result, _ = await asyncio.to_thread(_call_tool)
+                response = build_response(intent, text, tool_result, [])
+                trace.add_step("tool_call", {"tool_name": "query_stores", "intent_name": intent["name"], "params": params})
+                trace.add_step("tool_result", {"success": tool_result.get("success", False) if tool_result else False, "data": tool_result.get("data", []) if tool_result else []})
+                trace.add_step("response", {"text": response})
+                trace.save_to_file()
+                if memory_store:
+                    save_message(memory_store, session_id, text, response)
+                _cache_response(text, response)
+                return response, intent
+            else:
+                response = f"【思考】{intent['name']}\n【回复】请问您当前的位置在哪里？这样我可以帮您查询附近的门店。"
+                trace.add_step("clarify", {"missing_params": ["位置信息"]})
+                trace.add_step("response", {"text": response})
+                trace.save_to_file()
+                if memory_store:
+                    save_message(memory_store, session_id, text, response)
+                _cache_response(text, response)
+                return response, intent
         
         elif intent["name"].startswith("complaint"):
             tool_result = None
@@ -1351,6 +1384,14 @@ def harness_handle(text, session_id, intent, trace, memory_store):
         trace.add_step("tool_result", {"success": tool_result.get("success", False) if tool_result else False, "data": tool_result.get("data", []) if tool_result else []})
         
         if tool_result and tool_result.get("success"):
+            response = build_response(intent, text, tool_result, [])
+            trace.add_step("response", {"text": response})
+            trace.save_to_file()
+            if memory_store:
+                save_message(memory_store, session_id, text, response)
+            return response, intent
+        
+        if intent["name"] == "query_menu":
             response = build_response(intent, text, tool_result, [])
             trace.add_step("response", {"text": response})
             trace.save_to_file()

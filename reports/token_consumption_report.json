@@ -1,0 +1,282 @@
+{
+  "total_queries": 30,
+  "rule_matched": 30,
+  "llm_fallback": 0,
+  "token_estimates": [
+    {
+      "query": "我想点一杯少糖去冰加珍珠的奶茶",
+      "intent": "place_order",
+      "confidence": 0.55,
+      "rule_match": true,
+      "latency_ms": 10.129928588867188,
+      "response_length": 32,
+      "estimated_tokens": 41.6
+    },
+    {
+      "query": "你们家新品有哪些呀",
+      "intent": "query_recommend",
+      "confidence": 0.8,
+      "rule_match": true,
+      "latency_ms": 3.875255584716797,
+      "response_length": 65,
+      "estimated_tokens": 84.5
+    },
+    {
+      "query": "上次买的那个不好喝能退吗",
+      "intent": "complaint_taste",
+      "confidence": 0.8,
+      "rule_match": true,
+      "latency_ms": 0.9636878967285156,
+      "response_length": 42,
+      "estimated_tokens": 54.6
+    },
+    {
+      "query": "明天开业吗",
+      "intent": "query_promotion",
+      "confidence": 0.7,
+      "rule_match": true,
+      "latency_ms": 3.728628158569336,
+      "response_length": 38,
+      "estimated_tokens": 49.4
+    },
+    {
+      "query": "学生有优惠吗",
+      "intent": "query_promotion",
+      "confidence": 0.6,
+      "rule_match": true,
+      "latency_ms": 1362.2047901153564,
+      "response_length": 38,
+      "estimated_tokens": 49.4
+    },
+    {
+      "query": "能送到小区门口吗",
+      "intent": "query_delivery",
+      "confidence": 0.8,
+      "rule_match": true,
+      "latency_ms": 3.9234161376953125,
+      "response_length": 36,
+      "estimated_tokens": 46.800000000000004
+    },
+    {
+      "query": "可以用支付宝吗",
+      "intent": "query_promotion",
+      "confidence": 0.7,
+      "rule_match": true,
+      "latency_ms": 0.7882118225097656,
+      "response_length": 33,
+      "estimated_tokens": 42.9
+    },
+    {
+      "query": "有什么低糖的推荐",
+      "intent": "query_recommend",
+      "confidence": 0.8,
+      "rule_match": true,
+      "latency_ms": 3.8487911224365234,
+      "response_length": 65,
+      "estimated_tokens": 84.5
+    },
+    {
+      "query": "上次那个太甜了这次要无糖",
+      "intent": "complaint_taste",
+      "confidence": 0.8,
+      "rule_match": true,
+      "latency_ms": 5.578517913818359,
+      "response_length": 59,
+      "estimated_tokens": 76.7
+    },
+    {
+      "query": "外卖多久能到",
+      "intent": "query_delivery",
+      "confidence": 0.7,
+      "rule_match": true,
+      "latency_ms": 3.6814212799072266,
+      "response_length": 36,
+      "estimated_tokens": 46.800000000000004
+    },
+    {
+      "query": "可以开发票吗",
+      "intent": "query_invoice",
+      "confidence": 0.9,
+      "rule_match": true,
+      "latency_ms": 1.1680126190185547,
+      "response_length": 33,
+      "estimated_tokens": 42.9
+    },
+    {
+      "query": "买十杯有折扣吗",
+      "intent": "place_order",
+      "confidence": 0.7,
+      "rule_match": true,
+      "latency_ms": 3.8137435913085938,
+      "response_length": 32,
+      "estimated_tokens": 41.6
+    },
+    {
+      "query": "有没有热饮推荐",
+      "intent": "query_recommend",
+      "confidence": 0.8,
+      "rule_match": true,
+      "latency_ms": 6.58726692199707,
+      "response_length": 65,
+      "estimated_tokens": 84.5
+    },
+    {
+      "query": "上次那个杯子挺好看的能卖吗",
+      "intent": "unclear",
+      "confidence": 0.8500000000000001,
+      "rule_match": true,
+      "latency_ms": 3.5567283630371094,
+      "response_length": 29,
+      "estimated_tokens": 37.7
+    },
+    {
+      "query": "你们几点关门",
+      "intent": "query_hours",
+      "confidence": 0.8500000000000001,
+      "rule_match": true,
+      "latency_ms": 3.568887710571289,
+      "response_length": 52,
+      "estimated_tokens": 67.60000000000001
+    },
+    {
+      "query": "能帮我送到写字楼楼下吗",
+      "intent": "query_order",
+      "confidence": 0.7,
+      "rule_match": true,
+      "latency_ms": 3.5254955291748047,
+      "response_length": 47,
+      "estimated_tokens": 61.1
+    },
+    {
+      "query": "有什么季节限定的饮品",
+      "intent": "query_menu",
+      "confidence": 0.7000000000000001,
+      "rule_match": true,
+      "latency_ms": 6.181240081787109,
+      "response_length": 58,
+      "estimated_tokens": 75.4
+    },
+    {
+      "query": "上次点的那个还能做吗",
+      "intent": "complaint_vague",
+      "confidence": 0.7,
+      "rule_match": true,
+      "latency_ms": 3.8323402404785156,
+      "response_length": 50,
+      "estimated_tokens": 65.0
+    },
+    {
+      "query": "可以加双倍珍珠吗",
+      "intent": "query_customize",
+      "confidence": 0.7000000000000001,
+      "rule_match": true,
+      "latency_ms": 0.732421875,
+      "response_length": 33,
+      "estimated_tokens": 42.9
+    },
+    {
+      "query": "有没有不含咖啡因的",
+      "intent": "query_recommend",
+      "confidence": 0.6,
+      "rule_match": true,
+      "latency_ms": 433.57348442077637,
+      "response_length": 29,
+      "estimated_tokens": 37.7
+    },
+    {
+      "query": "离地铁站近吗",
+      "intent": "query_promotion",
+      "confidence": 0.7,
+      "rule_match": true,
+      "latency_ms": 3.530740737915039,
+      "response_length": 38,
+      "estimated_tokens": 49.4
+    },
+    {
+      "query": "可以堂食吗",
+      "intent": "query_promotion",
+      "confidence": 0.7,
+      "rule_match": true,
+      "latency_ms": 0.7870197296142578,
+      "response_length": 33,
+      "estimated_tokens": 42.9
+    },
+    {
+      "query": "生日当天有优惠吗",
+      "intent": "query_promotion",
+      "confidence": 0.6,
+      "rule_match": true,
+      "latency_ms": 574.364423751831,
+      "response_length": 38,
+      "estimated_tokens": 49.4
+    },
+    {
+      "query": "上次那个水果茶挺不错的再推荐几个",
+      "intent": "query_recommend",
+      "confidence": 0.8,
+      "rule_match": true,
+      "latency_ms": 3.528594970703125,
+      "response_length": 65,
+      "estimated_tokens": 84.5
+    },
+    {
+      "query": "能预约吗",
+      "intent": "query_promotion",
+      "confidence": 0.7,
+      "rule_match": true,
+      "latency_ms": 3.487110137939453,
+      "response_length": 38,
+      "estimated_tokens": 49.4
+    },
+    {
+      "query": "下雨天送得慢吗",
+      "intent": "complaint_delivery",
+      "confidence": 0.6000000000000001,
+      "rule_match": true,
+      "latency_ms": 2.892017364501953,
+      "response_length": 59,
+      "estimated_tokens": 76.7
+    },
+    {
+      "query": "有会员日吗",
+      "intent": "query_promotion",
+      "confidence": 0.7,
+      "rule_match": true,
+      "latency_ms": 4.190921783447266,
+      "response_length": 38,
+      "estimated_tokens": 49.4
+    },
+    {
+      "query": "上次买的少给了配料",
+      "intent": "place_order",
+      "confidence": 0.7,
+      "rule_match": true,
+      "latency_ms": 3.693819046020508,
+      "response_length": 32,
+      "estimated_tokens": 41.6
+    },
+    {
+      "query": "杯子能回收吗",
+      "intent": "query_promotion",
+      "confidence": 0.7,
+      "rule_match": true,
+      "latency_ms": 3.425121307373047,
+      "response_length": 38,
+      "estimated_tokens": 49.4
+    },
+    {
+      "query": "有什么适合夏天喝的",
+      "intent": "query_menu",
+      "confidence": 0.7000000000000001,
+      "rule_match": true,
+      "latency_ms": 3.3109188079833984,
+      "response_length": 58,
+      "estimated_tokens": 75.4
+    }
+  ],
+  "avg_latency_ms": 82.28243192036946,
+  "avg_tokens_per_query": 56.723333333333336,
+  "total_estimated_tokens": 1701.7,
+  "rule_coverage": 100.0,
+  "llm_fallback_rate": 0.0
+}
