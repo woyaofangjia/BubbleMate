@@ -4,12 +4,14 @@ from pydantic import BaseModel
 from typing import Optional, Dict, Any
 import json
 import os
+import time
+from collections import defaultdict
 
 import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from bubble_agent import process_message, process_message_async, recognize_intent, create_memory_store, get_context, TOOLS, get_user_id, query_menu, query_promotions, query_recommend, query_customize, MemoryStore, clear_intent_cache
+from bubble_agent import process_message, process_message_async, recognize_intent, create_memory_store, get_context, TOOLS, get_user_id, query_menu, query_promotions, query_recommend, query_customize, MemoryStore, clear_intent_cache, clear_response_cache
 from storage.database import init_db, get_user_preferences, get_complaint_history, get_user_stats, get_knowledge_candidates, approve_candidate, reject_candidate, get_complaint_knowledge, get_knowledge_complaints, update_knowledge_parent, get_all_complaints, get_knowledge_list, get_knowledge_graph, get_knowledge_graph_aggregated, review_knowledge, delete_knowledge, get_complaint_stats, resolve_complaint, add_knowledge_node
 from storage.data_access import get_shops, get_menu_items, get_orders, get_shop_by_name
 from storage.redis_store import session_store
@@ -19,7 +21,47 @@ init_db()
 ADMIN_KEY = "bubble2026"
 TAKEOVER_SESSIONS = set()
 
+IP_RATE_LIMIT = 5000
+SESSION_RATE_LIMIT = 1000
+RATE_LIMIT_WINDOW = 1
+
+ip_requests = defaultdict(list)
+session_requests = defaultdict(list)
+
+def cleanup_rate_limits():
+    now = time.time()
+    for key, timestamps in list(ip_requests.items()):
+        ip_requests[key] = [t for t in timestamps if now - t < RATE_LIMIT_WINDOW]
+        if not ip_requests[key]:
+            del ip_requests[key]
+    for key, timestamps in list(session_requests.items()):
+        session_requests[key] = [t for t in timestamps if now - t < RATE_LIMIT_WINDOW]
+        if not session_requests[key]:
+            del session_requests[key]
+
 app = FastAPI(title="BubbleMate API", version="0.4.0")
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    now = time.time()
+    cleanup_rate_limits()
+    
+    client_ip = request.client.host if request.client else "unknown"
+    
+    ip_requests[client_ip].append(now)
+    ip_count = len([t for t in ip_requests[client_ip] if now - t < RATE_LIMIT_WINDOW])
+    if ip_count > IP_RATE_LIMIT:
+        return Response(status_code=429, content=json.dumps({"error": "Rate limit exceeded for IP", "retry_after": RATE_LIMIT_WINDOW}))
+    
+    session_id = request.headers.get("x-session-id", "")
+    if session_id:
+        session_requests[session_id].append(now)
+        session_count = len([t for t in session_requests[session_id] if now - t < RATE_LIMIT_WINDOW])
+        if session_count > SESSION_RATE_LIMIT:
+            return Response(status_code=429, content=json.dumps({"error": "Rate limit exceeded for session", "retry_after": RATE_LIMIT_WINDOW}))
+    
+    response = await call_next(request)
+    return response
 
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
@@ -73,7 +115,15 @@ async def process_complaint_async(session_id: str, message: str, intent_name: st
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
-    response, intent = await process_message_async(request.message, request.session_id, memory_store)
+    print(f"chat request: message='{request.message}', session_id='{request.session_id}'")
+    try:
+        response, intent = await process_message_async(request.message, request.session_id, memory_store)
+        print(f"chat response: intent={intent}, response_len={len(response)}")
+    except Exception as e:
+        print(f"chat error: {e}")
+        import traceback
+        traceback.print_exc()
+        raise
     
     if intent["name"].startswith("complaint"):
         background_tasks.add_task(process_complaint_async, request.session_id, request.message, intent["name"])
@@ -335,6 +385,7 @@ async def admin_clear_cache():
     get_knowledge_list.cache_clear()
     get_knowledge_graph.cache_clear()
     clear_intent_cache()
+    clear_response_cache()
     return {"success": True, "message": "缓存已清除"}
 
 class FeedbackRequest(BaseModel):

@@ -1,0 +1,26 @@
+{
+  "url": "http://127.0.0.1:8000/chat",
+  "concurrency": 50,
+  "duration": 30,
+  "total_requests": 5981,
+  "successful_requests": 5981,
+  "status_counts": {
+    "200": 5981
+  },
+  "intent_counts": {
+    "cached": 3614,
+    "query_promotion": 575,
+    "query_hours": 597,
+    "general": 1195
+  },
+  "success_rate": 100.0,
+  "throughput": 199.36666666666667,
+  "latency_ms": {
+    "avg": 252.59026351371273,
+    "min": 10.19430160522461,
+    "max": 2478.92427444458,
+    "p50": 65.70148468017578,
+    "p95": 853.8286685943604,
+    "p99": 1182.9988956451416
+  }
+}

@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import * as d3 from 'd3';
+import { useEffect, useRef, useCallback } from 'react';
+import { select, zoom, hierarchy, tree } from 'd3';
 
 interface KnowledgeNode {
   id: number;
@@ -31,11 +31,12 @@ const getNodeWidth = (content: string) => {
 
 export default function KnowledgeGraphD3({ data, onNodeClick }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const tooltipRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    if (!data || data.length === 0) return;
+  const renderGraph = useCallback(() => {
+    if (!data || data.length === 0 || !containerRef.current) return;
 
-    const container = d3.select(containerRef.current);
+    const container = select(containerRef.current);
     if (!container.node()) return;
 
     container.selectAll('*').remove();
@@ -53,13 +54,13 @@ export default function KnowledgeGraphD3({ data, onNodeClick }: Props) {
     const g = svg.append('g')
       .attr('transform', 'translate(50, 30)');
 
-    const zoom = d3.zoom<SVGSVGElement, unknown>()
+    const zoomBehavior = zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.5, 2])
       .on('zoom', (event) => {
         g.attr('transform', event.transform);
       });
 
-    svg.call(zoom);
+    svg.call(zoomBehavior);
 
     const idMap = new Map<number, KnowledgeNode>();
     const buildHierarchy = (nodes: KnowledgeNode[]): { name: string; children: any[]; data: KnowledgeNode }[] => {
@@ -90,13 +91,13 @@ export default function KnowledgeGraphD3({ data, onNodeClick }: Props) {
 
     const hierarchyData = buildHierarchy(data);
 
-    const root = d3.hierarchy({
+    const root = hierarchy({
       name: '投诉',
       children: hierarchyData,
       data: { id: 0, node_type: 'complaint_type', content: '投诉', reviewed: 1, parent_id: null, children: [] } as KnowledgeNode,
     });
 
-    const treeLayout = d3.tree<any>()
+    const treeLayout = tree<any>()
       .size([height - 60, width - 100])
       .nodeSize([40, 180]);
 
@@ -122,29 +123,29 @@ export default function KnowledgeGraphD3({ data, onNodeClick }: Props) {
       .style('fill', 'none');
 
     const nodeGroup = g.append('g').attr('class', 'nodes');
-    const node = nodeGroup.selectAll<SVGGElement, d3.HierarchyNode<any>>('g')
+    const node = nodeGroup.selectAll<SVGGElement, any>('g')
       .data(root.descendants())
       .enter().append('g')
-      .attr('transform', (d) => `translate(${d.y}, ${d.x})`)
+      .attr('transform', (d: any) => `translate(${d.y}, ${d.x})`)
       .attr('cursor', 'pointer');
 
-    const nodeWidths = new Map<d3.HierarchyNode<any>, number>();
+    const nodeWidths = new Map<any, number>();
 
     node.append('rect')
-      .attr('x', (d) => {
+      .attr('x', (d: any) => {
         const w = getNodeWidth(d.data.name);
         nodeWidths.set(d, w);
         return -w / 2;
       })
       .attr('y', -15)
-      .attr('width', (d) => nodeWidths.get(d) || 60)
+      .attr('width', (d: any) => nodeWidths.get(d) || 60)
       .attr('height', 30)
       .attr('rx', 8)
-      .attr('fill', (d) => {
+      .attr('fill', (d: any) => {
         const nodeData = (d.data as any).data || d.data;
         return getColor(nodeData.node_type || '');
       })
-      .attr('stroke', (d) => {
+      .attr('stroke', (d: any) => {
         const nodeData = (d.data as any).data || d.data;
         return (nodeData.reviewed === 1) ? '#FFD700' : '#9CA3AF';
       })
@@ -155,12 +156,12 @@ export default function KnowledgeGraphD3({ data, onNodeClick }: Props) {
       .attr('dy', 5)
       .attr('font-size', 12)
       .attr('fill', '#374151')
-      .text((d) => d.data.name);
+      .text((d: any) => d.data.name);
 
-    node.filter((d): boolean => !!d.children && d.children.length > 0)
+    node.filter((d: any): boolean => !!d.children && d.children.length > 0)
       .append('circle')
       .attr('r', 6)
-      .attr('cx', (d) => (nodeWidths.get(d) || 60) / 2 + 8)
+      .attr('cx', (d: any) => (nodeWidths.get(d) || 60) / 2 + 8)
       .attr('cy', 0)
       .attr('fill', '#374151')
       .append('text')
@@ -170,7 +171,7 @@ export default function KnowledgeGraphD3({ data, onNodeClick }: Props) {
       .attr('fill', 'white')
       .text('-');
 
-    const tooltip = d3.select('body').append('div')
+    const tooltip = select('body').append('div')
       .attr('class', 'd3-tooltip')
       .style('position', 'absolute')
       .style('background', 'rgba(0,0,0,0.8)')
@@ -181,8 +182,10 @@ export default function KnowledgeGraphD3({ data, onNodeClick }: Props) {
       .style('pointer-events', 'none')
       .style('opacity', 0);
 
-    node.on('mouseenter', function(event, d) {
-      d3.select(this).select('rect').transition().duration(200).attr('rx', 12);
+    tooltipRef.current = tooltip.node() as HTMLDivElement;
+
+    node.on('mouseenter', function(event: any, d: any) {
+      select(this).select('rect').transition().duration(200).attr('rx', 12);
       tooltip.transition().duration(200).style('opacity', 1);
       const nodeData = d.data.data || d.data;
       tooltip.html(`
@@ -191,12 +194,12 @@ export default function KnowledgeGraphD3({ data, onNodeClick }: Props) {
       `).style('left', (event.pageX + 10) + 'px').style('top', (event.pageY - 10) + 'px');
     });
 
-    node.on('mouseleave', function(event, d) {
-      d3.select(this).select('rect').transition().duration(200).attr('rx', 8);
+    node.on('mouseleave', function(_: any, d: any) {
+      select(this).select('rect').transition().duration(200).attr('rx', 8);
       tooltip.transition().duration(200).style('opacity', 0);
     });
 
-    node.on('click', function(event, d) {
+    node.on('click', function(event: any, d: any) {
       event.stopPropagation();
       const nodeData = d.data.data || d.data;
       if (nodeData && nodeData.id !== undefined) {
@@ -209,9 +212,39 @@ export default function KnowledgeGraphD3({ data, onNodeClick }: Props) {
 
     return () => {
       tooltip.remove();
+      tooltipRef.current = null;
       container.selectAll('*').remove();
     };
   }, [data, onNodeClick]);
+
+  useEffect(() => {
+    if (!data || data.length === 0) return;
+
+    let scheduled: number | undefined;
+    const scheduleRender = () => {
+      if (typeof requestIdleCallback === 'function') {
+        scheduled = requestIdleCallback(renderGraph, { timeout: 1000 });
+      } else {
+        scheduled = window.setTimeout(renderGraph, 100);
+      }
+    };
+
+    scheduleRender();
+
+    return () => {
+      if (scheduled !== undefined) {
+        if (typeof requestIdleCallback === 'function') {
+          cancelIdleCallback(scheduled);
+        } else {
+          clearTimeout(scheduled);
+        }
+      }
+      if (tooltipRef.current) {
+        tooltipRef.current.remove();
+        tooltipRef.current = null;
+      }
+    };
+  }, [data, onNodeClick, renderGraph]);
 
   return (
     <div ref={containerRef} className="w-full h-full">

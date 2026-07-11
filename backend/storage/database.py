@@ -1,7 +1,9 @@
 import sqlite3
 import os
 import json
+import time
 import threading
+import multiprocessing
 from datetime import datetime
 from contextlib import contextmanager
 from functools import lru_cache
@@ -9,17 +11,20 @@ from functools import lru_cache
 DB_PATH = os.path.join(os.path.dirname(__file__), "../../data/bubblemate.db")
 
 class SQLiteConnectionPool:
-    _instance = None
+    _instances = {}
     _lock = threading.Lock()
+    MAX_CONNECTIONS = 40
     
     def __new__(cls):
-        if cls._instance is None:
-            with cls._lock:
-                if cls._instance is None:
-                    cls._instance = super().__new__(cls)
-                    cls._instance._connections = {}
-                    cls._instance._connection_lock = threading.Lock()
-        return cls._instance
+        pid = os.getpid()
+        with cls._lock:
+            if pid not in cls._instances:
+                instance = super().__new__(cls)
+                instance._connections = {}
+                instance._connection_lock = threading.Lock()
+                instance._timestamps = {}
+                cls._instances[pid] = instance
+            return cls._instances[pid]
     
     def _create_connection(self):
         os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
@@ -30,6 +35,8 @@ class SQLiteConnectionPool:
             timeout=30
         )
         conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA synchronous=NORMAL")
         return conn
     
     @contextmanager
@@ -37,7 +44,16 @@ class SQLiteConnectionPool:
         thread_id = threading.current_thread().ident
         with self._connection_lock:
             if thread_id not in self._connections:
+                if len(self._connections) >= self.MAX_CONNECTIONS:
+                    oldest_key = min(self._timestamps.keys(), key=lambda k: self._timestamps[k])
+                    try:
+                        self._connections[oldest_key].close()
+                    except:
+                        pass
+                    del self._connections[oldest_key]
+                    del self._timestamps[oldest_key]
                 self._connections[thread_id] = self._create_connection()
+            self._timestamps[thread_id] = time.time()
             conn = self._connections[thread_id]
         try:
             yield conn
@@ -47,7 +63,10 @@ class SQLiteConnectionPool:
     def close_all(self):
         with self._connection_lock:
             for conn in self._connections.values():
-                conn.close()
+                try:
+                    conn.close()
+                except:
+                    pass
             self._connections.clear()
 
 connection_pool = SQLiteConnectionPool()
@@ -58,6 +77,19 @@ def get_db_connection():
         yield conn
 
 def _connect():
+    thread_id = threading.current_thread().ident
+    with connection_pool._connection_lock:
+        if thread_id not in connection_pool._connections:
+            connection_pool._connections[thread_id] = connection_pool._create_connection()
+        else:
+            try:
+                connection_pool._connections[thread_id].cursor()
+            except sqlite3.ProgrammingError:
+                connection_pool._connections[thread_id] = connection_pool._create_connection()
+        conn = connection_pool._connections[thread_id]
+    return conn
+
+def init_db():
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     conn = sqlite3.connect(
         DB_PATH,
@@ -66,19 +98,8 @@ def _connect():
         timeout=30
     )
     conn.row_factory = sqlite3.Row
-    return conn
-
-
-def _connect_pool():
-    thread_id = threading.current_thread().ident
-    with connection_pool._connection_lock:
-        if thread_id not in connection_pool._connections:
-            connection_pool._connections[thread_id] = connection_pool._create_connection()
-        conn = connection_pool._connections[thread_id]
-    return conn
-
-def init_db():
-    conn = _connect()
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA synchronous=NORMAL")
     c = conn.cursor()
     c.execute("""
         CREATE TABLE IF NOT EXISTS users (

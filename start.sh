@@ -26,7 +26,7 @@ fi
 
 # 启动后端
 echo "启动后端服务..."
-python -m uvicorn backend.api.main:app --host 0.0.0.0 --port 8000 &
+python -m uvicorn backend.api.main:app --host 0.0.0.0 --port 8000 --workers 8 &
 
 # 启动前端
 echo "启动前端服务..."

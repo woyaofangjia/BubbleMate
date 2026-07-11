@@ -17,6 +17,7 @@ except:
 try:
     from storage.database import save_session, get_user_by_session, save_user_preference, get_user_preferences, save_complaint, save_complaint_with_candidate, get_knowledge_graph, save_knowledge as _save_knowledge, save_complaint_db as _save_complaint_db, get_complaint_stats
     from storage.data_access import get_shops, get_menu_items, get_orders, get_inventory, get_shop_by_name
+    from core.cache import cache
 except:
     save_session = lambda s, u: None
     get_user_by_session = lambda s: None
@@ -33,6 +34,7 @@ except:
     _save_knowledge = lambda ct, s, c: None
     _save_complaint_db = lambda u, ct, d: None
     get_complaint_stats = lambda: {"by_type": []}
+    cache = None
 
 # ==================== Harness自我反思 ====================
 
@@ -349,8 +351,8 @@ def get_user_id(session_id: str) -> str:
 INTENT_KEYWORDS = {
     "complaint_taste": ["太甜", "太酸", "太苦", "难喝", "不好喝", "口感", "味道怪", "喝不下", "糖浆劣质", "巨甜", "像药", "酸死了", "苦死了", "涩", "太淡", "没味道", "香精味"],
     "complaint_quantity": ["份量", "分量", "冰块太多", "配料少", "珍珠少", "料少", "少的可怜", "少得可怜", "只有半杯", "大杯", "送来只有", "太少了", "不够多", "只有一点点", "就几颗"],
-    "complaint_service": ["服务差", "态度差", "电话打不通", "备注没按", "服务不好", "联系商家", "不理我", "不理", "不回"],
-    "complaint_delivery": ["配送慢", "超时", "送得晚", "等太久", "包装破了", "等了", "还没到", "送错", "漏送", "破损", "撒了"],
+    "complaint_service": ["服务差", "态度差", "电话打不通", "备注没按", "服务不好", "联系商家", "不理我", "不理", "不回", "态度恶劣", "不耐烦", "服务态度", "客服态度", "没人理"],
+    "complaint_delivery": ["配送慢", "超时", "送得晚", "等太久", "包装破了", "等了", "还没到", "送错", "漏送", "破损", "撒了", "等了多久", "预计到达", "什么时候到", "还在路上", "一直没到", "送达时间"],
     "complaint_price": ["太贵", "价格高", "不值", "被坑了", "性价比低", "又贵"],
     "complaint_refund": ["退款", "退钱", "要求退款", "申请退款"],
     "complaint_sarcasm": ["呵呵", "绝了", "也是绝了", "真是", "太坑了"],
@@ -367,7 +369,7 @@ INTENT_KEYWORDS = {
     "query_price": ["多少钱", "价格", "贵不贵", "价位"],
     "query_temp": ["热", "冰", "温度", "热的", "冰的", "温的"],
     "query_delivery": ["外卖", "配送", "能送", "送到"],
-    "query_promotion": ["优惠", "活动", "折扣", "特价", "第二杯半价", "吗"],
+    "query_promotion": ["优惠", "活动", "折扣", "特价", "第二杯半价", "吗", "打折", "促销", "优惠券", "满减", "团购", "套餐"],
     "query_member": ["会员", "会员卡", "积分", "会员权益"],
     "query_invoice": ["发票", "开票", "开发票"],
     "query_customize": ["加料", "配料", "珍珠", "椰果", "仙草", "芋圆", "定制", "加", "添加"],
@@ -398,14 +400,14 @@ CATEGORY_MAP = {
 RULE_PATTERNS = {
     "complaint_taste": [re.compile(r"(太甜|太酸|太苦|难喝|不好喝|口感不好|味道怪|喝不下)", re.I), re.compile(r"(糖浆.*?(劣质|不好)|巨甜|像药)", re.I), re.compile(r"(冰放太多.*?头疼|喝着头疼)", re.I)],
     "complaint_quantity": [re.compile(r"(份量|分量|量).*?(少|小|不够)", re.I), re.compile(r"(冰块).*?(太多|全是)", re.I), re.compile(r"(少的可怜|少得可怜|只有半杯|大杯.*?送来)", re.I)],
-    "complaint_service": [re.compile(r"(服务|态度).*?(差|不好|恶劣)", re.I), re.compile(r"(联系商家|商家.*?(不理|不回|没回))", re.I)],
-    "complaint_delivery": [re.compile(r"(配送|送达|送).*?(慢|超时|晚)", re.I)],
-    "complaint_price": [re.compile(r"(贵|价格).*?(高|不值)", re.I), re.compile(r"(又贵|太贵了)", re.I)],
+    "complaint_service": [re.compile(r"(服务|态度).*?(差|不好|恶劣)", re.I), re.compile(r"(联系商家|商家.*?(不理|不回|没回))", re.I), re.compile(r"(态度).*?(不耐烦|恶劣|太差)", re.I), re.compile(r"(客服|服务).*?(态度.*?(差|不好)|没人理)", re.I)],
+    "complaint_delivery": [re.compile(r"(配送|送达|送).*?(慢|超时|晚)", re.I), re.compile(r"(配送速度).*?(打破认知|惊到我|意想不到|感人)", re.I), re.compile(r"(配送速度).*?(认知|想象|预料)", re.I), re.compile(r"(等了|等待).*?(多久|长时间)", re.I), re.compile(r"(预计|什么时候|几点).*?(到达|送到|到)", re.I), re.compile(r"(还在路上|一直没到|迟迟没到)", re.I)],
+    "complaint_price": [re.compile(r"(贵|价格).*?(高|不值)", re.I), re.compile(r"(又贵|太贵了)", re.I), re.compile(r"(价格|贵).*?(具有竞争力|很有竞争力|感人)", re.I)],
     "complaint_refund": [re.compile(r"(要求退款|申请退款|我要退款)", re.I)],
-    "complaint_sarcasm": [re.compile(r"(呵呵|绝了|也是绝了|太坑了)", re.I)],
+    "complaint_sarcasm": [re.compile(r"(呵呵|绝了|也是绝了|太坑了)", re.I), re.compile(r"(一言难尽|太离谱)", re.I)],
     "complaint_accessory": [re.compile(r"(吸管).*?(细|怎么喝)", re.I), re.compile(r"(吸管|配件).*?(少|没|缺失|不见)", re.I)],
     "complaint_vague": [re.compile(r"(就是那个|你们懂的|懂的都懂|又少又难喝)", re.I)],
-    "complaint_compare_history": [re.compile(r"(跟这次不一样|换配方)", re.I)],
+    "complaint_compare_history": [re.compile(r"(跟这次不一样|跟之前不一样)", re.I)],
     "complaint_taste_service": [re.compile(r"(口味|口感|甜|酸|苦|难喝).*?(服务|不理|不回)", re.I)],
     "complaint_taste_price": [re.compile(r"(苦|难喝|甜).*?(贵|不值)", re.I)],
     "query_recommend": [re.compile(r"(推荐|招牌|热门|特色|新品|必点)", re.I), re.compile(r"(有什么).*?(好喝|推荐)", re.I)],
@@ -415,7 +417,7 @@ RULE_PATTERNS = {
     "query_location": [re.compile(r"(门店|地址|位置)", re.I), re.compile(r"(附近|周边).*?(有|店|奶茶)", re.I), re.compile(r"(最近的一家店|最近的店)", re.I)],
     "query_refund": [re.compile(r"(怎么退款|如何退款|退款流程)", re.I), re.compile(r"(可以退吗|能退吗|能退款吗)", re.I)],
     "query_price": [re.compile(r"(多少钱|价格|贵不贵)", re.I)],
-    "query_promotion": [re.compile(r"(优惠|活动|折扣|券).*?(有|今天)", re.I), re.compile(r"(有什么|今天).*?(优惠|活动|折扣)", re.I)],
+    "query_promotion": [re.compile(r"(优惠|活动|折扣|券).*?(有|今天)", re.I), re.compile(r"(有什么|今天).*?(优惠|活动|折扣)", re.I), re.compile(r"(打折|促销|团购|套餐).*?(有|吗|今天)", re.I), re.compile(r"(优惠券|满减|第二杯).*?(半价|活动|有吗)", re.I)],
     "query_customize": [re.compile(r"(加料|配料|珍珠|椰果).*?(可以|能加|有哪些)", re.I), re.compile(r"(可以|能).*?(加.*?珍珠|加.*?配料)", re.I), re.compile(r"(我要.*?(少糖|无糖|去冰|少冰)|给我.*?(热|温))", re.I)],
     "query_history": [re.compile(r"(历史订单|之前.*?(订单|买过))", re.I), re.compile(r"(之前点过什么|之前买过什么)", re.I)],
     "place_order": [re.compile(r"(点|买|要).*?(一杯|奶茶|饮品)", re.I), re.compile(r"(下单|来一杯)", re.I)],
@@ -593,36 +595,58 @@ def _get_llm_result(text):
         pass
     return None
 
+async def _get_llm_result_async(text):
+    try:
+        from backend.core.zhipu_client import call_llm_async, is_available
+        if not is_available():
+            return None
+        prompt = f"判断用户意图：'{text}'\n可选：{', '.join(INTENT_KEYWORDS.keys())}\n只返回意图名称，不要其他内容。"
+        resp = await call_llm_async([{"role": "user", "content": prompt}], max_tokens=20, temperature=0.1)
+        intent_name = resp.strip().strip("'\"")
+        if intent_name in CATEGORY_MAP:
+            return {"name": intent_name, "confidence": 0.6, "category": CATEGORY_MAP.get(intent_name, "通用")}
+    except Exception as e:
+        pass
+    return None
+
 LLM_FALLBACK_THRESHOLD = 0.55
 
-INTENT_CACHE = {}
-INTENT_CACHE_MAX_SIZE = 500
 INTENT_CACHE_SIMILARITY_THRESHOLD = 0.8
 
 def _get_cached_intent(text):
     text = text.strip()
-    if text in INTENT_CACHE:
-        cached = INTENT_CACHE[text]
-        if time.time() - cached["timestamp"] < 300:
-            return cached["intent"]
-    
-    for cached_text, cached_data in INTENT_CACHE.items():
-        similarity = difflib.SequenceMatcher(None, text, cached_text).ratio()
-        if similarity >= INTENT_CACHE_SIMILARITY_THRESHOLD:
-            if time.time() - cached_data["timestamp"] < 300:
-                return cached_data["intent"]
+    if cache:
+        cached = cache.get("intent", text)
+        if cached:
+            return cached
     
     return None
 
 def _cache_intent(text, intent):
     text = text.strip()
-    if len(INTENT_CACHE) >= INTENT_CACHE_MAX_SIZE:
-        oldest_key = min(INTENT_CACHE.keys(), key=lambda k: INTENT_CACHE[k]["timestamp"])
-        del INTENT_CACHE[oldest_key]
-    INTENT_CACHE[text] = {"intent": intent, "timestamp": time.time()}
+    if cache:
+        cache.set("intent", text, intent, ttl=3600)
 
 def clear_intent_cache():
-    INTENT_CACHE.clear()
+    if cache:
+        cache.clear("intent")
+
+def _get_cached_response(text):
+    text = text.strip()
+    if cache:
+        cached = cache.get("response", text)
+        if cached:
+            return cached
+    return None
+
+def _cache_response(text, response):
+    text = text.strip()
+    if cache:
+        cache.set("response", text, response, ttl=600)
+
+def clear_response_cache():
+    if cache:
+        cache.clear("response")
 
 def recognize_intent(text, llm_client=None):
     if not text or text.strip() == "":
@@ -661,6 +685,50 @@ def recognize_intent(text, llm_client=None):
         _cache_intent(text, result)
         return result
     llm_result = _get_llm_result(text)
+    if llm_result:
+        _cache_intent(text, llm_result)
+        return llm_result
+    result = {"name": "general", "confidence": 0.2, "category": "通用"}
+    _cache_intent(text, result)
+    return result
+
+async def recognize_intent_async(text, llm_client=None):
+    if not text or text.strip() == "":
+        return {"name": "unknown", "confidence": 0.9, "category": "未知"}
+    
+    cached_intent = _get_cached_intent(text)
+    if cached_intent:
+        return cached_intent
+    
+    rule = _rule_match(text)
+    composite = _composite_match(text)
+    if composite:
+        result = {"name": "composite", "confidence": 0.85, "category": "复合意图", "sub_intents": composite["sub_intents"]}
+        _cache_intent(text, result)
+        return result
+    if rule:
+        name, kw, conf = rule
+        if conf < LLM_FALLBACK_THRESHOLD:
+            llm_result = await _get_llm_result_async(text)
+            if llm_result:
+                _cache_intent(text, llm_result)
+                return llm_result
+        result = {"name": name, "confidence": conf, "category": CATEGORY_MAP.get(name, "通用"), "keywords": [kw]}
+        _cache_intent(text, result)
+        return result
+    kw_match = _multi_keyword_match(text)
+    if kw_match:
+        name, score = kw_match
+        conf = min(score + 0.2, 0.9)
+        if conf < LLM_FALLBACK_THRESHOLD:
+            llm_result = await _get_llm_result_async(text)
+            if llm_result:
+                _cache_intent(text, llm_result)
+                return llm_result
+        result = {"name": name, "confidence": conf, "category": CATEGORY_MAP.get(name, "通用")}
+        _cache_intent(text, result)
+        return result
+    llm_result = await _get_llm_result_async(text)
     if llm_result:
         _cache_intent(text, llm_result)
         return llm_result
@@ -889,7 +957,7 @@ def query_history(user_id=None, limit=3, data_dir="data"):
 @lru_cache(maxsize=32)
 def query_recommend(preference=None, data_dir=None):
     if data_dir is None:
-        data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
+        data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
     menu = _read_json(os.path.join(data_dir, "menu_data.json"))
     all_items = []
     for store, items in menu.items():
@@ -1152,6 +1220,12 @@ async def process_message_async(text, session_id="default", memory_store=None, l
     trace = ExecutionTrace()
     trace.session_id = session_id
     
+    cached_response = _get_cached_response(text)
+    if cached_response:
+        if memory_store:
+            asyncio.create_task(asyncio.to_thread(save_message, memory_store, session_id, text, cached_response))
+        return cached_response, {"name": "cached", "confidence": 1.0, "category": "缓存"}
+    
     termination = should_terminate(text, trace)
     if termination["terminate"]:
         if termination["action"] == "human_handover":
@@ -1162,7 +1236,7 @@ async def process_message_async(text, session_id="default", memory_store=None, l
             save_message(memory_store, session_id, text, reply)
         return reply, {"name": "terminated", "confidence": 1.0, "category": "终止"}
     
-    intent_task = asyncio.create_task(asyncio.to_thread(recognize_intent, text, llm_client))
+    intent_task = asyncio.create_task(recognize_intent_async(text, llm_client))
     
     def load_context():
         if memory_store:
@@ -1179,7 +1253,13 @@ async def process_message_async(text, session_id="default", memory_store=None, l
         tool_name = INTENT_TOOL.get(intent["name"])
         
         if intent["name"] == "query_recommend":
-            tool_result, _ = await asyncio.to_thread(get_tool_response, intent["name"], text, session_id=session_id)
+            try:
+                tool_result = await asyncio.to_thread(query_recommend)
+                print(f"query_recommend tool_result: {tool_result}")
+                print(f"query_recommend success: {tool_result.get('success') if tool_result else 'None'}")
+            except Exception as e:
+                print(f"query_recommend error: {e}")
+                tool_result = {"success": False, "data": [], "error": str(e)}
             response = build_response(intent, text, tool_result, [])
             trace.add_step("tool_call", {"tool_name": "query_recommend", "intent_name": intent["name"], "params": {}})
             trace.add_step("tool_result", {"success": tool_result.get("success", False), "data": tool_result.get("data", [])})
@@ -1187,12 +1267,15 @@ async def process_message_async(text, session_id="default", memory_store=None, l
             trace.save_to_file()
             if memory_store:
                 save_message(memory_store, session_id, text, response)
+            _cache_response(text, response)
             return response, intent
         
         elif intent["name"] == "query_order":
             params, missing = extract_params(text, intent["name"], session_id)
             if params.get("order_id"):
-                tool_result, _ = await asyncio.to_thread(get_tool_response, intent["name"], text, session_id=session_id)
+                def _call_tool():
+                    return get_tool_response(intent["name"], text, TOOLS, session_id)
+                tool_result, _ = await asyncio.to_thread(_call_tool)
                 response = build_response(intent, text, tool_result, [])
                 trace.add_step("tool_call", {"tool_name": "query_order", "intent_name": intent["name"], "params": params})
                 trace.add_step("tool_result", {"success": tool_result.get("success", False), "data": tool_result.get("data", [])})
@@ -1200,6 +1283,7 @@ async def process_message_async(text, session_id="default", memory_store=None, l
                 trace.save_to_file()
                 if memory_store:
                     save_message(memory_store, session_id, text, response)
+                _cache_response(text, response)
                 return response, intent
             else:
                 response = f"【思考】{intent['name']}\n【回复】请问您能提供一下订单号吗？这样我可以帮您查询相关信息。"
@@ -1208,10 +1292,13 @@ async def process_message_async(text, session_id="default", memory_store=None, l
                 trace.save_to_file()
                 if memory_store:
                     save_message(memory_store, session_id, text, response)
+                _cache_response(text, response)
                 return response, intent
         
         elif intent["name"] == "query_location" or intent["name"] == "query_store":
-            tool_result, _ = await asyncio.to_thread(get_tool_response, intent["name"], text, session_id=session_id)
+            def _call_tool():
+                return get_tool_response(intent["name"], text, TOOLS, session_id)
+            tool_result, _ = await asyncio.to_thread(_call_tool)
             response = build_response(intent, text, tool_result, [])
             trace.add_step("tool_call", {"tool_name": "query_stores", "intent_name": intent["name"], "params": extract_params(text, intent["name"], session_id)[0]})
             trace.add_step("tool_result", {"success": tool_result.get("success", False) if tool_result else False, "data": tool_result.get("data", []) if tool_result else []})
@@ -1219,6 +1306,7 @@ async def process_message_async(text, session_id="default", memory_store=None, l
             trace.save_to_file()
             if memory_store:
                 save_message(memory_store, session_id, text, response)
+            _cache_response(text, response)
             return response, intent
         
         elif intent["name"].startswith("complaint"):
@@ -1232,6 +1320,7 @@ async def process_message_async(text, session_id="default", memory_store=None, l
             trace.save_to_file()
             if memory_store:
                 save_message(memory_store, session_id, text, response)
+            _cache_response(text, response)
             return response, intent
     
     return await asyncio.to_thread(harness_handle, text, session_id, intent, trace, memory_store)

@@ -1,0 +1,22 @@
+[
+  {
+    "model": "glm-4-flash",
+    "provider": "zhipu",
+    "available": true,
+    "avg_latency_ms": 866.29,
+    "p95_latency_ms": 2448.36,
+    "total_requests": 30,
+    "min_latency_ms": 232.32,
+    "max_latency_ms": 2918.45
+  },
+  {
+    "model": "glm-4-9b",
+    "provider": "zhipu",
+    "available": true,
+    "avg_latency_ms": 591.38,
+    "p95_latency_ms": 1100.99,
+    "total_requests": 30,
+    "min_latency_ms": 229.25,
+    "max_latency_ms": 1688.24
+  }
+]

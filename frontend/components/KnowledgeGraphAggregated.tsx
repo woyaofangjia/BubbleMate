@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import * as d3 from 'd3';
+import { select, zoom, hierarchy, tree } from 'd3';
 
 interface GraphNode {
   id: string;
@@ -101,7 +101,7 @@ export default function KnowledgeGraphAggregated({ nodes, onNodeClick }: Knowled
   const renderGraph = useCallback(debounce(() => {
     if (!svgRef.current || renderedNodes.length === 0) return;
 
-    const svg = d3.select(svgRef.current);
+    const svg = select(svgRef.current);
     svg.selectAll('*').remove();
 
     const width = svgRef.current.clientWidth;
@@ -110,27 +110,27 @@ export default function KnowledgeGraphAggregated({ nodes, onNodeClick }: Knowled
     const container = svg.append('g')
       .attr('transform', 'translate(50, 30)');
 
-    const zoom = d3.zoom<SVGSVGElement, unknown>()
+    const zoomBehavior = zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.5, 2])
       .on('zoom', (event) => {
         container.attr('transform', event.transform);
       });
 
-    svg.call(zoom);
+    svg.call(zoomBehavior);
 
     const rootData = { id: 'root', name: '', type: 'complaint' as GraphNode['type'], content: '', children: renderedNodes };
 
-    const hierarchy = d3.hierarchy<GraphNode>(rootData)
+    const hierarchyData = hierarchy<GraphNode>(rootData)
       .sort((a, b) => {
         const typeOrder = { complaint: 0, issue: 1, solution: 2, compensation: 3 };
         return typeOrder[a.data.type] - typeOrder[b.data.type];
       });
 
-    const treeLayout = d3.tree<GraphNode>()
+    const treeLayout = tree<GraphNode>()
       .size([height - 80, width - 100])
       .nodeSize([50, 120]);
 
-    const root = treeLayout(hierarchy);
+    const root = treeLayout(hierarchyData);
 
     const linkGroup = container.selectAll('g.links')
       .data([null])
@@ -168,23 +168,23 @@ export default function KnowledgeGraphAggregated({ nodes, onNodeClick }: Knowled
       .join('g')
       .attr('class', 'nodes');
 
-    const nodes = nodeGroup.selectAll<SVGGElement, d3.HierarchyNode<GraphNode>>('g.node')
+    const nodeSelection = nodeGroup.selectAll<SVGGElement, any>('g.node')
       .data(root.descendants());
 
-    nodes.exit().remove();
+    nodeSelection.exit().remove();
 
-    const newNodes = nodes.enter().append<SVGGElement>('g')
+    const newNodes = nodeSelection.enter().append<SVGGElement>('g')
       .attr('class', 'node')
       .style('cursor', 'pointer');
 
-    const allNodes = newNodes.merge(nodes as any);
+    const allNodes = newNodes.merge(nodeSelection as any);
 
-    allNodes.attr('transform', (d) => `translate(${d.x ?? 0}, ${d.y ?? 0})`);
+    allNodes.attr('transform', (d: any) => `translate(${d.x ?? 0}, ${d.y ?? 0})`);
 
-    newNodes.each(function(d) {
+    newNodes.each(function(d: any) {
       const node = d.data as GraphNode;
       if (node.id === 'root') return;
-      const group = d3.select(this);
+      const group = select(this);
       const color = NODE_COLORS[node.type];
       
       if (node.type === 'complaint') {
@@ -228,8 +228,8 @@ export default function KnowledgeGraphAggregated({ nodes, onNodeClick }: Knowled
         .text(node.id === 'root' ? '' : (node.name.length > 7 ? node.name.slice(0, 7) + '..' : node.name));
     });
 
-    nodeGroup.selectAll<SVGGElement, d3.HierarchyNode<GraphNode>>('g.node')
-      .on('mouseenter', function(event, d) {
+    nodeGroup.selectAll<SVGGElement, any>('g.node')
+      .on('mouseenter', function(event: any, d: any) {
         const node = d.data as GraphNode;
         if (node.id === 'root') return;
         
@@ -255,7 +255,7 @@ export default function KnowledgeGraphAggregated({ nodes, onNodeClick }: Knowled
           tooltipRef.current.style.opacity = '0';
         }
       })
-      .on('click', function(_, d) {
+      .on('click', function(_: any, d: any) {
         const node = d.data as GraphNode;
         if (node.id !== 'root') {
           onNodeClick(node);
@@ -264,9 +264,29 @@ export default function KnowledgeGraphAggregated({ nodes, onNodeClick }: Knowled
   }, 100), [renderedNodes, onNodeClick]);
 
   useEffect(() => {
-    const rafId = requestAnimationFrame(renderGraph);
-    return () => cancelAnimationFrame(rafId);
-  }, [renderGraph]);
+    if (renderedNodes.length === 0) return;
+
+    let scheduled: number | undefined;
+    const scheduleRender = () => {
+      if (typeof requestIdleCallback === 'function') {
+        scheduled = requestIdleCallback(renderGraph, { timeout: 1000 });
+      } else {
+        scheduled = window.setTimeout(renderGraph, 100);
+      }
+    };
+
+    scheduleRender();
+
+    return () => {
+      if (scheduled !== undefined) {
+        if (typeof requestIdleCallback === 'function') {
+          cancelIdleCallback(scheduled);
+        } else {
+          clearTimeout(scheduled);
+        }
+      }
+    };
+  }, [renderedNodes, renderGraph]);
 
   if (nodes.length > MAX_NODES_FOR_RENDER) {
     return (

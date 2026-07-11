@@ -1,7 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // 允许访问本地API
+  compiler: {
+    removeConsole: {
+      exclude: ['error'],
+    },
+  },
   async rewrites() {
     return [
       {

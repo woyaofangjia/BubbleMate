@@ -1,0 +1,20 @@
+[
+  {
+    "model": "glm-4-flash",
+    "provider": "zhipu",
+    "accuracy": 91.0,
+    "correct": 182,
+    "total": 200,
+    "avg_latency_ms": 4.31,
+    "total_time_s": 0.86
+  },
+  {
+    "model": "glm-4-9b",
+    "provider": "zhipu",
+    "accuracy": 91.0,
+    "correct": 182,
+    "total": 200,
+    "avg_latency_ms": 0.0,
+    "total_time_s": 0.0
+  }
+]
