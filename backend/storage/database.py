@@ -4,6 +4,7 @@ import json
 import threading
 from datetime import datetime
 from contextlib import contextmanager
+from functools import lru_cache
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "../../data/bubblemate.db")
 
@@ -65,6 +66,15 @@ def _connect():
         timeout=30
     )
     conn.row_factory = sqlite3.Row
+    return conn
+
+
+def _connect_pool():
+    thread_id = threading.current_thread().ident
+    with connection_pool._connection_lock:
+        if thread_id not in connection_pool._connections:
+            connection_pool._connections[thread_id] = connection_pool._create_connection()
+        conn = connection_pool._connections[thread_id]
     return conn
 
 def init_db():
@@ -214,6 +224,67 @@ def init_db():
     c.execute("CREATE INDEX IF NOT EXISTS idx_candidates_status ON knowledge_candidates(status)")
     c.execute("CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id)")
 
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS shops (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            address TEXT,
+            location TEXT,
+            tel TEXT,
+            rating TEXT,
+            cost TEXT,
+            opentime TEXT,
+            business_area TEXT,
+            tag TEXT,
+            status TEXT DEFAULT 'active',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS menu_items (
+            id TEXT PRIMARY KEY,
+            shop_id TEXT REFERENCES shops(id),
+            name TEXT NOT NULL,
+            category TEXT,
+            price REAL,
+            available BOOLEAN DEFAULT 1,
+            description TEXT,
+            sales INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS orders (
+            id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            shop_id TEXT REFERENCES shops(id),
+            items TEXT,
+            total REAL,
+            status TEXT DEFAULT 'pending',
+            address TEXT,
+            create_time TEXT,
+            delivery_time TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP
+        )
+    """)
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS inventory (
+            shop_id TEXT REFERENCES shops(id),
+            menu_item_id TEXT REFERENCES menu_items(id),
+            quantity INTEGER DEFAULT 0,
+            PRIMARY KEY (shop_id, menu_item_id)
+        )
+    """)
+
+    c.execute("CREATE INDEX IF NOT EXISTS idx_shops_name ON shops(name)")
+    c.execute("CREATE INDEX IF NOT EXISTS idx_shops_area ON shops(business_area)")
+    c.execute("CREATE INDEX IF NOT EXISTS idx_menu_shop ON menu_items(shop_id)")
+    c.execute("CREATE INDEX IF NOT EXISTS idx_menu_name ON menu_items(name)")
+    c.execute("CREATE INDEX IF NOT EXISTS idx_orders_user ON orders(user_id)")
+    c.execute("CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status)")
+    c.execute("CREATE INDEX IF NOT EXISTS idx_inventory_shop ON inventory(shop_id)")
+
     conn.commit()
     conn.close()
 
@@ -308,6 +379,7 @@ def save_knowledge(complaint_type, solution, compensation):
     conn.commit()
     conn.close()
 
+@lru_cache(maxsize=64)
 def get_knowledge_list(reviewed_only=False):
     conn = _connect()
     c = conn.cursor()
@@ -319,6 +391,7 @@ def get_knowledge_list(reviewed_only=False):
     conn.close()
     return [dict(row) for row in rows]
 
+@lru_cache(maxsize=32)
 def get_knowledge_graph():
     conn = _connect()
     c = conn.cursor()

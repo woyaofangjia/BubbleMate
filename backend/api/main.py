@@ -9,8 +9,9 @@ import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from bubble_agent import process_message, recognize_intent, create_memory_store, get_context, TOOLS, get_user_id, query_menu, query_promotions, query_recommend, query_customize, MemoryStore
+from bubble_agent import process_message, process_message_async, recognize_intent, create_memory_store, get_context, TOOLS, get_user_id, query_menu, query_promotions, query_recommend, query_customize, MemoryStore, clear_intent_cache
 from storage.database import init_db, get_user_preferences, get_complaint_history, get_user_stats, get_knowledge_candidates, approve_candidate, reject_candidate, get_complaint_knowledge, get_knowledge_complaints, update_knowledge_parent, get_all_complaints, get_knowledge_list, get_knowledge_graph, get_knowledge_graph_aggregated, review_knowledge, delete_knowledge, get_complaint_stats, resolve_complaint, add_knowledge_node
+from storage.data_access import get_shops, get_menu_items, get_orders, get_shop_by_name
 from storage.redis_store import session_store
 
 init_db()
@@ -72,7 +73,7 @@ async def process_complaint_async(session_id: str, message: str, intent_name: st
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
-    response, intent = process_message(request.message, request.session_id, memory_store)
+    response, intent = await process_message_async(request.message, request.session_id, memory_store)
     
     if intent["name"].startswith("complaint"):
         background_tasks.add_task(process_complaint_async, request.session_id, request.message, intent["name"])
@@ -111,24 +112,24 @@ async def clear_session(session_id: str):
 
 @app.get("/menu")
 async def get_menu(category: Optional[str] = None):
-    menu = {
-        "芝士系列": [{"name": "芝芝莓莓", "price": 20}, {"name": "芝芝芒果", "price": 18}],
-        "鲜果茶系列": [{"name": "杨枝甘露", "price": 18}, {"name": "葡萄冰茶", "price": 15}],
-        "奶茶系列": [{"name": "珍珠奶茶", "price": 12}, {"name": "糯米奶茶", "price": 14}],
-        "纯茶系列": [{"name": "茉莉绿茶", "price": 15}, {"name": "柠檬茶", "price": 10}],
-    }
-    result = {"menu": menu} if not category else {"category": category, "items": menu.get(category, [])}
+    items = get_menu_items(category=category)
+    if category:
+        result = {"category": category, "items": items}
+    else:
+        menu = {}
+        for item in items:
+            cat = item.get('category', '其他')
+            if cat not in menu:
+                menu[cat] = []
+            menu[cat].append({"name": item['name'], "price": item['price']})
+        result = {"menu": menu}
     return Response(content=json.dumps(result, ensure_ascii=False), media_type="application/json", headers={"Cache-Control": "public, max-age=300"})
 
 @app.get("/shops")
 async def list_shops():
-    path = os.path.join(os.path.dirname(__file__), "../../data/bubble_tea_all.json")
-    if os.path.exists(path):
-        with open(path, "r", encoding="utf-8") as f:
-            shops = json.load(f)
-        result = {"shops": shops, "count": len(shops)}
-        return Response(content=json.dumps(result, ensure_ascii=False), media_type="application/json", headers={"Cache-Control": "public, max-age=600"})
-    return {"shops": [], "count": 0}
+    shops = get_shops()
+    result = {"shops": shops, "count": len(shops)}
+    return Response(content=json.dumps(result, ensure_ascii=False), media_type="application/json", headers={"Cache-Control": "public, max-age=600"})
 
 @app.get("/eval/report")
 async def get_eval_report():
@@ -144,13 +145,18 @@ async def get_user_profile(session_id: str):
     preferences = get_user_preferences(user_id)
     complaints = get_complaint_history(user_id)
     stats = get_user_stats(user_id)
-    orders_path = os.path.join(os.path.dirname(__file__), "../../data/orders_mock.json")
+    db_orders = get_orders(user_id=user_id)
     recent_orders = []
-    if os.path.exists(orders_path):
-        with open(orders_path, "r", encoding="utf-8") as f:
-            orders_data = json.load(f)
-            user_orders = orders_data.get(user_id, [])
-            recent_orders = [{"order_id": o["order_id"], "store": o["store"], "items": o["items"], "total": o["total"], "status": o["status"], "create_time": o["create_time"]} for o in user_orders][:5]
+    for order in db_orders[:5]:
+        shop = get_shop_by_name(order.get('shop_id', '')) if order.get('shop_id') else None
+        recent_orders.append({
+            "order_id": order['id'],
+            "store": shop['name'] if shop else order.get('shop_id', ''),
+            "items": order.get('items', []),
+            "total": order.get('total'),
+            "status": order.get('status', 'pending'),
+            "create_time": order.get('create_time'),
+        })
     return {
         "user_id": user_id,
         "preferences": preferences,
@@ -315,10 +321,20 @@ async def admin_release(session_id: str):
 
 @app.post("/api/admin/cache/clear")
 async def admin_clear_cache():
+    from storage.data_access import get_shops, get_shop_by_name, get_menu_items, get_hot_menu_items
+    from storage.database import get_knowledge_list, get_knowledge_graph
+    
     query_menu.cache_clear()
     query_promotions.cache_clear()
     query_recommend.cache_clear()
     query_customize.cache_clear()
+    get_shops.cache_clear()
+    get_shop_by_name.cache_clear()
+    get_menu_items.cache_clear()
+    get_hot_menu_items.cache_clear()
+    get_knowledge_list.cache_clear()
+    get_knowledge_graph.cache_clear()
+    clear_intent_cache()
     return {"success": True, "message": "缓存已清除"}
 
 class FeedbackRequest(BaseModel):

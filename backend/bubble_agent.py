@@ -4,6 +4,8 @@ import os
 import random
 import time
 import sqlite3
+import asyncio
+import difflib
 from collections import deque
 from functools import lru_cache
 
@@ -14,10 +16,16 @@ except:
 
 try:
     from storage.database import save_session, get_user_by_session, save_user_preference, get_user_preferences, save_complaint, save_complaint_with_candidate, get_knowledge_graph, save_knowledge as _save_knowledge, save_complaint_db as _save_complaint_db, get_complaint_stats
+    from storage.data_access import get_shops, get_menu_items, get_orders, get_inventory, get_shop_by_name
 except:
     save_session = lambda s, u: None
     get_user_by_session = lambda s: None
     save_user_preference = lambda u, k, v: None
+    get_shops = lambda **kwargs: []
+    get_menu_items = lambda **kwargs: []
+    get_orders = lambda **kwargs: []
+    get_inventory = lambda **kwargs: []
+    get_shop_by_name = lambda name: None
     get_user_preferences = lambda u: {}
     save_complaint = lambda u, d: None
     save_complaint_with_candidate = lambda u, ct, d: (None, None)
@@ -339,33 +347,34 @@ def get_user_id(session_id: str) -> str:
 # ==================== 关键词 & 配置 ====================
 
 INTENT_KEYWORDS = {
-    "complaint_taste": ["太甜", "太酸", "太苦", "难喝", "不好喝", "口感", "味道怪", "喝不下", "糖浆劣质", "巨甜", "像药"],
-    "complaint_quantity": ["份量", "分量", "冰块太多", "配料少", "珍珠少", "料少", "少的可怜", "只有半杯", "大杯", "送来只有"],
+    "complaint_taste": ["太甜", "太酸", "太苦", "难喝", "不好喝", "口感", "味道怪", "喝不下", "糖浆劣质", "巨甜", "像药", "酸死了", "苦死了", "涩", "太淡", "没味道", "香精味"],
+    "complaint_quantity": ["份量", "分量", "冰块太多", "配料少", "珍珠少", "料少", "少的可怜", "少得可怜", "只有半杯", "大杯", "送来只有", "太少了", "不够多", "只有一点点", "就几颗"],
     "complaint_service": ["服务差", "态度差", "电话打不通", "备注没按", "服务不好", "联系商家", "不理我", "不理", "不回"],
-    "complaint_delivery": ["配送慢", "超时", "送得晚", "等太久", "包装破了"],
+    "complaint_delivery": ["配送慢", "超时", "送得晚", "等太久", "包装破了", "等了", "还没到", "送错", "漏送", "破损", "撒了"],
     "complaint_price": ["太贵", "价格高", "不值", "被坑了", "性价比低", "又贵"],
     "complaint_refund": ["退款", "退钱", "要求退款", "申请退款"],
-    "complaint_sarcasm": ["呵呵", "绝了", "也是绝了", "真是", "一言难尽"],
+    "complaint_sarcasm": ["呵呵", "绝了", "也是绝了", "真是", "太坑了"],
     "complaint_accessory": ["吸管", "冰沙", "细吸管"],
     "complaint_vague": ["那个", "你们懂的", "就是那个", "懂的都懂"],
     "complaint_compare_history": ["上次那个", "跟这次不一样", "之前那次", "换配方", "不一样"],
     "query_recommend": ["推荐", "招牌", "热门", "特色", "好喝", "有什么好喝"],
-    "query_menu": ["菜单", "饮品", "有什么", "菜单发一下"],
+    "query_menu": ["菜单", "饮品", "有什么", "菜单发一下", "没了", "下架", "不卖了", "没有了", "停售"],
     "query_order": ["订单", "单号", "配送", "送到", "查订单", "我的单"],
     "query_refund": ["退款", "退钱", "售后", "怎么退款"],
     "query_hours": ["几点关门", "几点开门", "营业时间"],
     "query_location": ["门店", "地址", "附近", "在哪", "附近有门店吗", "最近的一家店", "最近的店"],
-    "query_store": ["门店", "店铺", "店", "地址", "位置"],
+    "query_store": ["门店", "店铺", "店", "地址", "位置", "在哪"],
     "query_price": ["多少钱", "价格", "贵不贵", "价位"],
     "query_temp": ["热", "冰", "温度", "热的", "冰的", "温的"],
     "query_delivery": ["外卖", "配送", "能送", "送到"],
-    "query_promotion": ["优惠", "活动", "折扣", "特价", "第二杯半价"],
+    "query_promotion": ["优惠", "活动", "折扣", "特价", "第二杯半价", "吗"],
     "query_member": ["会员", "会员卡", "积分", "会员权益"],
     "query_invoice": ["发票", "开票", "开发票"],
-    "query_customize": ["加料", "配料", "珍珠", "椰果", "仙草", "芋圆", "定制"],
+    "query_customize": ["加料", "配料", "珍珠", "椰果", "仙草", "芋圆", "定制", "加", "添加"],
     "query_history": ["历史订单", "之前的订单", "买过", "订单记录"],
     "place_order": ["点", "买", "下单", "来一杯", "我要"],
     "unclear": ["那个", "跟之前一样", "上次那个", "还行吧"],
+    "general": ["随便", "都行", "没什么事", "没事了", "不用了", "算了"],
 }
 
 CATEGORY_MAP = {
@@ -387,8 +396,8 @@ CATEGORY_MAP = {
 }
 
 RULE_PATTERNS = {
-    "complaint_taste": [re.compile(r"(太甜|太酸|太苦|难喝|不好喝|口感不好|味道怪|喝不下)", re.I), re.compile(r"(糖浆.*?(劣质|不好)|巨甜|像药)", re.I)],
-    "complaint_quantity": [re.compile(r"(份量|分量|量).*?(少|小|不够)", re.I), re.compile(r"(冰块).*?(太多|全是)", re.I), re.compile(r"(少的可怜|只有半杯|大杯.*?送来)", re.I)],
+    "complaint_taste": [re.compile(r"(太甜|太酸|太苦|难喝|不好喝|口感不好|味道怪|喝不下)", re.I), re.compile(r"(糖浆.*?(劣质|不好)|巨甜|像药)", re.I), re.compile(r"(冰放太多.*?头疼|喝着头疼)", re.I)],
+    "complaint_quantity": [re.compile(r"(份量|分量|量).*?(少|小|不够)", re.I), re.compile(r"(冰块).*?(太多|全是)", re.I), re.compile(r"(少的可怜|少得可怜|只有半杯|大杯.*?送来)", re.I)],
     "complaint_service": [re.compile(r"(服务|态度).*?(差|不好|恶劣)", re.I), re.compile(r"(联系商家|商家.*?(不理|不回|没回))", re.I)],
     "complaint_delivery": [re.compile(r"(配送|送达|送).*?(慢|超时|晚)", re.I)],
     "complaint_price": [re.compile(r"(贵|价格).*?(高|不值)", re.I), re.compile(r"(又贵|太贵了)", re.I)],
@@ -396,21 +405,22 @@ RULE_PATTERNS = {
     "complaint_sarcasm": [re.compile(r"(呵呵|绝了|也是绝了|太坑了)", re.I)],
     "complaint_accessory": [re.compile(r"(吸管).*?(细|怎么喝)", re.I), re.compile(r"(吸管|配件).*?(少|没|缺失|不见)", re.I)],
     "complaint_vague": [re.compile(r"(就是那个|你们懂的|懂的都懂|又少又难喝)", re.I)],
-    "complaint_compare_history": [re.compile(r"(上次那个|跟这次不一样|换配方)", re.I)],
+    "complaint_compare_history": [re.compile(r"(跟这次不一样|换配方)", re.I)],
     "complaint_taste_service": [re.compile(r"(口味|口感|甜|酸|苦|难喝).*?(服务|不理|不回)", re.I)],
     "complaint_taste_price": [re.compile(r"(苦|难喝|甜).*?(贵|不值)", re.I)],
     "query_recommend": [re.compile(r"(推荐|招牌|热门|特色|新品|必点)", re.I), re.compile(r"(有什么).*?(好喝|推荐)", re.I)],
-    "query_menu": [re.compile(r"(菜单|饮品).*?(列出|看看|都有)", re.I), re.compile(r"(有什么).*?(喝的|饮品)", re.I)],
-    "query_order": [re.compile(r"(订单|单号).*?(查询|状态|进度|到哪)", re.I), re.compile(r"(订单).*?(\d{5,})|(\d{5,}).*?(订单)", re.I), re.compile(r"(查|查看|我的).*?(订单)", re.I)],
+    "query_menu": [re.compile(r"(菜单|饮品).*?(列出|看看|都有)", re.I), re.compile(r"(有什么).*?(喝的|饮品)", re.I), re.compile(r"(上次买的|之前买的).*?(没了|下架|不卖)", re.I)],
+    "query_order": [re.compile(r"(订单|单号).*?(查询|状态|进度|到哪)", re.I), re.compile(r"(订单).*?(\d{5,})|(\d{5,}).*?(订单)", re.I), re.compile(r"(查|查看|我的).*?(订单)", re.I), re.compile(r"(查.*?上次点的|上次点的是什么)", re.I)],
     "query_hours": [re.compile(r"(营业时间|开门|关门|几点开门)", re.I)],
     "query_location": [re.compile(r"(门店|地址|位置)", re.I), re.compile(r"(附近|周边).*?(有|店|奶茶)", re.I), re.compile(r"(最近的一家店|最近的店)", re.I)],
-    "query_refund": [re.compile(r"(退款)$", re.I), re.compile(r"(怎么退款|申请退款)", re.I)],
+    "query_refund": [re.compile(r"(怎么退款|如何退款|退款流程)", re.I), re.compile(r"(可以退吗|能退吗|能退款吗)", re.I)],
     "query_price": [re.compile(r"(多少钱|价格|贵不贵)", re.I)],
     "query_promotion": [re.compile(r"(优惠|活动|折扣|券).*?(有|今天)", re.I), re.compile(r"(有什么|今天).*?(优惠|活动|折扣)", re.I)],
-    "query_customize": [re.compile(r"(加料|配料|珍珠|椰果).*?(可以|能加|有哪些)", re.I)],
-    "query_history": [re.compile(r"(历史订单|之前.*?(订单|买过))", re.I)],
+    "query_customize": [re.compile(r"(加料|配料|珍珠|椰果).*?(可以|能加|有哪些)", re.I), re.compile(r"(可以|能).*?(加.*?珍珠|加.*?配料)", re.I), re.compile(r"(我要.*?(少糖|无糖|去冰|少冰)|给我.*?(热|温))", re.I)],
+    "query_history": [re.compile(r"(历史订单|之前.*?(订单|买过))", re.I), re.compile(r"(之前点过什么|之前买过什么)", re.I)],
     "place_order": [re.compile(r"(点|买|要).*?(一杯|奶茶|饮品)", re.I), re.compile(r"(下单|来一杯)", re.I)],
-    "unclear": [re.compile(r"(那个)$|(跟之前一样|上次那个)", re.I)],
+    "unclear": [re.compile(r"(那个)$|(跟之前一样|上次那个)", re.I), re.compile(r"(我点的那个|那个饮料|那个吃的)", re.I), re.compile(r"(那个.*?算了|算了吧)", re.I)],
+    "general": [re.compile(r"(随便|都行|没什么事|没事了|不用了|算了)", re.I)],
     "unknown": [re.compile(r"^\s*$", re.I)],
 }
 
@@ -423,12 +433,14 @@ PRIORITY_ORDER = [
     "query_order", "query_refund", "query_hours", "query_price",
     "query_store", "query_location", "query_promotion",
     "query_recommend", "query_menu", "query_customize",
-    "place_order", "unclear", "unknown",
+    "place_order", "unclear", "general", "unknown",
 ]
 
 COMPOSITE_PATTERNS = [
     (re.compile(r"(太甜).*?(还.*?贵|又.*?贵)", re.I), ["complaint_taste", "complaint_price"]),
     (re.compile(r"(料.*?少).*?(还.*?甜|又.*?甜)", re.I), ["complaint_quantity", "complaint_taste"]),
+    (re.compile(r"(好喝吗).*?(多少钱|价格)", re.I), ["query_recommend", "query_price"]),
+    (re.compile(r"(点.*?一杯|下单).*?(优惠|活动)", re.I), ["place_order", "query_promotion"]),
 ]
 
 DIRECT_RESPONSES = {
@@ -442,6 +454,7 @@ DIRECT_RESPONSES = {
     "query_promotion": "今日优惠：新品第二杯半价，会员9折。",
     "query_member": "会员卡免费办理，首单立减5元。",
     "query_invoice": "支持电子发票，小程序申请。",
+    "query_order": "抱歉，订单查询暂时有点小问题，请您稍后再试，或者拨打客服电话咨询。",
 }
 
 INTENT_TO_CATEGORY = {
@@ -553,8 +566,12 @@ def _multi_keyword_match(text):
         if count > 0:
             s = count / len(keywords)
             if count >= 2: s = min(s * 1.2, 0.95)
+            if count == 1 and len(keywords) > 10:
+                s = min(s * 2, 0.4)
+            if count == 1:
+                s = min(s * 3, 0.5)
             if s > score: score, best = s, intent_name
-    return (best, score) if best and score >= 0.4 else None
+    return (best, score) if best and score >= 0.1 else None
 
 def _composite_match(text):
     for pattern, intent_names in COMPOSITE_PATTERNS:
@@ -562,27 +579,94 @@ def _composite_match(text):
             return {"name": "composite", "sub_intents": intent_names}
     return None
 
+def _get_llm_result(text):
+    try:
+        from backend.core.zhipu_client import call_llm, is_available
+        if not is_available():
+            return None
+        prompt = f"判断用户意图：'{text}'\n可选：{', '.join(INTENT_KEYWORDS.keys())}\n只返回意图名称，不要其他内容。"
+        resp = call_llm([{"role": "user", "content": prompt}], max_tokens=20, temperature=0.1)
+        intent_name = resp.strip().strip("'\"")
+        if intent_name in CATEGORY_MAP:
+            return {"name": intent_name, "confidence": 0.6, "category": CATEGORY_MAP.get(intent_name, "通用")}
+    except Exception as e:
+        pass
+    return None
+
+LLM_FALLBACK_THRESHOLD = 0.55
+
+INTENT_CACHE = {}
+INTENT_CACHE_MAX_SIZE = 500
+INTENT_CACHE_SIMILARITY_THRESHOLD = 0.8
+
+def _get_cached_intent(text):
+    text = text.strip()
+    if text in INTENT_CACHE:
+        cached = INTENT_CACHE[text]
+        if time.time() - cached["timestamp"] < 300:
+            return cached["intent"]
+    
+    for cached_text, cached_data in INTENT_CACHE.items():
+        similarity = difflib.SequenceMatcher(None, text, cached_text).ratio()
+        if similarity >= INTENT_CACHE_SIMILARITY_THRESHOLD:
+            if time.time() - cached_data["timestamp"] < 300:
+                return cached_data["intent"]
+    
+    return None
+
+def _cache_intent(text, intent):
+    text = text.strip()
+    if len(INTENT_CACHE) >= INTENT_CACHE_MAX_SIZE:
+        oldest_key = min(INTENT_CACHE.keys(), key=lambda k: INTENT_CACHE[k]["timestamp"])
+        del INTENT_CACHE[oldest_key]
+    INTENT_CACHE[text] = {"intent": intent, "timestamp": time.time()}
+
+def clear_intent_cache():
+    INTENT_CACHE.clear()
+
 def recognize_intent(text, llm_client=None):
     if not text or text.strip() == "":
         return {"name": "unknown", "confidence": 0.9, "category": "未知"}
+    
+    cached_intent = _get_cached_intent(text)
+    if cached_intent:
+        return cached_intent
+    
     rule = _rule_match(text)
     composite = _composite_match(text)
-    if composite: return {"name": "composite", "confidence": 0.85, "category": "复合意图", "sub_intents": composite["sub_intents"]}
+    if composite:
+        result = {"name": "composite", "confidence": 0.85, "category": "复合意图", "sub_intents": composite["sub_intents"]}
+        _cache_intent(text, result)
+        return result
     if rule:
         name, kw, conf = rule
-        return {"name": name, "confidence": conf, "category": CATEGORY_MAP.get(name, "通用"), "keywords": [kw]}
+        if conf < LLM_FALLBACK_THRESHOLD:
+            llm_result = _get_llm_result(text)
+            if llm_result:
+                _cache_intent(text, llm_result)
+                return llm_result
+        result = {"name": name, "confidence": conf, "category": CATEGORY_MAP.get(name, "通用"), "keywords": [kw]}
+        _cache_intent(text, result)
+        return result
     kw_match = _multi_keyword_match(text)
     if kw_match:
         name, score = kw_match
-        return {"name": name, "confidence": min(score + 0.2, 0.9), "category": CATEGORY_MAP.get(name, "通用")}
-    if llm_client:
-        try:
-            prompt = f"判断用户意图：'{text}'\n可选：{', '.join(INTENT_KEYWORDS.keys())}"
-            resp = llm_client([{"role": "user", "content": prompt}], max_tokens=20, temperature=0.1)
-            if resp.strip() in CATEGORY_MAP:
-                return {"name": resp.strip(), "confidence": 0.6, "category": CATEGORY_MAP.get(resp.strip(), "通用")}
-        except: pass
-    return {"name": "general", "confidence": 0.2, "category": "通用"}
+        conf = min(score + 0.2, 0.9)
+        if conf < LLM_FALLBACK_THRESHOLD:
+            llm_result = _get_llm_result(text)
+            if llm_result:
+                _cache_intent(text, llm_result)
+                return llm_result
+        result = {"name": name, "confidence": conf, "category": CATEGORY_MAP.get(name, "通用")}
+        _cache_intent(text, result)
+        return result
+    llm_result = _get_llm_result(text)
+    if llm_result:
+        _cache_intent(text, llm_result)
+        return llm_result
+    result = {"name": "general", "confidence": 0.2, "category": "通用"}
+    _cache_intent(text, result)
+    return result
 
 # ==================== 工具函数 ====================
 
@@ -591,63 +675,102 @@ def _read_json(path):
         return json.load(f)
 
 @lru_cache(maxsize=32)
-def query_menu(store_name=None, keyword=None, category=None, data_dir="data"):
-    menu_data = _read_json(os.path.join(data_dir, "menu_data.json"))
-    if not store_name:
-        hot = []
-        for store, items in menu_data.items():
-            available = [i for i in items if i["available"]]
-            if available: hot.append({"store": store, **max(available, key=lambda x: x["sales"])})
-        return {"success": True, "data": hot, "stores": list(menu_data.keys())}
-    matched = next((n for n in menu_data if store_name.lower() in n.lower()), None)
-    if not matched: return {"success": False, "data": []}
-    items = menu_data[matched]
-    filtered = [i for i in items if i["available"]]
-    if keyword: filtered = [i for i in filtered if keyword.lower() in i["name"].lower()]
-    if category: filtered = [i for i in filtered if i["category"] == category]
-    return {"success": True, "data": filtered, "store": matched}
+def query_menu(store_name=None, keyword=None, category=None, data_dir=None):
+    if store_name:
+        shop = get_shop_by_name(store_name)
+        if not shop:
+            shops = get_shops(location=store_name)
+            if shops:
+                shop = shops[0]
+            else:
+                return {"success": False, "data": []}
+        items = get_menu_items(shop_id=shop['id'], keyword=keyword, category=category)
+        return {"success": True, "data": items, "store": shop['name']}
+    
+    hot_items = get_hot_menu_items(limit=5)
+    hot = []
+    for item in hot_items:
+        shop = get_shop_by_name(item.get('shop_id', ''))
+        shop_name = shop['name'] if shop else '未知门店'
+        hot.append({"store": shop_name, "name": item['name'], "price": item['price'], "category": item.get('category'), "sales": item.get('sales', 0)})
+    
+    all_shops = get_shops()
+    return {"success": True, "data": hot, "stores": [s['name'] for s in all_shops]}
 
 def query_stores(location, radius=3000, data_dir=None):
-    if data_dir is None:
-        data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
-    
     key = os.environ.get("AMAP_API_KEY", "")
-    if not key or not requests:
-        stores = _read_json(os.path.join(data_dir, "stores_mock.json"))
-        if stores:
-            return {"success": True, "data": stores, "count": len(stores)}
-        return {"success": True, "data": [
-            {"name": f"{location}附近门店1", "address": f"{location}街道1号"},
-            {"name": f"{location}附近门店2", "address": f"{location}街道2号"},
-        ], "count": 2}
+    if key and requests:
+        url = "https://restapi.amap.com/v3/geocode/geo"
+        geocode = requests.get(url, params={"key": key, "address": location, "city": "武汉"}, timeout=5).json()
+        if geocode.get("status") != "1": return {"success": False, "data": []}
+        loc = geocode["geocodes"][0]["location"].split(",")
+        around = requests.get("https://restapi.amap.com/v3/place/around", params={
+            "key": key, "location": f"{loc[0]},{loc[1]}", "keywords": "奶茶", "radius": radius
+        }, timeout=5).json()
+        if around.get("status") != "1": return {"success": False, "data": []}
+        return {"success": True, "data": around["pois"], "count": len(around["pois"])}
     
-    url = "https://restapi.amap.com/v3/geocode/geo"
-    geocode = requests.get(url, params={"key": key, "address": location, "city": "武汉"}, timeout=5).json()
-    if geocode.get("status") != "1": return {"success": False, "data": []}
-    loc = geocode["geocodes"][0]["location"].split(",")
-    around = requests.get("https://restapi.amap.com/v3/place/around", params={
-        "key": key, "location": f"{loc[0]},{loc[1]}", "keywords": "奶茶", "radius": radius
-    }, timeout=5).json()
-    if around.get("status") != "1": return {"success": False, "data": []}
-    return {"success": True, "data": around["pois"], "count": len(around["pois"])}
+    stores = get_shops(location=location)
+    if stores:
+        return {"success": True, "data": stores, "count": len(stores)}
+    return {"success": True, "data": [
+        {"name": f"{location}附近门店1", "address": f"{location}街道1号"},
+        {"name": f"{location}附近门店2", "address": f"{location}街道2号"},
+    ], "count": 2}
 
 def query_order(user_id=None, order_id=None, data_dir=None):
     user_id = user_id or "default_user"
-    if data_dir is None:
-        data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
-    orders = _read_json(os.path.join(data_dir, "orders_mock.json"))
     
     if order_id:
-        all_orders = []
-        for uid, user_orders in orders.items():
-            all_orders.extend(user_orders)
-        matched = [o for o in all_orders if o["order_id"] == order_id]
-        return {"success": True, "data": matched, "count": len(matched)}
+        matched = get_orders(order_id=order_id)
+        result = []
+        for order in matched:
+            shop = get_shop_by_name(order.get('shop_id', '')) if order.get('shop_id') else None
+            result.append({
+                "order_id": order['id'],
+                "store": shop['name'] if shop else order.get('shop_id', ''),
+                "items": order.get('items', []),
+                "total": order.get('total'),
+                "status": order.get('status', 'pending'),
+                "create_time": order.get('create_time'),
+                "delivery_time": order.get('delivery_time'),
+                "address": order.get('address')
+            })
+        return {"success": True, "data": result, "count": len(result)}
     
-    user_orders = orders.get(user_id, [])
-    return {"success": True, "data": user_orders, "count": len(user_orders)}
+    user_orders = get_orders(user_id=user_id)
+    result = []
+    for order in user_orders:
+        shop = get_shop_by_name(order.get('shop_id', '')) if order.get('shop_id') else None
+        result.append({
+            "order_id": order['id'],
+            "store": shop['name'] if shop else order.get('shop_id', ''),
+            "items": order.get('items', []),
+            "total": order.get('total'),
+            "status": order.get('status', 'pending'),
+            "create_time": order.get('create_time'),
+            "delivery_time": order.get('delivery_time'),
+            "address": order.get('address')
+        })
+    return {"success": True, "data": result, "count": len(result)}
 
 def check_stock(item_name, store_name=None):
+    shop = None
+    if store_name:
+        shop = get_shop_by_name(store_name)
+        if not shop:
+            shops = get_shops(location=store_name)
+            if shops:
+                shop = shops[0]
+    
+    if shop:
+        items = get_menu_items(shop_id=shop['id'], keyword=item_name)
+        if items:
+            inv = get_inventory(shop_id=shop['id'], menu_item_id=items[0]['id'])
+            if inv:
+                return {"success": True, "item": item_name, "available": inv['quantity'] > 0, "quantity": inv['quantity']}
+            return {"success": True, "item": item_name, "available": True, "quantity": 50}
+    
     hot = ["幽兰拿铁", "多肉葡萄", "霸气芝士草莓", "珍珠奶茶"]
     available = random.choice([True, True, False]) if item_name in hot else random.choice([True, True, True, False])
     return {"success": True, "item": item_name, "available": available, "quantity": random.randint(0, 50) if available else 0}
@@ -1015,7 +1138,7 @@ def _format_tool_result(intent_name, result):
             for o in result["data"]:
                 orders.append(f"{o.get('order_id', '')} ({o.get('store', '')})：{o.get('status', '')}")
             return f"您有{len(result['data'])}个订单：{'；'.join(orders)}。"
-        return "未找到订单记录。"
+        return "抱歉，没有找到相关的订单记录呢。请问您提供的订单号是否正确？或者您可以稍后再试。"
     if intent_name == "query_recommend":
         if result["data"]:
             items = []
@@ -1025,7 +1148,7 @@ def _format_tool_result(intent_name, result):
         return "暂无推荐。"
     return "查询完成。"
 
-def process_message(text, session_id="default", memory_store=None, llm_client=None):
+async def process_message_async(text, session_id="default", memory_store=None, llm_client=None):
     trace = ExecutionTrace()
     trace.session_id = session_id
     
@@ -1039,14 +1162,24 @@ def process_message(text, session_id="default", memory_store=None, llm_client=No
             save_message(memory_store, session_id, text, reply)
         return reply, {"name": "terminated", "confidence": 1.0, "category": "终止"}
     
-    intent = recognize_intent(text, llm_client)
+    intent_task = asyncio.create_task(asyncio.to_thread(recognize_intent, text, llm_client))
+    
+    def load_context():
+        if memory_store:
+            return get_context(memory_store, session_id)
+        return None
+    
+    context_task = asyncio.create_task(asyncio.to_thread(load_context))
+    
+    intent, context = await asyncio.gather(intent_task, context_task)
+    
     trace.add_step("intent", {"name": intent["name"], "confidence": intent["confidence"], "category": intent.get("category")})
     
     if intent["confidence"] >= 0.6:
         tool_name = INTENT_TOOL.get(intent["name"])
         
         if intent["name"] == "query_recommend":
-            tool_result, _ = get_tool_response(intent["name"], text, session_id=session_id)
+            tool_result, _ = await asyncio.to_thread(get_tool_response, intent["name"], text, session_id=session_id)
             response = build_response(intent, text, tool_result, [])
             trace.add_step("tool_call", {"tool_name": "query_recommend", "intent_name": intent["name"], "params": {}})
             trace.add_step("tool_result", {"success": tool_result.get("success", False), "data": tool_result.get("data", [])})
@@ -1059,7 +1192,7 @@ def process_message(text, session_id="default", memory_store=None, llm_client=No
         elif intent["name"] == "query_order":
             params, missing = extract_params(text, intent["name"], session_id)
             if params.get("order_id"):
-                tool_result, _ = get_tool_response(intent["name"], text, session_id=session_id)
+                tool_result, _ = await asyncio.to_thread(get_tool_response, intent["name"], text, session_id=session_id)
                 response = build_response(intent, text, tool_result, [])
                 trace.add_step("tool_call", {"tool_name": "query_order", "intent_name": intent["name"], "params": params})
                 trace.add_step("tool_result", {"success": tool_result.get("success", False), "data": tool_result.get("data", [])})
@@ -1078,7 +1211,7 @@ def process_message(text, session_id="default", memory_store=None, llm_client=No
                 return response, intent
         
         elif intent["name"] == "query_location" or intent["name"] == "query_store":
-            tool_result, _ = get_tool_response(intent["name"], text, session_id=session_id)
+            tool_result, _ = await asyncio.to_thread(get_tool_response, intent["name"], text, session_id=session_id)
             response = build_response(intent, text, tool_result, [])
             trace.add_step("tool_call", {"tool_name": "query_stores", "intent_name": intent["name"], "params": extract_params(text, intent["name"], session_id)[0]})
             trace.add_step("tool_result", {"success": tool_result.get("success", False) if tool_result else False, "data": tool_result.get("data", []) if tool_result else []})
@@ -1091,7 +1224,7 @@ def process_message(text, session_id="default", memory_store=None, llm_client=No
         elif intent["name"].startswith("complaint"):
             tool_result = None
             if tool_name == "log_complaint":
-                tool_result = log_complaint(get_user_id(session_id), text, category=INTENT_TO_CATEGORY.get(intent["name"], "口味"), intent_name=intent["name"])
+                tool_result = await asyncio.to_thread(log_complaint, get_user_id(session_id), text, category=INTENT_TO_CATEGORY.get(intent["name"], "口味"), intent_name=intent["name"])
                 trace.add_step("tool_call", {"tool_name": "log_complaint", "intent_name": intent["name"], "params": {"complaint": text}})
                 trace.add_step("tool_result", {"success": tool_result.get("success", False), "data": {"complaint_id": tool_result.get("complaint_id")}})
             response = build_response(intent, text, tool_result, [])
@@ -1101,7 +1234,11 @@ def process_message(text, session_id="default", memory_store=None, llm_client=No
                 save_message(memory_store, session_id, text, response)
             return response, intent
     
-    return harness_handle(text, session_id, intent, trace, memory_store)
+    return await asyncio.to_thread(harness_handle, text, session_id, intent, trace, memory_store)
+
+
+def process_message(text, session_id="default", memory_store=None, llm_client=None):
+    return asyncio.run(process_message_async(text, session_id, memory_store, llm_client))
 
 
 def harness_handle(text, session_id, intent, trace, memory_store):

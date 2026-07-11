@@ -1,0 +1,129 @@
+{
+  "total_errors": 9,
+  "errors": [
+    {
+      "text": "退款",
+      "expected": "complaint_refund",
+      "predicted": "query_refund",
+      "confidence": 0.95,
+      "matched_patterns": [
+        [
+          "query_refund",
+          "(退款)$"
+        ]
+      ]
+    },
+    {
+      "text": "退款",
+      "expected": "complaint_refund",
+      "predicted": "query_refund",
+      "confidence": 0.95,
+      "matched_patterns": [
+        [
+          "query_refund",
+          "(退款)$"
+        ]
+      ]
+    },
+    {
+      "text": "退款",
+      "expected": "complaint_refund",
+      "predicted": "query_refund",
+      "confidence": 0.95,
+      "matched_patterns": [
+        [
+          "query_refund",
+          "(退款)$"
+        ]
+      ]
+    },
+    {
+      "text": "上次那个",
+      "expected": "unclear",
+      "predicted": "complaint_compare_history",
+      "confidence": 0.95,
+      "matched_patterns": [
+        [
+          "complaint_compare_history",
+          "(上次那个|跟这次不一样|换配方)"
+        ],
+        [
+          "unclear",
+          "(那个)$|(跟之前一样|上次那个)"
+        ]
+      ]
+    },
+    {
+      "text": "上次那个",
+      "expected": "unclear",
+      "predicted": "complaint_compare_history",
+      "confidence": 0.95,
+      "matched_patterns": [
+        [
+          "complaint_compare_history",
+          "(上次那个|跟这次不一样|换配方)"
+        ],
+        [
+          "unclear",
+          "(那个)$|(跟之前一样|上次那个)"
+        ]
+      ]
+    },
+    {
+      "text": "上次那个",
+      "expected": "unclear",
+      "predicted": "complaint_compare_history",
+      "confidence": 0.95,
+      "matched_patterns": [
+        [
+          "complaint_compare_history",
+          "(上次那个|跟这次不一样|换配方)"
+        ],
+        [
+          "unclear",
+          "(那个)$|(跟之前一样|上次那个)"
+        ]
+      ]
+    },
+    {
+      "text": "退款",
+      "expected": "complaint_refund",
+      "predicted": "query_refund",
+      "confidence": 0.95,
+      "matched_patterns": [
+        [
+          "query_refund",
+          "(退款)$"
+        ]
+      ]
+    },
+    {
+      "text": "上次那个",
+      "expected": "unclear",
+      "predicted": "complaint_compare_history",
+      "confidence": 0.95,
+      "matched_patterns": [
+        [
+          "complaint_compare_history",
+          "(上次那个|跟这次不一样|换配方)"
+        ],
+        [
+          "unclear",
+          "(那个)$|(跟之前一样|上次那个)"
+        ]
+      ]
+    },
+    {
+      "text": "退款",
+      "expected": "complaint_refund",
+      "predicted": "query_refund",
+      "confidence": 0.95,
+      "matched_patterns": [
+        [
+          "query_refund",
+          "(退款)$"
+        ]
+      ]
+    }
+  ]
+}

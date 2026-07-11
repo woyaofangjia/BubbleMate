@@ -1,0 +1,9 @@
+{
+  "total": 200,
+  "rule_matches": 107,
+  "kw_matches": 85,
+  "llm_calls": 8,
+  "llm_ratio": 4.0,
+  "direct_llm": 8,
+  "fallback_llm": 0
+}

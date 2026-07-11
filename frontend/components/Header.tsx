@@ -29,9 +29,6 @@ export default function Header() {
             <Link href="/profile" className="px-3 py-1 rounded-lg text-sm text-gray-600 hover:bg-gray-100">
               我的画像
             </Link>
-            <Link href="/experiment-report" className="px-3 py-1 rounded-lg text-sm text-gray-600 hover:bg-gray-100">
-              实验报告
-            </Link>
             <Link href="/human-support" className="px-3 py-1 rounded-lg text-sm bg-red-50 text-red-600 hover:bg-red-100">
               人工客服
             </Link>

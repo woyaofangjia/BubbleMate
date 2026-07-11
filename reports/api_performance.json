@@ -1,0 +1,11 @@
+{
+  "throughput": 23.499042727127446,
+  "success_rate": 100.0,
+  "avg_latency_ms": 2094.623722553253,
+  "p50_latency_ms": 2069.0619945526123,
+  "p95_latency_ms": 2328.981399536133,
+  "p99_latency_ms": 2581.1634063720703,
+  "total_requests": 500,
+  "successful_requests": 500,
+  "failed_requests": 0
+}

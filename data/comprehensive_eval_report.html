@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BubbleMate 综合测试报告</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; color: #1a1a2e; }
+.header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; }
+.header h1 { font-size: 2.5rem; margin-bottom: 10px; }
+.header p { opacity: 0.9; font-size: 1.1rem; }
+.container { max-width: 1400px; margin: 0 auto; padding: 30px 20px; }
+.card { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 24px; margin-bottom: 24px; }
+.card-title { font-size: 1.3rem; color: #333; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #f0f0f0; }
+.dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+.stat-box { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 8px; padding: 20px; text-align: center; }
+.stat-box .value { font-size: 2.5rem; font-weight: bold; color: #667eea; }
+.stat-box .label { font-size: 0.9rem; color: #666; margin-top: 5px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+th { background: #f8f9fa; font-weight: 600; }
+.progress-bar { height: 20px; background: #e9ecef; border-radius: 10px; overflow: hidden; margin: 8px 0; }
+.progress-fill { height: 100%; border-radius: 10px; }
+.progress-fill.high { background: #28a745; }
+.progress-fill.medium { background: #ffc107; }
+.progress-fill.low { background: #dc3545; }
+.level-header { background: #667eea; color: white; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; }
+.level-header h2 { font-size: 1.5rem; }
+</style>
+</head>
+<body>
+<div class="header">
+<h1>BubbleMate 综合测试报告</h1>
+<p>生成时间: 2026-07-11 13:12:13</p>
+</div>
+<div class="container"><div class="card">
+<h2 class="card-title">总体评测仪表盘</h2>
+<div class="dashboard">
+<div class="stat-box"><div class="value">91.0%</div><div class="label">意图识别准确率 (200条)</div></div>
+<div class="stat-box"><div class="value">55.56%</div><div class="label">工具调用准确率 (9场景)</div></div>
+<div class="stat-box"><div class="value">100.0%</div><div class="label">Held-out准确率 (30条)</div></div>
+<div class="stat-box"><div class="value">83.33%</div><div class="label">对抗样本通过率</div></div>
+<div class="stat-box"><div class="value">91.0%</div><div class="label">5-Fold平均准确率</div></div>
+<div class="stat-box"><div class="value">27个</div><div class="label">Bad Case数量</div></div>
+</div>
+</div><div class="level-header"><h2>第一层：离线评测</h2></div><div class="card">
+<h2 class="card-title">意图识别准确率评测 (200条测试集)</h2>
+<div class="progress-bar"><div class="progress-fill high" style="width:91.0%">准确率: 91.0%</div></div>
+<p style="color:#666;">正确数: 182 / 200</p>
+</div><div class="card">
+<h2 class="card-title">工具调用准确率评测 (9个异常场景)</h2>
+<p style="color:#666;">总体准确率: 55.56% (5/9)</p>
+</div><div class="card">
+<h2 class="card-title">置信度校准</h2>
+<table>
+<thead><tr><th>置信度区间</th><th>实际准确率</th><th>样本数</th></tr></thead>
+<tbody><tr><td>0.6-0.7</td><td>80.0%</td><td>50</td></tr><tr><td>0.7-0.8</td><td>93.1%</td><td>58</td></tr><tr><td>0.8-0.9</td><td>93.44%</td><td>61</td></tr><tr><td>0.9-1.0</td><td>100.0%</td><td>14</td></tr><tr><td>1.0-1.1</td><td>100.0%</td><td>17</td></tr></tbody></table>
+</div><div class="card">
+<h2 class="card-title">Bad Case挖掘 (置信度<0.6)</h2>
+<p style="color:#666;">共发现 27 个Bad Case</p>
+</div><div class="level-header"><h2>第二层：泛化评测</h2></div><div class="card">
+<h2 class="card-title">Held-out验证 (30条未见样本)</h2>
+<div class="progress-bar"><div class="progress-fill high" style="width:100.0%">准确率: 100.0%</div></div>
+<p style="color:#666;">正确数: 30 / 30</p>
+</div><div class="card">
+<h2 class="card-title">5-Fold交叉验证</h2>
+<table>
+<thead><tr><th>Fold</th><th>准确率</th><th>正确数</th><th>总样本</th></tr></thead>
+<tbody><tr><td>Fold 1</td><td>95.0%</td><td>38</td><td>40</td></tr><tr><td>Fold 2</td><td>85.0%</td><td>34</td><td>40</td></tr><tr><td>Fold 3</td><td>95.0%</td><td>38</td><td>40</td></tr><tr><td>Fold 4</td><td>92.5%</td><td>37</td><td>40</td></tr><tr><td>Fold 5</td><td>87.5%</td><td>35</td><td>40</td></tr></tbody></table>
+<p style="color:#666;">平均准确率: 91.0%</p>
+</div><div class="card">
+<h2 class="card-title">对抗样本集评测</h2>
+<div class="progress-bar"><div class="progress-fill high" style="width:83.33%">通过率: 83.33%</div></div>
+<p style="color:#666;">正确数: 10 / 12</p>
+</div><div class="level-header"><h2>第三层：性能评测</h2></div><div class="card">
+<h2 class="card-title">数据库索引检查</h2>
+<table>
+<thead><tr><th>表名</th><th>索引列表</th></tr></thead>
+<tbody><tr><td>shops</td><td>sqlite_autoindex_shops_1, idx_shops_name, idx_shops_area</td></tr><tr><td>menu_items</td><td>sqlite_autoindex_menu_items_1, idx_menu_shop, idx_menu_name</td></tr><tr><td>orders</td><td>sqlite_autoindex_orders_1, idx_orders_user, idx_orders_status</td></tr><tr><td>inventory</td><td>sqlite_autoindex_inventory_1, idx_inventory_shop</td></tr></tbody></table>
+</div></div></body></html>
