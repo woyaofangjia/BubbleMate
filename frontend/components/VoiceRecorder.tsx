@@ -68,8 +68,13 @@ export default function VoiceRecorder({ onVoiceInput, disabled }: VoiceRecorderP
       mediaRecorder.start();
       setIsRecording(true);
     } catch (err) {
-      setError('无法访问麦克风，请检查权限设置');
-      console.error('录音启动失败:', err);
+      if (err instanceof DOMException && err.name === 'NotAllowedError') {
+        setError('麦克风权限被拒绝，请在浏览器设置中允许访问麦克风');
+      } else if (err instanceof DOMException && err.name === 'NotFoundError') {
+        setError('未检测到麦克风设备');
+      } else {
+        setError('录音启动失败，请重试');
+      }
     }
   }, []);
 

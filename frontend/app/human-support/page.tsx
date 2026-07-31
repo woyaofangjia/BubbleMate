@@ -42,11 +42,13 @@ export default function HumanSupport() {
       
       if (intervRes.ok && isMounted.current) {
         const data = await intervRes.json();
-        setInterventions(data);
+        setInterventions(Array.isArray(data) ? data : []);
       }
       if (statsRes.ok && isMounted.current) {
         const statsData = await statsRes.json();
-        setStats(statsData);
+        if (statsData && typeof statsData === 'object') {
+          setStats(statsData);
+        }
       }
     } catch (error) {
       console.error('获取数据失败:', error);
