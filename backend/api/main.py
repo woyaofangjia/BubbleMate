@@ -1,15 +1,25 @@
-from fastapi import FastAPI, HTTPException, Request, Response, BackgroundTasks
+from fastapi import FastAPI, HTTPException, Request, Response, BackgroundTasks, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
 import json
 import os
 import time
+import base64
 from collections import defaultdict
 
 import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
+# 加载环境变量
+try:
+    from dotenv import load_dotenv
+    env_path = os.path.join(os.path.dirname(__file__), '..', '..', '.env')
+    if os.path.exists(env_path):
+        load_dotenv(env_path)
+except ImportError:
+    pass
 
 from bubble_agent import process_message, process_message_async, recognize_intent, create_memory_store, get_context, TOOLS, get_user_id, query_menu, query_promotions, query_recommend, query_customize, MemoryStore, clear_intent_cache, clear_response_cache
 from storage.database import init_db, get_user_preferences, get_complaint_history, get_user_stats, get_knowledge_candidates, approve_candidate, reject_candidate, get_complaint_knowledge, get_knowledge_complaints, update_knowledge_parent, get_all_complaints, get_knowledge_list, get_knowledge_graph, get_knowledge_graph_aggregated, review_knowledge, delete_knowledge, get_complaint_stats, resolve_complaint, add_knowledge_node
@@ -130,6 +140,52 @@ async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
         background_tasks.add_task(process_complaint_async, request.session_id, request.message, intent["name"])
     
     return ChatResponse(response=response, intent=intent, session_id=request.session_id)
+
+@app.post("/voice-to-text")
+async def voice_to_text(audio: UploadFile = File(...)):
+    try:
+        audio_bytes = await audio.read()
+        if len(audio_bytes) < 100:
+            raise HTTPException(status_code=400, detail="音频文件太短")
+        
+        from core.zhipu_client import api_key
+        
+        if not api_key:
+            raise HTTPException(status_code=500, detail="语音识别服务未配置")
+        
+        import aiohttp
+        
+        url = "https://open.bigmodel.cn/api/paas/v4/audio/transcriptions"
+        
+        form_data = aiohttp.FormData()
+        form_data.add_field('model', 'glm-asr-2512')
+        form_data.add_field('stream', 'false')
+        form_data.add_field('file', audio_bytes, filename=audio.filename or 'recording.wav')
+        
+        headers = {
+            "Authorization": f"Bearer {api_key}"
+        }
+        
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, data=form_data, headers=headers) as resp:
+                if resp.status != 200:
+                    error_text = await resp.text()
+                    print(f"语音识别API错误: {resp.status} - {error_text}")
+                    raise HTTPException(status_code=500, detail="语音识别服务错误")
+                
+                result = await resp.json()
+                text = result.get("text", "")
+                
+                if not text:
+                    raise HTTPException(status_code=422, detail="未能识别语音内容")
+                
+                return {"text": text}
+                
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"语音转文字错误: {e}")
+        raise HTTPException(status_code=500, detail="语音识别处理失败")
 
 @app.get("/tools")
 async def list_tools():

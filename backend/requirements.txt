@@ -4,6 +4,7 @@
 fastapi>=0.100.0
 uvicorn>=0.23.0
 pydantic>=2.0.0
+python-multipart>=0.0.5
 
 # Agent组件
 # openai>=1.0.0  # 可选，用于LLM调用
@@ -14,6 +15,9 @@ redis>=4.5.0  # 可选，用于Redis存储
 # 工具/测试
 requests>=2.28.0
 pytest>=7.0.0
+
+# 异步HTTP客户端
+aiohttp>=3.8.0
 
 # 开发工具
 python-dotenv>=1.0.0

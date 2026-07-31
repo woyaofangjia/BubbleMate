@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import VoiceRecorder from './VoiceRecorder';
 
 const getSessionId = () => {
   let sessionId = localStorage.getItem('bubblemate_session_id');
@@ -45,19 +46,12 @@ export default function ChatInterface({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
   
-  // 发送消息
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || isStreaming) return;
+  const sendMessageToAgent = async (userMessage: string) => {
+    if (!userMessage.trim() || isStreaming) return;
     
-    const userMessage = input.trim();
-    setInput('');
-    
-    // 添加用户消息
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setIsStreaming(true);
     
-    // 调用API
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -67,26 +61,18 @@ export default function ChatInterface({
       
       const data = await response.json();
       
-      // 解析回复，提取思考链和工具调用
       const agentMessage = data.response;
-      
-      // 提取思考链
       const thoughtMatch = agentMessage.match(/【思考】(.+)/);
       const thought = thoughtMatch ? thoughtMatch[1] : '';
-      
-      // 提取工具调用
       const toolMatch = agentMessage.match(/【行动】调用工具: (.+)/);
       const tools = toolMatch ? [{ name: toolMatch[1], status: 'completed' }] : [];
       
-      // 更新思考链和工具面板
       setCurrentThought(thought);
       setCurrentTools(tools);
       
-      // 提取最终回复
       const replyMatch = agentMessage.match(/【回复】([\s\S]+)/);
       const reply = replyMatch ? replyMatch[1] : agentMessage;
       
-      // 添加Agent回复
       setMessages(prev => [...prev, {
         role: 'agent',
         content: reply,
@@ -103,6 +89,22 @@ export default function ChatInterface({
     }
     
     setIsStreaming(false);
+  };
+
+  // 发送消息
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || isStreaming) return;
+    
+    const userMessage = input.trim();
+    setInput('');
+    await sendMessageToAgent(userMessage);
+  };
+
+  // 处理语音输入
+  const handleVoiceInput = async (text: string) => {
+    if (!text.trim()) return;
+    await sendMessageToAgent(text);
   };
   
   const handleFeedback = (msgIdx: number, type: 'positive' | 'negative') => {
@@ -204,15 +206,21 @@ export default function ChatInterface({
       
       {/* 输入区域 */}
       <div className="p-4 border-t border-gray-200">
-        <form onSubmit={handleSubmit} className="flex gap-2">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="输入消息，例如：你们有什么招牌推荐？"
-            className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
-            disabled={isStreaming}
-          />
+        <form onSubmit={handleSubmit} className="flex gap-2 items-center">
+          <div className="flex-1 flex gap-2">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="输入消息，或点击麦克风说话..."
+              className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+              disabled={isStreaming}
+            />
+            <VoiceRecorder 
+              onVoiceInput={handleVoiceInput} 
+              disabled={isStreaming} 
+            />
+          </div>
           <button
             type="submit"
             disabled={isStreaming || !input.trim()}
