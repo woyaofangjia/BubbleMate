@@ -19,6 +19,7 @@ interface Message {
   toolCalls?: Array<{ name: string; status: string; result?: string }>;
   messageId?: string;
   feedback?: 'positive' | 'negative';
+  intent?: string;
 }
 
 interface ChatInterfaceProps {
@@ -84,6 +85,7 @@ export default function ChatInterface({
       const decoder = new TextDecoder();
       let buffer = '';
       let finalContent = '';
+      let finalIntent = '';
 
       while (true) {
         const { done, value } = await reader.read();
@@ -120,6 +122,7 @@ export default function ChatInterface({
               finalContent = data.content || '';
               break;
             case 'done':
+              finalIntent = data.intent?.name || '';
               break;
             case 'error':
               throw new Error(data.message || '服务异常');
@@ -144,6 +147,7 @@ export default function ChatInterface({
           thoughtChain: thought,
           toolCalls: tools,
           messageId: `msg_${Date.now()}`,
+          intent: finalIntent,
         }]);
       }
     } catch (error: any) {
@@ -186,6 +190,11 @@ export default function ChatInterface({
       const msg = newMessages[msgIdx];
       if (msg.role === 'agent' && !msg.feedback) {
         newMessages[msgIdx] = { ...msg, feedback: type };
+        // 找上一条 user 消息作为 user_query，用于负反馈根因分析
+        let userQuery = '';
+        for (let i = msgIdx - 1; i >= 0; i--) {
+          if (newMessages[i].role === 'user') { userQuery = newMessages[i].content; break; }
+        }
         fetch('/api/feedback', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -193,6 +202,9 @@ export default function ChatInterface({
             message_id: msg.messageId || `msg_${msgIdx}`,
             feedback_type: type,
             session_id: getSessionId(),
+            user_query: userQuery,
+            agent_response: msg.content,
+            intent: msg.intent || '',
           }),
         }).catch(() => {});
       }

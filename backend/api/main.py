@@ -23,7 +23,7 @@ except ImportError:
     pass
 
 from bubble_agent import process_message, process_message_async, process_message_stream_async, recognize_intent, create_memory_store, get_context, TOOLS, get_user_id, query_menu, query_promotions, query_recommend, query_customize, MemoryStore, clear_intent_cache, clear_response_cache
-from storage.database import init_db, get_user_preferences, get_complaint_history, get_user_stats, get_knowledge_candidates, approve_candidate, reject_candidate, get_complaint_knowledge, get_knowledge_complaints, update_knowledge_parent, get_all_complaints, get_knowledge_list, get_knowledge_graph, get_knowledge_graph_aggregated, review_knowledge, delete_knowledge, get_complaint_stats, resolve_complaint, add_knowledge_node
+from storage.database import init_db, get_user_preferences, get_complaint_history, get_user_stats, get_knowledge_candidates, approve_candidate, reject_candidate, get_complaint_knowledge, get_knowledge_complaints, update_knowledge_parent, get_all_complaints, get_knowledge_list, get_knowledge_graph, get_knowledge_graph_aggregated, review_knowledge, delete_knowledge, get_complaint_stats, resolve_complaint, add_knowledge_node, save_feedback, get_feedback_analysis
 from storage.data_access import get_shops, get_menu_items, get_orders, get_shop_by_name
 from storage.redis_store import session_store
 from core.cache import cache
@@ -473,12 +473,24 @@ class FeedbackRequest(BaseModel):
     message_id: str
     feedback_type: str
     session_id: str
+    user_query: Optional[str] = None
+    agent_response: Optional[str] = None
+    intent: Optional[str] = None
 
 @app.post("/api/feedback")
 async def submit_feedback(request: FeedbackRequest):
     user_id = get_user_id(request.session_id)
-    save_feedback(user_id, request.message_id, request.feedback_type)
+    save_feedback(user_id, request.message_id, request.feedback_type,
+                  user_query=request.user_query,
+                  agent_response=request.agent_response,
+                  intent=request.intent)
     return {"success": True, "message": "反馈已记录"}
+
+
+@app.get("/api/admin/feedback-analysis")
+async def feedback_analysis():
+    """负反馈分析：按意图聚合 Top 失败意图 + 近期待分析样本。"""
+    return get_feedback_analysis()
 
 @app.get("/api/admin/eval-report")
 async def get_eval_report():

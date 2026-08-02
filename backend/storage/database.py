@@ -127,6 +127,11 @@ def init_db():
             FOREIGN KEY (user_id) REFERENCES users(user_id)
         )
     """)
+    # migration: 补充反馈分析字段（兼容已存在的表）
+    _fb_cols = {row[1] for row in c.execute("PRAGMA table_info(feedback)").fetchall()}
+    for _col in ('user_query', 'agent_response', 'intent'):
+        if _col not in _fb_cols:
+            c.execute(f"ALTER TABLE feedback ADD COLUMN {_col} TEXT")
     c.execute("""
         CREATE TABLE IF NOT EXISTS complaints (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -816,15 +821,59 @@ def get_user_by_session(session_id):
     conn.close()
     return row["user_id"] if row else None
 
-def save_feedback(user_id, message_id, feedback_type):
+def save_feedback(user_id, message_id, feedback_type, user_query=None, agent_response=None, intent=None):
     conn = _connect()
     c = conn.cursor()
     c.execute("""
-        INSERT INTO feedback (user_id, message_id, feedback_type)
-        VALUES (?, ?, ?)
-    """, (user_id, message_id, feedback_type))
+        INSERT INTO feedback (user_id, message_id, feedback_type, user_query, agent_response, intent)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (user_id, message_id, feedback_type, user_query, agent_response, intent))
     conn.commit()
     conn.close()
+
+
+def get_feedback_analysis(top_n=10):
+    """按意图聚合负反馈，返回 Top N 失败意图及近期待分析样本。"""
+    conn = _connect()
+    c = conn.cursor()
+    # 按意图聚合负反馈数量（intent 为空归为 'unknown'）
+    c.execute("""
+        SELECT COALESCE(NULLIF(intent, ''), 'unknown') AS intent_name,
+               feedback_type,
+               COUNT(*) AS cnt
+        FROM feedback
+        GROUP BY intent_name, feedback_type
+        ORDER BY cnt DESC
+        LIMIT ?
+    """, (top_n * 2,))
+    by_intent = []
+    for row in c.fetchall():
+        by_intent.append({"intent": row[0], "feedback_type": row[1], "count": row[2]})
+
+    # 总反馈数与负反馈数
+    c.execute("SELECT COUNT(*) FROM feedback")
+    total = c.fetchone()[0]
+    c.execute("SELECT COUNT(*) FROM feedback WHERE feedback_type = 'negative'")
+    negative = c.fetchone()[0]
+
+    # 最近 20 条负反馈样本（待分析）
+    c.execute("""
+        SELECT user_query, agent_response, intent, created_at
+        FROM feedback
+        WHERE feedback_type = 'negative'
+        ORDER BY created_at DESC
+        LIMIT 20
+    """)
+    recent = [{"user_query": r[0], "agent_response": r[1], "intent": r[2], "created_at": r[3]}
+              for r in c.fetchall()]
+    conn.close()
+    return {
+        "total_feedback": total,
+        "negative_feedback": negative,
+        "negative_rate": round(negative / total, 4) if total > 0 else 0.0,
+        "by_intent": by_intent,
+        "recent_negative": recent,
+    }
 
 def get_user_stats(user_id):
     conn = _connect()

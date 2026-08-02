@@ -6,7 +6,8 @@
 
 | 方法 | 端点 | 说明 |
 |------|------|------|
-| POST | `/chat` | 聊天对话 |
+| POST | `/chat` | 聊天对话（同步，一次性返回） |
+| POST | `/chat/stream` | 聊天对话（SSE 流式，逐事件推送） |
 | GET | `/intent/{text}` | 意图识别测试 |
 | GET | `/tools` | 获取工具列表 |
 | GET | `/menu` | 菜单查询 |
@@ -19,7 +20,7 @@
 | 方法 | 端点 | 说明 |
 |------|------|------|
 | GET | `/api/user/profile?session_id=` | 用户画像 |
-| POST | `/api/feedback` | 提交反馈 |
+| POST | `/api/feedback` | 提交反馈（含 user_query/agent_response/intent） |
 
 ### 管理接口（需登录）
 
@@ -38,6 +39,9 @@
 | DELETE | `/api/admin/knowledge/{id}` | 删除知识 |
 | POST | `/api/admin/cache/clear` | 清除缓存 |
 | GET | `/api/cache/stats` | 缓存统计 |
+| GET | `/api/admin/feedback-analysis` | 负反馈分析（按意图聚合 Top 失败） |
+| GET | `/api/admin/eval-report` | 获取评测报告 |
+| POST | `/api/admin/run-eval` | 触发评测 |
 
 ### 客服接口
 
@@ -117,6 +121,21 @@ CREATE TABLE complaints (
     candidate_id INTEGER,
     resolved_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### feedback - 用户反馈表
+```sql
+CREATE TABLE feedback (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT,
+    message_id TEXT,
+    feedback_type TEXT,      -- 'positive' | 'negative'
+    user_query TEXT,         -- 触发回复的用户原始消息（负反馈根因分析）
+    agent_response TEXT,     -- 被反馈的 Agent 回复内容
+    intent TEXT,             -- 该次对话的意图名（按意图聚合失败率）
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 ```
 

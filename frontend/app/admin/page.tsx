@@ -85,6 +85,14 @@ interface EvalReport {
   bad_cases: { case_id: string; category: string; difficulty: string }[];
 }
 
+interface FeedbackAnalysis {
+  total_feedback: number;
+  negative_feedback: number;
+  negative_rate: number;
+  by_intent: { intent: string; feedback_type: string; count: number }[];
+  recent_negative: { user_query: string; agent_response: string; intent: string; created_at: string }[];
+}
+
 export default function AdminPage() {
   const router = useRouter();
   const { role, adminVerified } = useRole();
@@ -129,6 +137,12 @@ export default function AdminPage() {
 
   const { data: evalReport, mutate: mutateEval } = useSWR<EvalReport>(
     '/api/admin/eval-report',
+    fetcher,
+    { refreshInterval: 60000, revalidateOnFocus: false }
+  );
+
+  const { data: feedbackAnalysis, mutate: mutateFeedback } = useSWR<FeedbackAnalysis>(
+    '/api/admin/feedback-analysis',
     fetcher,
     { refreshInterval: 60000, revalidateOnFocus: false }
   );
@@ -269,6 +283,72 @@ export default function AdminPage() {
               <div>
                 <div className="text-xs text-gray-500 mb-1">Bad Case数</div>
                 <div className="text-xl font-bold text-red-500">{evalReport.bad_cases.length}</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {feedbackAnalysis && (
+          <div className="bg-white rounded-xl p-4 border border-gray-200 mb-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold flex items-center gap-2">📉 负反馈分析</h2>
+              <button
+                onClick={() => mutateFeedback()}
+                className="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg text-xs hover:bg-gray-200 transition-colors"
+              >
+                刷新
+              </button>
+            </div>
+            <div className="grid grid-cols-3 gap-4 mb-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-700">{feedbackAnalysis.total_feedback}</div>
+                <div className="text-xs text-gray-500 mt-1">总反馈数</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-red-500">{feedbackAnalysis.negative_feedback}</div>
+                <div className="text-xs text-gray-500 mt-1">负反馈数</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-orange-500">{(feedbackAnalysis.negative_rate * 100).toFixed(1)}%</div>
+                <div className="text-xs text-gray-500 mt-1">负反馈率</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="text-xs text-gray-500 mb-2">Top 失败意图（负反馈）</div>
+                {feedbackAnalysis.by_intent.filter(b => b.feedback_type === 'negative').length === 0 ? (
+                  <div className="text-sm text-gray-400">暂无负反馈数据</div>
+                ) : (
+                  <div className="space-y-1.5">
+                    {feedbackAnalysis.by_intent
+                      .filter(b => b.feedback_type === 'negative')
+                      .slice(0, 5)
+                      .map((b, i) => (
+                        <div key={i} className="flex justify-between items-center text-sm">
+                          <span className="font-mono text-gray-700">{b.intent}</span>
+                          <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-xs">{b.count} 次</span>
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </div>
+              <div>
+                <div className="text-xs text-gray-500 mb-2">最近负反馈样本（待分析）</div>
+                {feedbackAnalysis.recent_negative.length === 0 ? (
+                  <div className="text-sm text-gray-400">暂无待分析样本</div>
+                ) : (
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {feedbackAnalysis.recent_negative.slice(0, 8).map((s, i) => (
+                      <div key={i} className="text-xs border-l-2 border-red-300 pl-2 py-1">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="font-mono px-1.5 py-0.5 rounded bg-gray-100 text-gray-600">{s.intent || 'unknown'}</span>
+                          <span className="text-gray-400">{s.created_at}</span>
+                        </div>
+                        <div className="text-gray-700 line-clamp-1">{s.user_query || '(空)'}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>

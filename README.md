@@ -40,6 +40,7 @@ BubbleMate/
 │   ├── orders_mock.json        # 订单模拟数据
 │   ├── knowledge_graph.json    # 知识图谱
 │   ├── menu_data.json          # 菜单数据
+│   ├── menu_vectors.json       # 菜单向量缓存（语义检索，由 gen_menu_vectors.py 生成）
 │   ├── promotions.json         # 优惠活动
 │   └── eval_dataset.json       # 评测数据集
 │
@@ -51,6 +52,7 @@ BubbleMate/
 │   ├── api_load_test.py        # API压测
 │   ├── generate_test_data.py   # 生成测试数据
 │   ├── crawler_mall.py         # 数据爬取
+│   ├── gen_menu_vectors.py     # 预生成菜单向量（语义检索）
 │   └── token_cost_analysis.py  # 成本分析
 │
 ├── docs/                       # 文档（分层）
@@ -72,6 +74,8 @@ BubbleMate/
 ### 🤖 智能客服
 - 意图识别：规则+关键词+LLM兜底（18+种意图，测试集准确率100%）
 - 工具调用：订单查询、门店查询、菜单查询、投诉处理、优惠查询
+- 流式输出：SSE 逐事件推送（思考→工具调用→回复），前端实时展示进度
+- 语义推荐：embedding 向量匹配替代关键词，支持"清爽的""便宜的"等模糊需求
 - 思考链可视化：实时展示Agent推理过程
 - 会话记忆：滑动窗口（5轮）+ 自动摘要压缩
 
@@ -83,6 +87,7 @@ BubbleMate/
 ### 📊 运营后台
 - 投诉统计：按类型分布、今日新增、解决率
 - 知识图谱管理：审核知识点、删除无效知识
+- 负反馈分析：按意图聚合 Top 失败意图 + 待分析样本，驱动规则/Prompt 优化
 - 全局数据监控
 
 ### 🛠️ 客服工作台
@@ -100,7 +105,7 @@ BubbleMate/
 
 ## 技术栈
 
-- **后端**: Python 3.10+, FastAPI, 原生 Agent（自研框架）, SQLite
+- **后端**: Python 3.10+, FastAPI, 原生 Agent（自研框架）, SQLite, 智谱 embedding-3（语义检索）
 - **前端**: Next.js 14+, React, Tailwind CSS
 - **LLM**: 智谱AI (GLM-4)
 

@@ -15,7 +15,7 @@
 | `query_promotions` | query_promotion | - | 3s |
 | `query_customize` | query_customize | item_name | 3s |
 | `query_history` | query_history | user_id, limit | 3s |
-| `query_recommend` | query_recommend | preference | 3s |
+| `query_recommend` | query_recommend | query | 3s |
 
 ## 执行流程
 
@@ -55,6 +55,34 @@ PARAM_EXTRACTORS = {
 - `query_stores`: 提取位置关键词，缺失则反问
 - `query_order/query_history`: 提取订单号，缺失则反问
 - `log_complaint`: 直接传递用户原文作为投诉内容
+- `query_recommend`: 直接传递用户原文作为 `query`，走语义检索
+
+## 语义检索（query_recommend）
+
+`query_recommend` 使用 embedding 语义匹配替代关键词匹配，解决"抹茶饮品""清爽的""不甜的"等模糊需求无法命中关键词的问题。
+
+### 工作流程
+```
+用户 query
+    │
+    ▼
+[1] query 向量化 (zhipuai embedding-3, ~200ms)
+    │
+    ▼
+[2] 与菜单向量算余弦相似度 (纯 Python, 菜单向量预生成缓存)
+    │
+    ▼
+[3] 取 Top3 → 返回 (matched_by: semantic)
+    │ embedding 失败 / 无向量缓存
+    ▼
+[4] 回退销量排序 (matched_by: sales)
+```
+
+### 向量预生成
+- 脚本: `scripts/gen_menu_vectors.py`
+- 输出: `data/menu_vectors.json`（17 条 available 菜品向量）
+- 文本拼接: `name + category + description`
+- 菜单更新后重跑脚本刷新向量
 
 ## 超时机制
 

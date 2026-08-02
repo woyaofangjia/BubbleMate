@@ -209,3 +209,14 @@ def is_available():
         except:
             return False
     return False
+
+
+def embed_text(text, model="embedding-3"):
+    """调用 embedding 模型把文本转向量。"""
+    if LLM_PROVIDER == "zhipu":
+        if not client:
+            raise RuntimeError("LLM客户端未初始化，请检查API Key和zhipuai库")
+        resp = client.embeddings.create(model=model, input=text)
+        return resp.data[0].embedding
+    else:
+        raise RuntimeError(f"embedding 不支持 LLM_PROVIDER={LLM_PROVIDER}")

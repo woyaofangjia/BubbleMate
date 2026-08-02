@@ -955,10 +955,38 @@ def query_history(user_id=None, limit=3, data_dir="data"):
     orders = _read_json(os.path.join(data_dir, "orders_mock.json"))
     return {"success": True, "data": orders.get(user_id, [])[:limit]}
 
+_menu_vectors_cache = None
+
+def _cosine(a, b):
+    dot = sum(x * y for x, y in zip(a, b))
+    na = sum(x * x for x in a) ** 0.5
+    nb = sum(y * y for y in b) ** 0.5
+    return dot / (na * nb) if na and nb else 0.0
+
 @lru_cache(maxsize=32)
-def query_recommend(preference=None, data_dir=None):
+def query_recommend(query=None, preference=None, data_dir=None):
     if data_dir is None:
         data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+    # 优先语义检索：用户 query 向量与菜单向量算余弦相似度
+    if query:
+        global _menu_vectors_cache
+        if _menu_vectors_cache is None:
+            vec_path = os.path.join(data_dir, "menu_vectors.json")
+            _menu_vectors_cache = _read_json(vec_path) if os.path.exists(vec_path) else []
+        if _menu_vectors_cache:
+            try:
+                from core.zhipu_client import embed_text
+                qv = embed_text(query)
+                scored = sorted(
+                    ((_cosine(qv, v["vector"]), v) for v in _menu_vectors_cache),
+                    key=lambda x: x[0], reverse=True,
+                )
+                top = [{k: v[k] for k in ("name", "store", "price", "category", "description", "sales")}
+                       for _, v in scored[:3]]
+                return {"success": True, "data": top, "matched_by": "semantic"}
+            except Exception as e:
+                print(f"语义推荐失败，回退销量排序: {e}")
+    # 兜底：按销量排序
     menu = _read_json(os.path.join(data_dir, "menu_data.json"))
     all_items = []
     for store, items in menu.items():
@@ -967,7 +995,7 @@ def query_recommend(preference=None, data_dir=None):
         if "甜" in preference or "奶茶" in preference: all_items = [i for i in all_items if i["category"] == "奶茶"]
         elif "酸" in preference or "果茶" in preference: all_items = [i for i in all_items if i["category"] == "果茶"]
     all_items.sort(key=lambda x: x["sales"], reverse=True)
-    return {"success": True, "data": all_items[:3]}
+    return {"success": True, "data": all_items[:3], "matched_by": "sales"}
 
 TOOLS = {
     "query_menu": query_menu, "query_stores": query_stores, "query_order": query_order,
@@ -1262,7 +1290,7 @@ async def process_message_async(text, session_id="default", memory_store=None, l
         
         if intent["name"] == "query_recommend":
             try:
-                tool_result = await asyncio.to_thread(query_recommend)
+                tool_result = await asyncio.to_thread(query_recommend, query=text)
                 print(f"query_recommend tool_result: {tool_result}")
                 print(f"query_recommend success: {tool_result.get('success') if tool_result else 'None'}")
             except Exception as e:
@@ -1453,7 +1481,7 @@ async def process_message_stream_async(text, session_id="default", memory_store=
             if intent["name"] == "query_recommend":
                 yield _evt({"type": "tool_call", "tool": "query_recommend", "params": {}})
                 try:
-                    tool_result = await asyncio.to_thread(query_recommend)
+                    tool_result = await asyncio.to_thread(query_recommend, query=text)
                 except Exception as e:
                     tool_result = {"success": False, "data": [], "error": str(e)}
                 async for evt in _emit_tool_done(intent, text, trace, memory_store, "query_recommend", tool_result):
