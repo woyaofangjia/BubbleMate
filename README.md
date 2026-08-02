@@ -11,30 +11,28 @@ BubbleMate/
 │   │   └── main.py             # FastAPI入口 + API端点
 │   ├── core/
 │   │   ├── config.py           # 配置管理
-│   │   └── zhipu_client.py     # 智谱AI客户端
+│   │   ├── zhipu_client.py     # 智谱AI/Ollama客户端
+│   │   └── cache.py            # Redis+内存降级缓存
 │   ├── storage/
 │   │   ├── database.py         # SQLite数据库管理
-│   │   └── memory_store.py     # 存储接口封装
-│   ├── tools/
-│   │   └── __init__.py
+│   │   ├── data_access.py      # 门店/菜单/订单查询
+│   │   ├── memory_store.py     # 会话记忆存储
+│   │   └── redis_store.py      # Redis会话管理
+│   ├── agent/tools/            # Agent工具
 │   ├── bubble_agent.py         # Agent核心逻辑（单文件）
 │   └── requirements.txt
 │
-├── frontend/                   # 前端界面（Next.js）
+├── frontend/                   # 前端界面（Next.js 14）
 │   ├── app/
 │   │   ├── page.tsx            # 主页面（聊天）
 │   │   ├── profile/            # 用户画像
 │   │   ├── admin/              # 运营后台
 │   │   ├── agent-dashboard/    # 客服工作台
-│   │   ├── eval-report/        # 评估报告
-│   │   ├── experiment-report/  # 实验报告
 │   │   ├── human-support/      # 人工客服
+│   │   ├── landing/            # 落地页
 │   │   └── api/                # API路由代理
-│   ├── components/
-│   │   ├── ChatInterface.tsx   # 聊天界面
-│   │   ├── ThoughtChainPanel.tsx  # 思考链展示
-│   │   ├── ToolVisualization.tsx  # 工具可视化
-│   │   └── Header.tsx
+│   ├── components/             # React组件（11个）
+│   ├── context/                # RoleContext
 │   └── package.json
 │
 ├── data/                       # 数据文件
@@ -42,23 +40,31 @@ BubbleMate/
 │   ├── orders_mock.json        # 订单模拟数据
 │   ├── knowledge_graph.json    # 知识图谱
 │   ├── menu_data.json          # 菜单数据
-│   ├── test_cases.json         # 测试用例
-│   └── eval_report.json        # 评估报告
+│   ├── promotions.json         # 优惠活动
+│   └── eval_dataset.json       # 评测数据集
 │
 ├── scripts/                    # 工具脚本
-│   ├── bubble_eval_runner.py   # 评估脚本
-│   ├── stratified_eval.py      # 分层评测
-│   ├── llm_baseline_test.py    # LLM基线测试
-│   └── generate_test_data.py   # 生成测试数据
+│   ├── run_comprehensive_eval.py    # 综合评估
+│   ├── run_pure_llm_baseline.py     # LLM基线测试
+│   ├── run_memory_window_experiment.py  # 记忆窗口实验
+│   ├── run_token_consumption_test.py # Token消耗测试
+│   ├── api_load_test.py        # API压测
+│   ├── generate_test_data.py   # 生成测试数据
+│   ├── crawler_mall.py         # 数据爬取
+│   └── token_cost_analysis.py  # 成本分析
 │
-├── docs/                       # 文档
-│   ├── 30天执行计划.md
-│   ├── 技术架构设计.md
-│   └── KEY_DESIGN_DECISIONS.md
+├── docs/                       # 文档（分层）
+│   ├── README.md               # 文档导航
+│   ├── design-decisions.md     # 关键设计决策
+│   ├── architecture/           # 核心架构文档
+│   └── development/            # 开发参考文档
 │
-├── start.bat                   # Windows启动脚本
-├── start.sh                    # Linux/Mac启动脚本
-└── docker-compose.yml          # Docker部署
+├── reports/                    # 实验与评测报告
+├── CodeAgent.md                # 架构概览 + 代码规范（必读）
+├── Dockerfile + docker-compose.yml  # Docker部署
+├── nginx.conf + nginx-lb.conf  # Nginx配置
+├── start.bat / start.sh        # 启动脚本
+└── README.md                   # 本文件
 ```
 
 ## 核心功能
@@ -94,16 +100,15 @@ BubbleMate/
 
 ## 技术栈
 
-- **后端**: Python 3.10+, FastAPI, LangChain, SQLite
+- **后端**: Python 3.10+, FastAPI, 原生 Agent（自研框架）, SQLite
 - **前端**: Next.js 14+, React, Tailwind CSS
 - **LLM**: 智谱AI (GLM-4)
 
 ## 运行方式
 
 ```bash
-# 后端（端口8000）
-cd backend
-pip install -r requirements.txt
+# 后端（端口8000，在项目根目录执行）
+pip install -r backend/requirements.txt
 python -m uvicorn backend.api.main:app --host 0.0.0.0 --port 8000
 
 # 前端（端口3001）

@@ -117,10 +117,10 @@ npm install
 
 ### 2. 启动服务
 ```bash
-# 后端（端口8000）
+# 后端（端口8000，在项目根目录执行）
 python -m uvicorn backend.api.main:app --host 0.0.0.0 --port 8000
 
-# 前端（端口3001）
+# 前端（端口3001，在 frontend 目录执行）
 npm run dev
 ```
 
