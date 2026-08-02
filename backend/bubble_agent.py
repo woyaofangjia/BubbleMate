@@ -1363,6 +1363,178 @@ def process_message(text, session_id="default", memory_store=None, llm_client=No
     return asyncio.run(process_message_async(text, session_id, memory_store, llm_client))
 
 
+async def process_message_stream_async(text, session_id="default", memory_store=None, llm_client=None):
+    """流式版本：分步 yield SSE 事件（start/thinking/tool_call/tool_result/response/done/error）。
+    复用 process_message_async 的子函数，保持业务逻辑一致。"""
+    import json as _json
+
+    def _evt(data):
+        return f"data: {_json.dumps(data, ensure_ascii=False)}\n\n"
+
+    async def _emit_tool_done(intent, text, trace, memory_store, tool_label, tool_result, params=None):
+        """工具调用后统一收尾：yield tool_result / response / done。"""
+        data_list = (tool_result.get("data", []) if tool_result else [])
+        yield _evt({"type": "tool_result",
+                    "success": bool(tool_result.get("success", False)) if tool_result else False,
+                    "data": data_list[:5], "count": len(data_list)})
+        response = build_response(intent, text, tool_result, [])
+        trace.add_step("tool_call", {"tool_name": tool_label, "intent_name": intent["name"], "params": params or {}})
+        trace.add_step("tool_result", {"success": tool_result.get("success", False) if tool_result else False, "data": data_list})
+        trace.add_step("response", {"text": response})
+        trace.save_to_file()
+        if memory_store:
+            save_message(memory_store, session_id, text, response)
+        _cache_response(text, response)
+        yield _evt({"type": "response", "content": response, "intent": intent})
+        yield _evt({"type": "done", "intent": intent})
+
+    async def _call_get_tool_response():
+        return await asyncio.to_thread(get_tool_response, intent["name"], text, TOOLS, session_id)
+
+    trace = ExecutionTrace()
+    trace.session_id = session_id
+
+    try:
+        # ---- 空输入 ----
+        if not text or not text.strip():
+            response = "【思考】空输入\n【回复】您好，请问有什么可以帮助您的？"
+            trace.add_step("clarify", {"missing_params": ["用户意图"]})
+            trace.add_step("response", {"text": response})
+            trace.save_to_file()
+            if memory_store:
+                save_message(memory_store, session_id, text or "", response)
+            intent = {"name": "unclear", "confidence": 0.0, "category": "通用"}
+            yield _evt({"type": "response", "content": response, "intent": intent})
+            yield _evt({"type": "done", "intent": intent})
+            return
+
+        # ---- 缓存命中 ----
+        cached_response = _get_cached_response(text)
+        if cached_response:
+            if memory_store:
+                asyncio.create_task(asyncio.to_thread(save_message, memory_store, session_id, text, cached_response))
+            intent = {"name": "cached", "confidence": 1.0, "category": "缓存"}
+            yield _evt({"type": "thinking", "intent": intent})
+            yield _evt({"type": "response", "content": cached_response, "intent": intent})
+            yield _evt({"type": "done", "intent": intent})
+            return
+
+        # ---- 终止判断 ----
+        termination = should_terminate(text, trace)
+        if termination["terminate"]:
+            if termination["action"] == "human_handover":
+                reply = "【思考】终止判断：需要转人工\n【回复】抱歉，我无法解决您的问题，已为您转接人工客服。"
+            else:
+                reply = "【思考】终止判断：对话结束\n【回复】很高兴能帮到您，祝您生活愉快！"
+            if memory_store:
+                save_message(memory_store, session_id, text, reply)
+            intent = {"name": "terminated", "confidence": 1.0, "category": "终止"}
+            yield _evt({"type": "response", "content": reply, "intent": intent})
+            yield _evt({"type": "done", "intent": intent})
+            return
+
+        # ---- 意图识别 + 上下文（并行）----
+        intent_task = asyncio.create_task(recognize_intent_async(text, llm_client))
+
+        def load_context():
+            if memory_store:
+                return get_context(memory_store, session_id)
+            return None
+
+        context_task = asyncio.create_task(asyncio.to_thread(load_context))
+        intent, context = await asyncio.gather(intent_task, context_task)
+        trace.add_step("intent", {"name": intent["name"], "confidence": intent["confidence"], "category": intent.get("category")})
+        yield _evt({"type": "thinking", "intent": intent})
+
+        # ---- 工具调用分支 ----
+        if intent["confidence"] >= 0.6:
+            tool_name = INTENT_TOOL.get(intent["name"])
+
+            if intent["name"] == "query_recommend":
+                yield _evt({"type": "tool_call", "tool": "query_recommend", "params": {}})
+                try:
+                    tool_result = await asyncio.to_thread(query_recommend)
+                except Exception as e:
+                    tool_result = {"success": False, "data": [], "error": str(e)}
+                async for evt in _emit_tool_done(intent, text, trace, memory_store, "query_recommend", tool_result):
+                    yield evt
+                return
+
+            if intent["name"] == "query_menu":
+                yield _evt({"type": "tool_call", "tool": "query_menu", "params": {}})
+                tool_result, _ = await _call_get_tool_response()
+                async for evt in _emit_tool_done(intent, text, trace, memory_store, "query_menu", tool_result):
+                    yield evt
+                return
+
+            if intent["name"] in ("query_order", "query_refund"):
+                params, missing = extract_params(text, intent["name"], session_id)
+                if params.get("order_id"):
+                    yield _evt({"type": "tool_call", "tool": "query_order", "params": params})
+                    tool_result, _ = await _call_get_tool_response()
+                    async for evt in _emit_tool_done(intent, text, trace, memory_store, "query_order", tool_result, params):
+                        yield evt
+                else:
+                    response = f"【思考】{intent['name']}\n【回复】请问您能提供一下订单号吗？这样我可以帮您查询相关信息。"
+                    trace.add_step("clarify", {"missing_params": ["订单号"]})
+                    trace.add_step("response", {"text": response})
+                    trace.save_to_file()
+                    if memory_store:
+                        save_message(memory_store, session_id, text, response)
+                    _cache_response(text, response)
+                    yield _evt({"type": "response", "content": response, "intent": intent})
+                    yield _evt({"type": "done", "intent": intent})
+                return
+
+            if intent["name"] in ("query_location", "query_store"):
+                params, missing = extract_params(text, intent["name"], session_id)
+                if params.get("location"):
+                    yield _evt({"type": "tool_call", "tool": "query_stores", "params": params})
+                    tool_result, _ = await _call_get_tool_response()
+                    async for evt in _emit_tool_done(intent, text, trace, memory_store, "query_stores", tool_result, params):
+                        yield evt
+                else:
+                    response = f"【思考】{intent['name']}\n【回复】请问您当前的位置在哪里？这样我可以帮您查询附近的门店。"
+                    trace.add_step("clarify", {"missing_params": ["位置信息"]})
+                    trace.add_step("response", {"text": response})
+                    trace.save_to_file()
+                    if memory_store:
+                        save_message(memory_store, session_id, text, response)
+                    _cache_response(text, response)
+                    yield _evt({"type": "response", "content": response, "intent": intent})
+                    yield _evt({"type": "done", "intent": intent})
+                return
+
+            if intent["name"].startswith("complaint"):
+                tool_result = None
+                if tool_name == "log_complaint":
+                    yield _evt({"type": "tool_call", "tool": "log_complaint", "params": {"complaint": text}})
+                    tool_result = await asyncio.to_thread(log_complaint, get_user_id(session_id), text,
+                                                          category=INTENT_TO_CATEGORY.get(intent["name"], "口味"),
+                                                          intent_name=intent["name"])
+                async for evt in _emit_tool_done(intent, text, trace, memory_store, "log_complaint", tool_result):
+                    yield evt
+                return
+
+            # 其他命中工具的意图：通用流程
+            if tool_name:
+                yield _evt({"type": "tool_call", "tool": tool_name, "params": {}})
+                tool_result, _ = await _call_get_tool_response()
+                async for evt in _emit_tool_done(intent, text, trace, memory_store, tool_name, tool_result):
+                    yield evt
+                return
+
+        # ---- 兜底：harness_handle ----
+        response, intent = await asyncio.to_thread(harness_handle, text, session_id, intent, trace, memory_store)
+        yield _evt({"type": "response", "content": response, "intent": intent})
+        yield _evt({"type": "done", "intent": intent})
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        yield _evt({"type": "error", "message": f"服务异常: {e}"})
+
+
 def harness_handle(text, session_id, intent, trace, memory_store):
     tool_name = INTENT_TOOL.get(intent["name"])
     tool_result = None

@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, Request, Response, BackgroundTasks, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
 import json
@@ -21,7 +22,7 @@ try:
 except ImportError:
     pass
 
-from bubble_agent import process_message, process_message_async, recognize_intent, create_memory_store, get_context, TOOLS, get_user_id, query_menu, query_promotions, query_recommend, query_customize, MemoryStore, clear_intent_cache, clear_response_cache
+from bubble_agent import process_message, process_message_async, process_message_stream_async, recognize_intent, create_memory_store, get_context, TOOLS, get_user_id, query_menu, query_promotions, query_recommend, query_customize, MemoryStore, clear_intent_cache, clear_response_cache
 from storage.database import init_db, get_user_preferences, get_complaint_history, get_user_stats, get_knowledge_candidates, approve_candidate, reject_candidate, get_complaint_knowledge, get_knowledge_complaints, update_knowledge_parent, get_all_complaints, get_knowledge_list, get_knowledge_graph, get_knowledge_graph_aggregated, review_knowledge, delete_knowledge, get_complaint_stats, resolve_complaint, add_knowledge_node
 from storage.data_access import get_shops, get_menu_items, get_orders, get_shop_by_name
 from storage.redis_store import session_store
@@ -138,8 +139,26 @@ async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
     
     if intent["name"].startswith("complaint"):
         background_tasks.add_task(process_complaint_async, request.session_id, request.message, intent["name"])
-    
+
     return ChatResponse(response=response, intent=intent, session_id=request.session_id)
+
+
+@app.post("/chat/stream")
+async def chat_stream(request: ChatRequest):
+    """流式聊天接口 - Server-Sent Events，分步推送思考/工具调用/回复事件。"""
+    async def event_generator():
+        async for chunk in process_message_stream_async(request.message, request.session_id, memory_store):
+            yield chunk
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",  # 禁用 Nginx 缓冲，保证实时推送
+        },
+    )
 
 @app.post("/voice-to-text")
 async def voice_to_text(audio: UploadFile = File(...)):

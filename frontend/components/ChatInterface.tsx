@@ -39,55 +39,128 @@ export default function ChatInterface({
   isStreaming,
 }: ChatInterfaceProps) {
   const [input, setInput] = useState('');
+  const [streamStage, setStreamStage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
+  const lastStageAt = useRef(0);
+
+  // 保证每个流式阶段至少展示 200ms，避免快路径下中间状态一闪即过
+  const applyStage = async (stage: string) => {
+    const now = Date.now();
+    if (lastStageAt.current > 0 && now - lastStageAt.current < 200) {
+      await new Promise(r => setTimeout(r, 200 - (now - lastStageAt.current)));
+    }
+    setStreamStage(stage);
+    setCurrentThought(stage);
+    lastStageAt.current = Date.now();
+  };
+
   // 自动滚动到底部
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
-  
+
   const sendMessageToAgent = async (userMessage: string) => {
     if (!userMessage.trim() || isStreaming) return;
-    
+
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setIsStreaming(true);
-    
+    lastStageAt.current = 0;
+    await applyStage('正在识别意图...');
+    setCurrentTools([]);
+
     try {
-      const response = await fetch('/api/chat', {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+      const response = await fetch(`${backendUrl}/chat/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userMessage, session_id: getSessionId() }),
       });
-      
-      const data = await response.json();
-      
-      const agentMessage = data.response;
-      const thoughtMatch = agentMessage.match(/【思考】(.+)/);
-      const thought = thoughtMatch ? thoughtMatch[1] : '';
-      const toolMatch = agentMessage.match(/【行动】调用工具: (.+)/);
-      const tools = toolMatch ? [{ name: toolMatch[1], status: 'completed' }] : [];
-      
-      setCurrentThought(thought);
-      setCurrentTools(tools);
-      
-      const replyMatch = agentMessage.match(/【回复】([\s\S]+)/);
-      const reply = replyMatch ? replyMatch[1] : agentMessage;
-      
-      setMessages(prev => [...prev, {
-        role: 'agent',
-        content: reply,
-        thoughtChain: thought,
-        toolCalls: tools,
-        messageId: `msg_${Date.now()}`,
-      }]);
-    } catch (error) {
-      console.error('API调用失败:', error);
-      setMessages(prev => [...prev, {
-        role: 'agent',
-        content: '抱歉，服务暂时不可用。请稍后再试。',
-      }]);
+
+      if (!response.ok || !response.body) {
+        throw new Error('流式服务不可用');
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let finalContent = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const events = buffer.split('\n\n');
+        buffer = events.pop() || '';
+        for (const evt of events) {
+          const line = evt.trim();
+          if (!line.startsWith('data: ')) continue;
+          const jsonStr = line.slice(6).trim();
+          if (!jsonStr) continue;
+          let data: any;
+          try { data = JSON.parse(jsonStr); } catch { continue; }
+
+          switch (data.type) {
+            case 'thinking': {
+              const intentName = data.intent?.name || '...';
+              const conf = data.intent?.confidence != null ? ` (${(data.intent.confidence * 100).toFixed(0)}%)` : '';
+              await applyStage(`识别意图: ${intentName}${conf}`);
+              break;
+            }
+            case 'tool_call':
+              await applyStage(`调用工具: ${data.tool}`);
+              setCurrentTools([{ name: data.tool, status: 'running' }]);
+              break;
+            case 'tool_result':
+              await applyStage('工具返回，正在生成回复...');
+              setCurrentTools(prev => prev.map(t => t.status === 'running'
+                ? { ...t, status: 'completed', result: `共 ${data.count} 条结果` }
+                : t));
+              break;
+            case 'response':
+              finalContent = data.content || '';
+              break;
+            case 'done':
+              break;
+            case 'error':
+              throw new Error(data.message || '服务异常');
+          }
+        }
+      }
+
+      // 流式结束，解析并添加最终回复
+      if (finalContent) {
+        const thoughtMatch = finalContent.match(/【思考】(.+)/);
+        const thought = thoughtMatch ? thoughtMatch[1] : '';
+        const toolMatch = finalContent.match(/【行动】调用工具: (.+)/);
+        const tools = toolMatch ? [{ name: toolMatch[1], status: 'completed' }] : [];
+        const replyMatch = finalContent.match(/【回复】([\s\S]+)/);
+        const reply = replyMatch ? replyMatch[1] : finalContent;
+
+        setCurrentThought(thought);
+        setCurrentTools(tools);
+        setMessages(prev => [...prev, {
+          role: 'agent',
+          content: reply,
+          thoughtChain: thought,
+          toolCalls: tools,
+          messageId: `msg_${Date.now()}`,
+        }]);
+      }
+    } catch (error: any) {
+      // HMR/页面导航会中断流式请求，属于 dev 模式正常现象，不显示错误
+      const isAbort = error?.name === 'AbortError' || /abort|interrupt/i.test(error?.message || '');
+      if (isAbort) {
+        console.warn('流式请求被中断（通常是热重载或导航引起）');
+      } else {
+        console.error('流式调用失败:', error);
+        setMessages(prev => [...prev, {
+          role: 'agent',
+          content: '抱歉，服务暂时不可用。请稍后再试。',
+        }]);
+      }
     }
-    
+
+    setStreamStage('');
     setIsStreaming(false);
   };
 
@@ -195,7 +268,7 @@ export default function ChatInterface({
             <div className="message-bubble message-agent">
               <div className="flex items-center gap-2">
                 <span className="animate-pulse">●</span>
-                <span className="streaming-text">正在思考</span>
+                <span className="streaming-text">{streamStage || '正在思考'}</span>
               </div>
             </div>
           </div>
