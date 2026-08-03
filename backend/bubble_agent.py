@@ -1269,7 +1269,16 @@ def save_message(store, session_id, user_msg, agent_msg):
         user_id = get_user_id(session_id)
         new_entities = _extract_entities(user_msg)
         agent_entities = _extract_entities(agent_msg)
+        existing_entities = sess.get("entities", {})
+        if agent_entities.get("drink") and agent_entities.get("price"):
+            drink_in_agent = agent_entities["drink"]
+            if drink_in_agent in agent_msg and existing_entities.get("drink") and existing_entities["drink"] not in agent_msg:
+                agent_entities = {}
         for k, v in agent_entities.items():
+            if k == "price" and k in new_entities:
+                continue
+            if k == "drink" and k in new_entities:
+                continue
             if k not in new_entities:
                 new_entities[k] = v
         for k, v in new_entities.items():
@@ -1288,7 +1297,16 @@ def save_message(store, session_id, user_msg, agent_msg):
         user_id = get_user_id(session_id)
         new_entities = _extract_entities(user_msg)
         agent_entities = _extract_entities(agent_msg)
+        existing_entities = store["sessions"][session_id].get("entities", {})
+        if agent_entities.get("drink") and agent_entities.get("price"):
+            drink_in_agent = agent_entities["drink"]
+            if drink_in_agent in agent_msg and existing_entities.get("drink") and existing_entities["drink"] not in agent_msg:
+                agent_entities = {}
         for k, v in agent_entities.items():
+            if k == "price" and k in new_entities:
+                continue
+            if k == "drink" and k in new_entities:
+                continue
             if k not in new_entities:
                 new_entities[k] = v
         for k, v in new_entities.items():
