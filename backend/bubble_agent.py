@@ -1158,8 +1158,11 @@ def _extract_entities(text):
             entities["drink"] = name
             break
     
-    price_match = re.search(r'[¥￥]?\s*(\d{1,3}(?:\.\d+)?)\s*元?\s*', text)
-    if price_match: entities["price"] = price_match.group(1)
+    price_matches = re.findall(r'[¥￥]\s*(\d{1,3}(?:\.\d+)?)\s*元?', text)
+    if not price_matches:
+        price_matches = re.findall(r'(\d{1,3}(?:\.\d+)?)\s*元', text)
+    if len(price_matches) == 1:
+        entities["price"] = price_matches[0]
     
     topping_map = {
         "珍珠": ["珍珠", "加珍珠", "珍珠奶茶"],
@@ -1883,7 +1886,18 @@ def harness_handle(text, session_id, intent, trace, memory_store):
     tool_name = INTENT_TOOL.get(intent["name"])
     tool_result = None
     missing_params = []
-    
+
+    if _has_reference(text):
+        resolved = _resolve_reference(text, entities, context_str)
+        if resolved:
+            response = f"【思考】指代消解\n【回复】{resolved}"
+            trace.add_step("reference_resolution", {"resolved": resolved})
+            trace.add_step("response", {"text": response})
+            trace.save_to_file()
+            if memory_store:
+                save_message(memory_store, session_id, text, response)
+            return response, intent
+
     if tool_name and tool_name != "log_complaint":
         tool_result, missing_params = get_tool_response(intent["name"], text, session_id=session_id)
         
