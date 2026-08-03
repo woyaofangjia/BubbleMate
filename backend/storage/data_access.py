@@ -28,6 +28,15 @@ def get_shop_by_name(name):
     conn.close()
     return dict(row) if row else None
 
+@lru_cache(maxsize=256)
+def get_shop_by_id(shop_id):
+    conn = _connect()
+    c = conn.cursor()
+    c.execute("SELECT * FROM shops WHERE id = ?", (shop_id,))
+    row = c.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
 @lru_cache(maxsize=128)
 def get_menu_items(shop_id=None, keyword=None, category=None):
     conn = _connect()

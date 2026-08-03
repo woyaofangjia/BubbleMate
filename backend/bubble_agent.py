@@ -1,7 +1,6 @@
 import re
 import json
 import os
-import random
 import time
 import sqlite3
 import asyncio
@@ -16,7 +15,7 @@ except:
 
 try:
     from storage.database import save_session, get_user_by_session, save_user_preference, get_user_preferences, save_complaint, save_complaint_with_candidate, get_knowledge_graph, save_knowledge as _save_knowledge, save_complaint_db as _save_complaint_db, get_complaint_stats
-    from storage.data_access import get_shops, get_menu_items, get_orders, get_inventory, get_shop_by_name, get_hot_menu_items
+    from storage.data_access import get_shops, get_menu_items, get_orders, get_shop_by_name, get_shop_by_id, get_hot_menu_items
     from core.cache import cache
 except:
     save_session = lambda s, u: None
@@ -25,8 +24,8 @@ except:
     get_shops = lambda **kwargs: []
     get_menu_items = lambda **kwargs: []
     get_orders = lambda **kwargs: []
-    get_inventory = lambda **kwargs: []
     get_shop_by_name = lambda name: None
+    get_shop_by_id = lambda shop_id: None
     get_user_preferences = lambda u: {}
     save_complaint = lambda u, d: None
     save_complaint_with_candidate = lambda u, ct, d: (None, None)
@@ -759,7 +758,7 @@ def query_menu(store_name=None, keyword=None, category=None, data_dir=None):
     hot_items = get_hot_menu_items(limit=5)
     hot = []
     for item in hot_items:
-        shop = get_shop_by_name(item.get('shop_id', ''))
+        shop = get_shop_by_id(item.get('shop_id', ''))
         shop_name = shop['name'] if shop else '未知门店'
         hot.append({"store": shop_name, "name": item['name'], "price": item['price'], "category": item.get('category'), "sales": item.get('sales', 0)})
     
@@ -782,10 +781,7 @@ def query_stores(location, radius=3000, data_dir=None):
     stores = get_shops(location=location)
     if stores:
         return {"success": True, "data": stores, "count": len(stores)}
-    return {"success": True, "data": [
-        {"name": f"{location}附近门店1", "address": f"{location}街道1号"},
-        {"name": f"{location}附近门店2", "address": f"{location}街道2号"},
-    ], "count": 2}
+    return {"success": False, "data": [], "count": 0, "message": f"未找到 {location} 附近的门店"}
 
 def query_order(user_id=None, order_id=None, data_dir=None):
     user_id = user_id or "default_user"
@@ -794,7 +790,7 @@ def query_order(user_id=None, order_id=None, data_dir=None):
         matched = get_orders(order_id=order_id)
         result = []
         for order in matched:
-            shop = get_shop_by_name(order.get('shop_id', '')) if order.get('shop_id') else None
+            shop = get_shop_by_id(order.get('shop_id', '')) if order.get('shop_id') else None
             result.append({
                 "order_id": order['id'],
                 "store": shop['name'] if shop else order.get('shop_id', ''),
@@ -810,7 +806,7 @@ def query_order(user_id=None, order_id=None, data_dir=None):
     user_orders = get_orders(user_id=user_id)
     result = []
     for order in user_orders:
-        shop = get_shop_by_name(order.get('shop_id', '')) if order.get('shop_id') else None
+        shop = get_shop_by_id(order.get('shop_id', '')) if order.get('shop_id') else None
         result.append({
             "order_id": order['id'],
             "store": shop['name'] if shop else order.get('shop_id', ''),
@@ -822,27 +818,6 @@ def query_order(user_id=None, order_id=None, data_dir=None):
             "address": order.get('address')
         })
     return {"success": True, "data": result, "count": len(result)}
-
-def check_stock(item_name, store_name=None):
-    shop = None
-    if store_name:
-        shop = get_shop_by_name(store_name)
-        if not shop:
-            shops = get_shops(location=store_name)
-            if shops:
-                shop = shops[0]
-    
-    if shop:
-        items = get_menu_items(shop_id=shop['id'], keyword=item_name)
-        if items:
-            inv = get_inventory(shop_id=shop['id'], menu_item_id=items[0]['id'])
-            if inv:
-                return {"success": True, "item": item_name, "available": inv['quantity'] > 0, "quantity": inv['quantity']}
-            return {"success": True, "item": item_name, "available": True, "quantity": 50}
-    
-    hot = ["幽兰拿铁", "多肉葡萄", "霸气芝士草莓", "珍珠奶茶"]
-    available = random.choice([True, True, False]) if item_name in hot else random.choice([True, True, True, False])
-    return {"success": True, "item": item_name, "available": available, "quantity": random.randint(0, 50) if available else 0}
 
 def log_complaint(user_id=None, complaint=None, severity="普通", category="口味", intent_name=None):
     user_id = user_id or "default_user"
@@ -952,8 +927,21 @@ def query_customize(item_name):
 
 def query_history(user_id=None, limit=3, data_dir="data"):
     user_id = user_id or "default_user"
-    orders = _read_json(os.path.join(data_dir, "orders_mock.json"))
-    return {"success": True, "data": orders.get(user_id, [])[:limit]}
+    orders = get_orders(user_id=user_id)[:limit]
+    result = []
+    for order in orders:
+        shop = get_shop_by_id(order.get('shop_id', '')) if order.get('shop_id') else None
+        result.append({
+            "order_id": order['id'],
+            "store": shop['name'] if shop else order.get('shop_id', ''),
+            "items": order.get('items', []),
+            "total": order.get('total'),
+            "status": order.get('status', 'pending'),
+            "create_time": order.get('create_time'),
+            "delivery_time": order.get('delivery_time'),
+            "address": order.get('address')
+        })
+    return {"success": True, "data": result, "count": len(result)}
 
 _menu_vectors_cache = None
 
@@ -999,7 +987,7 @@ def query_recommend(query=None, preference=None, data_dir=None):
 
 TOOLS = {
     "query_menu": query_menu, "query_stores": query_stores, "query_order": query_order,
-    "check_stock": check_stock, "log_complaint": log_complaint,
+    "log_complaint": log_complaint,
     "query_promotions": query_promotions, "query_customize": query_customize,
     "query_history": query_history, "query_recommend": query_recommend,
 }
@@ -1227,7 +1215,7 @@ def _format_tool_result(intent_name, result):
     if intent_name == "query_menu":
         names = [i.get("name", "") for i in result["data"][:3]]
         return f"饮品：{', '.join(names)}。"
-    if intent_name == "query_order":
+    if intent_name in ("query_order", "query_history"):
         if result["data"]:
             orders = []
             for o in result["data"]:

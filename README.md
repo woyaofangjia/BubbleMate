@@ -18,8 +18,7 @@ BubbleMate/
 │   │   ├── data_access.py      # 门店/菜单/订单查询
 │   │   ├── memory_store.py     # 会话记忆存储
 │   │   └── redis_store.py      # Redis会话管理
-│   ├── agent/tools/            # Agent工具
-│   ├── bubble_agent.py         # Agent核心逻辑（单文件）
+│   ├── bubble_agent.py         # Agent核心逻辑（单文件，含8个工具）
 │   └── requirements.txt
 │
 ├── frontend/                   # 前端界面（Next.js 14）
@@ -37,7 +36,7 @@ BubbleMate/
 │
 ├── data/                       # 数据文件
 │   ├── bubble_tea_all.json     # 门店信息
-│   ├── orders_mock.json        # 订单模拟数据
+│   ├── orders_mock.json        # 订单种子数据（DB初始化用，由 migrate_data.py 导入）
 │   ├── knowledge_graph.json    # 知识图谱
 │   ├── menu_data.json          # 菜单数据
 │   ├── menu_vectors.json       # 菜单向量缓存（语义检索，由 gen_menu_vectors.py 生成）
@@ -73,7 +72,7 @@ BubbleMate/
 
 ### 🤖 智能客服
 - 意图识别：规则+关键词+LLM兜底（18+种意图，测试集准确率100%）
-- 工具调用：订单查询、门店查询、菜单查询、投诉处理、优惠查询
+- 工具调用：8个工具——菜单查询、门店查询、订单查询、历史订单查询、投诉处理、优惠查询、加料定制、智能推荐
 - 流式输出：SSE 逐事件推送（思考→工具调用→回复），前端实时展示进度
 - 语义推荐：embedding 向量匹配替代关键词，支持"清爽的""便宜的"等模糊需求
 - 思考链可视化：实时展示Agent推理过程

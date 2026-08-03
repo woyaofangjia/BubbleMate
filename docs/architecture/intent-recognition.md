@@ -51,15 +51,17 @@
 - `complaint_compare_history` - 历史对比（跟上次不一样）
 
 ### 查询类 (query_*)
-- `query_menu` - 菜单查询
-- `query_order` - 订单查询
-- `query_location` - 门店查询
-- `query_hours` - 营业时间查询
-- `query_price` - 价格查询
-- `query_promotion` - 优惠活动查询
-- `query_customize` - 加料定制
-- `query_history` - 历史订单查询
-- `query_recommend` - 推荐咨询
+- `query_menu` - 菜单查询 → 工具 `query_menu`
+- `query_order` - 订单查询 → 工具 `query_order`
+- `query_location` - 门店查询 → 工具 `query_stores`
+- `query_store` - 门店查询(别名) → 工具 `query_stores`
+- `query_hours` - 营业时间查询 → 直接响应(硬编码)
+- `query_price` - 价格查询 → 直接响应(硬编码)
+- `query_promotion` - 优惠活动查询 → 工具 `query_promotions`
+- `query_customize` - 加料定制 → 工具 `query_customize`
+- `query_history` - 历史订单查询 → 工具 `query_history`(与 query_order 共用 SQLite 数据源)
+- `query_refund` - 退款查询 → 工具 `query_order`
+- `query_recommend` - 推荐咨询 → 工具 `query_recommend`
 
 ### 其他
 - `place_order` - 下单
@@ -117,6 +119,7 @@ def _calculate_confidence(pattern, match_text, text_length):
 2. 在 `RULE_PATTERNS` 添加正则模式
 3. 在 `CATEGORY_MAP` 添加分类映射
 4. 在 `INTENT_TOOL` 添加工具路由（如果需要）
+5. 若不需要工具调用（直接响应），在 `DIRECT_RESPONSES` 添加响应文本
 
 ### 调整阈值
 - `LLM_FALLBACK_THRESHOLD` (默认 0.55)：降低可减少 LLM 调用

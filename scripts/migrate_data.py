@@ -95,17 +95,28 @@ def migrate_orders():
     with open(path, 'r', encoding='utf-8') as f:
         orders_data = json.load(f)
     
-    from backend.storage.data_access import get_shop_by_name
-    
+    from backend.storage.data_access import get_shop_by_name, get_shops
+
+    def _find_shop_id(store_name):
+        shop = get_shop_by_name(store_name)
+        if shop:
+            return shop['id']
+        if not store_name:
+            return None
+        brand = store_name.split('-')[0].split('(')[0]
+        for s in get_shops():
+            if brand in s.get('name', ''):
+                return s['id']
+        return None
+
     count = 0
     for user_id, orders in orders_data.items():
         for order in orders:
-            shop = get_shop_by_name(order.get('store', ''))
-            shop_id = shop['id'] if shop else None
-            
+            shop_id = _find_shop_id(order.get('store', ''))
+
             add_order(
                 order_id=order['order_id'],
-                user_id=user_id.replace('user_', '').replace('user_session_', ''),
+                user_id=user_id,
                 shop_id=shop_id,
                 items=order.get('items', []),
                 total=order.get('total'),

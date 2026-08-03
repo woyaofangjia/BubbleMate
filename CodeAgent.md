@@ -44,16 +44,16 @@ BubbleMate 是一个面向奶茶店场景的智能客服 Agent，实现意图识
 
 ## 核心模块
 
-| 模块 | 文件 | 职责 |
-|------|------|------|
-| Agent核心 | `backend/bubble_agent.py` | 意图识别、工具路由、Harness循环 |
-| API路由 | `backend/api/main.py` | REST API端点、速率限制 |
-| 配置管理 | `backend/core/config.py` | 环境变量、路径配置 |
-| LLM客户端 | `backend/core/zhipu_client.py` | 智谱/Ollama双模型支持 |
-| 缓存层 | `backend/core/cache.py` | Redis+内存降级缓存 |
-| 数据访问 | `backend/storage/data_access.py` | 门店/菜单/订单查询 |
-| 数据库 | `backend/storage/database.py` | SQLite表结构、CRUD |
-| 会话存储 | `backend/storage/redis_store.py` | Redis会话管理 |
+| 模块 | 文件 | 职责 | 数据源 |
+|------|------|------|--------|
+| Agent核心 | `backend/bubble_agent.py` | 意图识别、工具路由、Harness循环 | 8个工具内联：SQLite + JSON + embedding |
+| API路由 | `backend/api/main.py` | REST API端点、速率限制 | — |
+| 配置管理 | `backend/core/config.py` | 环境变量、路径配置 | — |
+| LLM客户端 | `backend/core/zhipu_client.py` | 智谱/Ollama双模型支持 | — |
+| 缓存层 | `backend/core/cache.py` | Redis+内存降级缓存 | — |
+| 数据访问 | `backend/storage/data_access.py` | 门店/菜单/订单查询 | SQLite + lru_cache |
+| 数据库 | `backend/storage/database.py` | SQLite表结构、CRUD | SQLite (bubblemate.db) |
+| 会话存储 | `backend/storage/redis_store.py` | Redis会话管理 | Redis |
 
 ## 代码规范
 
@@ -88,7 +88,7 @@ BubbleMate 是一个面向奶茶店场景的智能客服 Agent，实现意图识
 BubbleMate/
 ├── backend/                    # 后端服务
 │   ├── api/main.py            # FastAPI入口
-│   ├── bubble_agent.py        # Agent核心逻辑
+│   ├── bubble_agent.py        # Agent核心逻辑（含8个工具）
 │   ├── core/                   # 配置、LLM、缓存
 │   ├── storage/                # 数据库、会话存储
 │   └── requirements.txt
