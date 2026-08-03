@@ -14,10 +14,11 @@ except:
     requests = None
 
 try:
-    from storage.database import save_session, get_user_by_session, save_user_preference, get_user_preferences, save_complaint, save_complaint_with_candidate, get_knowledge_graph, save_knowledge as _save_knowledge, save_complaint_db as _save_complaint_db, get_complaint_stats
-    from storage.data_access import get_shops, get_menu_items, get_orders, get_shop_by_name, get_shop_by_id, get_hot_menu_items
-    from core.cache import cache
-except:
+    from .storage.database import save_session, get_user_by_session, save_user_preference, get_user_preferences, save_complaint, save_complaint_with_candidate, get_knowledge_graph, save_knowledge as _save_knowledge, save_complaint_db as _save_complaint_db, get_complaint_stats
+    from .storage.data_access import get_shops, get_menu_items, get_orders, get_shop_by_name, get_shop_by_id, get_hot_menu_items
+except Exception as e:
+    import sys as _sys
+    print(f"Warning: storage modules not fully available: {e}", file=_sys.stderr)
     save_session = lambda s, u: None
     get_user_by_session = lambda s: None
     save_user_preference = lambda u, k, v: None
@@ -33,6 +34,10 @@ except:
     _save_knowledge = lambda ct, s, c: None
     _save_complaint_db = lambda u, ct, d: None
     get_complaint_stats = lambda: {"by_type": []}
+
+try:
+    from .core.cache import cache
+except Exception:
     cache = None
 
 # ==================== Harness自我反思 ====================
@@ -526,8 +531,8 @@ INTENT_TOOL = {
     "query_location": "query_stores", "query_menu": "query_menu",
     "query_order": "query_order", "query_promotion": "query_promotions",
     "query_customize": "query_customize", "query_history": "query_history",
-    "query_recommend": "query_recommend",
-    "query_refund": "query_order",
+    "query_recommend": "query_recommend", "query_refund": "query_order",
+    "query_price": "query_menu",
 }
 
 PARAM_EXTRACTORS = {
@@ -743,6 +748,18 @@ def _read_json(path):
 
 @lru_cache(maxsize=32)
 def query_menu(store_name=None, keyword=None, category=None, data_dir=None):
+    if keyword and not store_name:
+        all_items = []
+        shops = get_shops()
+        for shop in shops:
+            items = get_menu_items(shop_id=shop['id'], keyword=keyword, category=category)
+            for item in items:
+                item['store'] = shop['name']
+                all_items.append(item)
+        if all_items:
+            return {"success": True, "data": all_items[:5], "keyword": keyword}
+        return {"success": False, "data": [], "message": f"未找到与 {keyword} 相关的饮品"}
+    
     if store_name:
         shop = get_shop_by_name(store_name)
         if not shop:
@@ -754,7 +771,6 @@ def query_menu(store_name=None, keyword=None, category=None, data_dir=None):
         items = get_menu_items(shop_id=shop['id'], keyword=keyword, category=category)
         return {"success": True, "data": items, "store": shop['name']}
     
-    from storage.data_access import get_hot_menu_items
     hot_items = get_hot_menu_items(limit=5)
     hot = []
     for item in hot_items:
@@ -1022,7 +1038,18 @@ def extract_params(text, intent_name, session_id=None):
         params["complaint"] = PARAM_EXTRACTORS["complaint"](text)
         params["intent_name"] = intent_name
         params["category"] = INTENT_TO_CATEGORY.get(intent_name, "口味")
+    elif tool_name == "query_menu":
+        drink_kw = _extract_drink_keyword(text)
+        if drink_kw:
+            params["keyword"] = drink_kw
     return params, missing_params
+
+def _extract_drink_keyword(text):
+    menu_names = _get_menu_names()
+    for name in menu_names:
+        if name in text:
+            return name
+    return None
 
 import threading
 
@@ -1070,13 +1097,13 @@ def get_tool_response(intent_name, text, tools=TOOLS, session_id=None):
 # ==================== 记忆管理 ====================
 
 try:
-    from storage.redis_store import session_store
+    from .storage.redis_store import session_store
     REDIS_AVAILABLE = True
 except ImportError:
     REDIS_AVAILABLE = False
 
 class MemoryStore:
-    def __init__(self, window_size=5):
+    def __init__(self, window_size=3):
         self._window_size = window_size
         self._store = {"sessions": {}}
     
@@ -1096,18 +1123,128 @@ class MemoryStore:
             return session_store.get_all_sessions()
         return dict(self._store["sessions"])
 
-def create_memory_store(window_size=5):
+def create_memory_store(window_size=3):
     return MemoryStore(window_size)
 
-def _extract_prefs(text):
-    sugar_map = {"无糖": ["无糖", "零糖"], "三分糖": ["少糖"], "五分糖": ["半糖"]}
-    ice_map = {"热": ["热饮"], "去冰": ["去冰"], "少冰": ["少冰"]}
-    prefs = {}
+def _extract_entities(text):
+    entities = {}
+    
+    sugar_map = {"无糖": ["无糖", "零糖"], "三分糖": ["三分糖", "少糖"], "五分糖": ["五分糖", "半糖"], "七分糖": ["七分糖"]}
     for level, patterns in sugar_map.items():
-        if any(p in text for p in patterns): prefs["sugar"] = level
+        if any(p in text for p in patterns): entities["sugar"] = level
+    
+    ice_map = {"热": ["热饮", "热的"], "去冰": ["去冰"], "少冰": ["少冰"], "温": ["温的", "温热"]}
     for level, patterns in ice_map.items():
-        if any(p in text for p in patterns): prefs["ice"] = level
-    return prefs
+        if any(p in text for p in patterns): entities["ice"] = level
+    
+    order_match = re.search(r'(?:ORD-)?(\d{5,})', text)
+    if order_match: entities["order_id"] = order_match.group(1)
+    
+    location_patterns = [
+        re.compile(r'(光谷|街道口|银泰|武大|华师|汉口|武昌|江夏|汉阳|江汉|硚口|洪山)'),
+        re.compile(r'(在|去|到)([^\s，。的]{2,6})(?:附近|周边|这里)'),
+    ]
+    for pat in location_patterns:
+        m = pat.search(text)
+        if m:
+            loc = m.group(1) if m.lastindex == 1 else m.group(2)
+            if loc not in ["附近", "周边", "这里"]:
+                entities["location"] = loc
+                break
+    
+    menu_items = _get_menu_names()
+    for name in menu_items:
+        if name in text:
+            entities["drink"] = name
+            break
+    
+    price_match = re.search(r'[¥￥]?\s*(\d{1,3}(?:\.\d+)?)\s*元?\s*', text)
+    if price_match: entities["price"] = price_match.group(1)
+    
+    topping_map = {
+        "珍珠": ["珍珠", "加珍珠", "珍珠奶茶"],
+        "椰果": ["椰果"],
+        "布丁": ["布丁"],
+        "红豆": ["红豆"],
+        "绿豆": ["绿豆"],
+        "仙草": ["仙草"],
+        "芋圆": ["芋圆"],
+        "奶盖": ["奶盖", "加奶盖"],
+        "燕麦": ["燕麦", "加燕麦"],
+        "水果": ["加水果", "水果"],
+    }
+    for topping, patterns in topping_map.items():
+        if any(p in text for p in patterns):
+            entities["topping"] = topping
+            break
+    
+    temp_map = {
+        "热": ["热饮", "热的", "加热"],
+        "温": ["温的", "温热", "常温"],
+        "去冰": ["去冰", "不要冰", "无冰"],
+        "少冰": ["少冰", "少放点冰"],
+        "正常冰": ["正常冰", "标准冰"],
+        "多冰": ["多冰", "加冰"],
+    }
+    for temp, patterns in temp_map.items():
+        if any(p in text for p in patterns):
+            entities["temperature"] = temp
+            break
+    
+    size_map = {
+        "大杯": ["大杯", "大的", "L", "XL"],
+        "中杯": ["中杯", "中的", "M"],
+        "小杯": ["小杯", "小的", "S"],
+    }
+    for size, patterns in size_map.items():
+        if any(p in text for p in patterns):
+            entities["size"] = size
+            break
+    
+    if "太甜" in text:
+        entities["complaint_reason"] = "太甜"
+    elif "太咸" in text:
+        entities["complaint_reason"] = "太咸"
+    elif "太辣" in text:
+        entities["complaint_reason"] = "太辣"
+    elif "太淡" in text:
+        entities["complaint_reason"] = "太淡"
+    elif "变质" in text or "不新鲜" in text:
+        entities["complaint_reason"] = "变质/不新鲜"
+    
+    compliment_patterns = [
+        re.compile(r'(真好喝|好喝|不错|喜欢|爱喝|最爱)', re.I),
+    ]
+    for pat in compliment_patterns:
+        m = pat.search(text)
+        if m:
+            drink = entities.get("drink", "")
+            entities["complimented_drink"] = drink if drink else m.group(0)
+            break
+    
+    return entities
+
+def _get_menu_names():
+    global _menu_names_cache
+    if '_menu_names_cache' not in globals():
+        try:
+            menu_path = os.path.join(os.path.dirname(__file__), "../data/menu_data.json")
+            if os.path.exists(menu_path):
+                with open(menu_path, 'r', encoding='utf-8') as f:
+                    menu_data = json.load(f)
+                names = []
+                for store_items in menu_data.values():
+                    for item in store_items:
+                        if isinstance(item, dict) and 'name' in item:
+                            names.append(item['name'])
+                        elif isinstance(item, str):
+                            names.append(item)
+                _menu_names_cache = list(set(names))
+            else:
+                _menu_names_cache = []
+        except Exception:
+            _menu_names_cache = []
+    return _menu_names_cache
 
 def _compress_history(history, window_size):
     if len(history) <= window_size:
@@ -1125,52 +1262,164 @@ def save_message(store, session_id, user_msg, agent_msg):
     if isinstance(store, MemoryStore):
         sess = store._get_session(session_id)
         if not sess:
-            sess = {"history": [], "preferences": {}, "summary": ""}
+            sess = {"history": [], "preferences": {}, "entities": {}, "summary": ""}
         sess["history"].append({"user": user_msg, "agent": agent_msg})
         if len(sess["history"]) > store._window_size:
             sess["history"] = _compress_history(sess["history"], store._window_size)
         user_id = get_user_id(session_id)
-        new_prefs = _extract_prefs(user_msg)
-        for k, v in new_prefs.items():
-            save_user_preference(user_id, k, v)
-            sess["preferences"][k] = v
+        new_entities = _extract_entities(user_msg)
+        agent_entities = _extract_entities(agent_msg)
+        for k, v in agent_entities.items():
+            if k not in new_entities:
+                new_entities[k] = v
+        for k, v in new_entities.items():
+            if k in ("sugar", "ice"):
+                save_user_preference(user_id, k, v)
+                sess["preferences"][k] = v
+            sess["entities"][k] = v
         store._save_session(session_id, sess)
     else:
         if session_id not in store["sessions"]:
-            store["sessions"][session_id] = {"history": [], "preferences": {}, "window_size": store["window_size"]}
+            store["sessions"][session_id] = {"history": [], "preferences": {}, "entities": {}, "window_size": store["window_size"]}
         store["sessions"][session_id]["history"].append({"user": user_msg, "agent": agent_msg})
         window_size = store["sessions"][session_id]["window_size"]
         if len(store["sessions"][session_id]["history"]) > window_size:
             store["sessions"][session_id]["history"] = _compress_history(store["sessions"][session_id]["history"], window_size)
         user_id = get_user_id(session_id)
-        new_prefs = _extract_prefs(user_msg)
-        for k, v in new_prefs.items():
-            save_user_preference(user_id, k, v)
-            store["sessions"][session_id]["preferences"][k] = v
+        new_entities = _extract_entities(user_msg)
+        agent_entities = _extract_entities(agent_msg)
+        for k, v in agent_entities.items():
+            if k not in new_entities:
+                new_entities[k] = v
+        for k, v in new_entities.items():
+            if k in ("sugar", "ice"):
+                save_user_preference(user_id, k, v)
+                store["sessions"][session_id]["preferences"][k] = v
+            store["sessions"][session_id]["entities"][k] = v
 
 def get_context(store, session_id):
     if isinstance(store, MemoryStore):
         sess = store._get_session(session_id)
     else:
         sess = store["sessions"].get(session_id)
-    if not sess: return ""
+    if not sess: return "", {}
     user_id = get_user_id(session_id)
     db_prefs = get_user_preferences(user_id)
     prefs = {**db_prefs, **(sess.get("preferences", {}))}
+    entities = sess.get("entities", {})
     parts = []
     if prefs:
         parts.append(f"偏好: {', '.join([f'{k}={v}' for k, v in prefs.items()])}")
+    if entities:
+        parts.append(f"记忆实体: {', '.join([f'{k}={v}' for k, v in entities.items()])}")
     for msg in sess["history"]:
         parts.append(f"用户: {msg['user']}")
         parts.append(f"客服: {msg['agent']}")
-    return "\n".join(parts)
+    return "\n".join(parts), entities
+
+REFERENCE_KEYWORDS = ["刚才", "之前", "那个", "这件", "上次", "前面", "之前那个", "刚才那个", "刚才那件"]
+
+def _has_reference(text):
+    return any(kw in text for kw in REFERENCE_KEYWORDS)
+
+def _resolve_reference(text, entities, context_str):
+    if not entities and not context_str:
+        return None
+    
+    if ("糖度" in text or "甜" in text) and entities.get("sugar"):
+        return f"您之前选择的是{entities['sugar']}"
+    
+    if ("冰" in text or "温度" in text) and entities.get("ice"):
+        return f"您之前选择的是{entities['ice']}"
+    
+    if ("温度" in text or "多少度" in text or "热不热" in text) and entities.get("temperature"):
+        return f"您之前选择的温度是{entities['temperature']}"
+    
+    if ("加料" in text or "配料" in text or "加了什么" in text or "加啥" in text) and entities.get("topping"):
+        return f"您之前加的是{entities['topping']}"
+    
+    if ("大杯" in text or "中杯" in text or "小杯" in text or "杯型" in text or "规格" in text) and entities.get("size"):
+        return f"您之前选择的是{entities['size']}"
+    
+    if ("订单号" in text or "单号" in text) and entities.get("order_id"):
+        return f"您之前提到的订单号是{entities['order_id']}"
+    
+    if ("订单" in text or "查单" in text) and entities.get("order_id"):
+        return f"您之前提到的订单号是{entities['order_id']}"
+    
+    if ("位置" in text or "在哪" in text or "哪里" in text or "门店" in text) and entities.get("location"):
+        return f"您之前提到在{entities['location']}"
+    
+    if ("多少钱" in text or "价格" in text or "价钱" in text or "多少钱" in text or "报价" in text):
+        price = entities.get("price")
+        drink = entities.get("drink", "")
+        if not price and context_str:
+            context_lines = context_str.split("\n")
+            for i, line in enumerate(context_lines):
+                if drink and drink in line and "用户:" in line:
+                    if i + 1 < len(context_lines):
+                        next_line = context_lines[i + 1]
+                        m = re.search(r'[¥￥]?\s*(\d{1,3}(?:\.\d+)?)\s*元?', next_line)
+                        if m:
+                            price = m.group(1)
+                            break
+                    if price:
+                        break
+            if not price:
+                for i, line in enumerate(context_lines):
+                    if drink and drink in line:
+                        m = re.search(r'[¥￥]?\s*(\d{1,3}(?:\.\d+)?)\s*元?', line)
+                        if m:
+                            price = m.group(1)
+                            break
+            if not price:
+                for line in reversed(context_lines):
+                    m = re.search(r'[¥￥]?\s*(\d{1,3}(?:\.\d+)?)\s*元?', line)
+                    if m:
+                        price = m.group(1)
+                        break
+        if price:
+            price_display = price.rstrip('0').rstrip('.') if '.' in price else price
+            return f"{drink}的价格是{price_display}元" if drink else f"之前提到的价格是{price_display}元"
+    
+    if ("投诉" in text or "为什么" in text or "原因" in text or "后悔" in text):
+        reason = entities.get("complaint_reason")
+        if reason:
+            return f"您之前投诉的原因是：{reason}"
+        drink = entities.get("drink", "")
+        for line in context_str.split("\n"):
+            if "用户:" in line and ("甜" in line or "投诉" in line or "退款" in line or "太" in line or "咸" in line):
+                content = line.replace('用户:', '').strip()
+                if content and len(content) > 2:
+                    return f"您之前投诉的原因是：{content}"
+        if entities:
+            for k, v in entities.items():
+                if k in ("sugar", "ice", "complaint_reason", "temperature", "topping"):
+                    return f"您之前提到的问题与{v}有关"
+    
+    if ("推荐" in text or "类似" in text) and entities.get("complimented_drink"):
+        return f"您之前喜欢{entities['complimented_drink']}，类似风格的饮品还有：芝芝莓莓、杨枝甘露"
+    
+    if ("那个" in text or "这件" in text) and entities.get("drink"):
+        return f"您说的是{entities['drink']}"
+    
+    if entities:
+        parts = [f"{k}={v}" for k, v in entities.items()]
+        return f"我记得：{', '.join(parts)}"
+    
+    return None
 
 # ==================== Agent核心 ====================
 
-def build_response(intent, text, tool_result=None, missing_params=None):
+def build_response(intent, text, tool_result=None, missing_params=None, context_str=None, entities=None):
     if missing_params:
         params_text = "、".join(missing_params)
         return f"【思考】{intent['name']}\n【回复】请问您能提供一下{params_text}吗？这样我可以更好地帮助您。"
+    
+    if _has_reference(text):
+        resolved = _resolve_reference(text, entities or {}, context_str or "")
+        if resolved:
+            return f"【思考】指代消解\n【回复】{resolved}"
     
     tool_error = tool_result and not tool_result.get("success")
     
@@ -1195,16 +1444,63 @@ def build_response(intent, text, tool_result=None, missing_params=None):
     
     if intent["name"].startswith("query"):
         if intent["name"] == "query_refund":
+            if entities and entities.get("order_id"):
+                return f"【思考】指代消解\n【回复】您之前提到的订单号是{entities['order_id']}，可以用来查询退款。"
             return f"【思考】{intent['name']}\n【回复】请问您能提供一下订单号吗？这样我可以帮您查询退款相关信息。"
+        
+        if intent["name"] == "query_recommend" and entities and entities.get("complimented_drink"):
+            resolved = _resolve_reference(text, entities, context_str or "")
+            if resolved:
+                return f"【思考】记忆回复\n【回复】{resolved}"
+        
+        if intent["name"] == "query_order" and entities and entities.get("order_id"):
+            if tool_error or not tool_result or not tool_result.get("data"):
+                resolved = _resolve_reference(text, entities, context_str or "")
+                if resolved:
+                    return f"【思考】记忆回复\n【回复】{resolved}"
+        
+        if intent["name"] == "query_location" and entities and entities.get("location"):
+            if tool_error or not tool_result or not tool_result.get("data"):
+                return f"【思考】记忆回复\n【回复】您之前提到在{entities['location']}，附近门店信息需要实时查询，请确认网络连接。"
+        
+        if intent["name"] == "query_temp" and entities and entities.get("ice"):
+            return f"【思考】记忆回复\n【回复】您之前选择的是{entities['ice']}"
+        
+        if entities and entities.get("temperature") and ("温度" in text or "多少度" in text or "热不热" in text):
+            return f"【思考】记忆回复\n【回复】您之前选择的温度是{entities['temperature']}"
+        
+        if entities and entities.get("topping") and ("加料" in text or "配料" in text or "加了什么" in text or "加啥" in text):
+            return f"【思考】记忆回复\n【回复】您之前加的是{entities['topping']}"
+        
+        if entities and entities.get("size") and ("大杯" in text or "中杯" in text or "小杯" in text or "规格" in text):
+            return f"【思考】记忆回复\n【回复】您之前选择的是{entities['size']}"
+        
         if tool_error:
+            if entities:
+                resolved = _resolve_reference(text, entities, context_str or "")
+                if resolved:
+                    return f"【思考】记忆回复\n【回复】{resolved}"
             fallback = DIRECT_RESPONSES.get(intent["name"], "暂时无法查询，请稍后再试。")
             return f"【思考】{intent['name']}\n【行动】调用工具(失败)\n【回复】{fallback}"
         if tool_result and tool_result["success"]:
+            if entities and entities.get("complimented_drink") and ("类似" in text or "刚才" in text or "之前" in text):
+                resolved = _resolve_reference(text, entities, context_str or "")
+                if resolved:
+                    return f"【思考】记忆回复\n【回复】{resolved}"
             return f"【思考】{intent['name']}\n【行动】调用工具\n【回复】{_format_tool_result(intent['name'], tool_result)}"
+        if entities:
+            resolved = _resolve_reference(text, entities, context_str or "")
+            if resolved:
+                return f"【思考】记忆回复\n【回复】{resolved}"
         return f"【思考】{intent['name']}\n【回复】{DIRECT_RESPONSES.get(intent['name'], '请告诉我具体查询内容。')}"
     
     if intent["name"] in ["place_order", "order_modify"]:
         return f"【思考】{intent['name']}\n【回复】请提供您想点的饮品名称。"
+    
+    if entities:
+        resolved = _resolve_reference(text, entities, context_str or "")
+        if resolved:
+            return f"【思考】记忆回复\n【回复】{resolved}"
     
     return f"【思考】{intent['name']}\n【回复】{DIRECT_RESPONSES.get(intent['name'], '您好，有什么可以帮助您的？')}"
 
@@ -1212,7 +1508,10 @@ def _format_tool_result(intent_name, result):
     if intent_name == "query_stores" or intent_name == "query_location":
         names = [p.get("name", "") for p in result["data"][:3]]
         return f"附近门店：{', '.join(names)}。"
-    if intent_name == "query_menu":
+    if intent_name in ("query_menu", "query_price"):
+        if result.get("keyword"):
+            items = [f"{i.get('name', '')}（¥{i.get('price', '')}）" for i in result["data"][:3]]
+            return f"{', '.join(items)}。"
         names = [i.get("name", "") for i in result["data"][:3]]
         return f"饮品：{', '.join(names)}。"
     if intent_name in ("query_order", "query_history"):
@@ -1269,22 +1568,25 @@ async def process_message_async(text, session_id="default", memory_store=None, l
     
     context_task = asyncio.create_task(asyncio.to_thread(load_context))
     
-    intent, context = await asyncio.gather(intent_task, context_task)
+    intent, context_result = await asyncio.gather(intent_task, context_task)
+    context_str, entities = context_result if isinstance(context_result, tuple) else (context_result or "", {})
     
     trace.add_step("intent", {"name": intent["name"], "confidence": intent["confidence"], "category": intent.get("category")})
     
     if intent["confidence"] >= 0.6:
         tool_name = INTENT_TOOL.get(intent["name"])
         
+        drink_kw_for_price = _extract_drink_keyword(text)
+        if drink_kw_for_price and ("多少钱" in text or "价格" in text or "价钱" in text) and intent["name"] == "query_recommend":
+            intent = {"name": "query_price", "confidence": 0.8, "category": CATEGORY_MAP.get("query_price", "价格查询")}
+            tool_name = "query_menu"
+        
         if intent["name"] == "query_recommend":
             try:
                 tool_result = await asyncio.to_thread(query_recommend, query=text)
-                print(f"query_recommend tool_result: {tool_result}")
-                print(f"query_recommend success: {tool_result.get('success') if tool_result else 'None'}")
             except Exception as e:
-                print(f"query_recommend error: {e}")
                 tool_result = {"success": False, "data": [], "error": str(e)}
-            response = build_response(intent, text, tool_result, [])
+            response = build_response(intent, text, tool_result, [], context_str, entities)
             trace.add_step("tool_call", {"tool_name": "query_recommend", "intent_name": intent["name"], "params": {}})
             trace.add_step("tool_result", {"success": tool_result.get("success", False), "data": tool_result.get("data", [])})
             trace.add_step("response", {"text": response})
@@ -1294,11 +1596,11 @@ async def process_message_async(text, session_id="default", memory_store=None, l
             _cache_response(text, response)
             return response, intent
         
-        elif intent["name"] == "query_menu":
+        elif intent["name"] == "query_menu" or intent["name"] == "query_price":
             def _call_tool():
                 return get_tool_response(intent["name"], text, TOOLS, session_id)
             tool_result, _ = await asyncio.to_thread(_call_tool)
-            response = build_response(intent, text, tool_result, [])
+            response = build_response(intent, text, tool_result, [], context_str, entities)
             trace.add_step("tool_call", {"tool_name": "query_menu", "intent_name": intent["name"], "params": {}})
             trace.add_step("tool_result", {"success": tool_result.get("success", False) if tool_result else False, "data": tool_result.get("data", []) if tool_result else []})
             trace.add_step("response", {"text": response})
@@ -1314,7 +1616,7 @@ async def process_message_async(text, session_id="default", memory_store=None, l
                 def _call_tool():
                     return get_tool_response(intent["name"], text, TOOLS, session_id)
                 tool_result, _ = await asyncio.to_thread(_call_tool)
-                response = build_response(intent, text, tool_result, [])
+                response = build_response(intent, text, tool_result, [], context_str, entities)
                 trace.add_step("tool_call", {"tool_name": "query_order", "intent_name": intent["name"], "params": params})
                 trace.add_step("tool_result", {"success": tool_result.get("success", False), "data": tool_result.get("data", [])})
                 trace.add_step("response", {"text": response})
@@ -1324,7 +1626,10 @@ async def process_message_async(text, session_id="default", memory_store=None, l
                 _cache_response(text, response)
                 return response, intent
             else:
-                response = f"【思考】{intent['name']}\n【回复】请问您能提供一下订单号吗？这样我可以帮您查询相关信息。"
+                if entities and entities.get("order_id"):
+                    response = f"【思考】记忆回复\n【回复】您之前提到的订单号是{entities['order_id']}，请确认是否需要查询该订单。"
+                else:
+                    response = f"【思考】{intent['name']}\n【回复】请问您能提供一下订单号吗？这样我可以帮您查询相关信息。"
                 trace.add_step("clarify", {"missing_params": ["订单号"]})
                 trace.add_step("response", {"text": response})
                 trace.save_to_file()
@@ -1339,7 +1644,7 @@ async def process_message_async(text, session_id="default", memory_store=None, l
                 def _call_tool():
                     return get_tool_response(intent["name"], text, TOOLS, session_id)
                 tool_result, _ = await asyncio.to_thread(_call_tool)
-                response = build_response(intent, text, tool_result, [])
+                response = build_response(intent, text, tool_result, [], context_str, entities)
                 trace.add_step("tool_call", {"tool_name": "query_stores", "intent_name": intent["name"], "params": params})
                 trace.add_step("tool_result", {"success": tool_result.get("success", False) if tool_result else False, "data": tool_result.get("data", []) if tool_result else []})
                 trace.add_step("response", {"text": response})
@@ -1349,7 +1654,10 @@ async def process_message_async(text, session_id="default", memory_store=None, l
                 _cache_response(text, response)
                 return response, intent
             else:
-                response = f"【思考】{intent['name']}\n【回复】请问您当前的位置在哪里？这样我可以帮您查询附近的门店。"
+                if entities and entities.get("location"):
+                    response = f"【思考】记忆回复\n【回复】您之前提到在{entities['location']}，附近门店信息需要实时查询，请确认网络连接。"
+                else:
+                    response = f"【思考】{intent['name']}\n【回复】请问您当前的位置在哪里？这样我可以帮您查询附近的门店。"
                 trace.add_step("clarify", {"missing_params": ["位置信息"]})
                 trace.add_step("response", {"text": response})
                 trace.save_to_file()
@@ -1364,7 +1672,7 @@ async def process_message_async(text, session_id="default", memory_store=None, l
                 tool_result = await asyncio.to_thread(log_complaint, get_user_id(session_id), text, category=INTENT_TO_CATEGORY.get(intent["name"], "口味"), intent_name=intent["name"])
                 trace.add_step("tool_call", {"tool_name": "log_complaint", "intent_name": intent["name"], "params": {"complaint": text}})
                 trace.add_step("tool_result", {"success": tool_result.get("success", False), "data": {"complaint_id": tool_result.get("complaint_id")}})
-            response = build_response(intent, text, tool_result, [])
+            response = build_response(intent, text, tool_result, [], context_str, entities)
             trace.add_step("response", {"text": response})
             trace.save_to_file()
             if memory_store:
@@ -1388,12 +1696,12 @@ async def process_message_stream_async(text, session_id="default", memory_store=
         return f"data: {_json.dumps(data, ensure_ascii=False)}\n\n"
 
     async def _emit_tool_done(intent, text, trace, memory_store, tool_label, tool_result, params=None):
-        """工具调用后统一收尾：yield tool_result / response / done。"""
         data_list = (tool_result.get("data", []) if tool_result else [])
         yield _evt({"type": "tool_result",
                     "success": bool(tool_result.get("success", False)) if tool_result else False,
                     "data": data_list[:5], "count": len(data_list)})
-        response = build_response(intent, text, tool_result, [])
+        context_str, entities = get_context(memory_store, session_id) if memory_store else ("", {})
+        response = build_response(intent, text, tool_result, [], context_str, entities)
         trace.add_step("tool_call", {"tool_name": tool_label, "intent_name": intent["name"], "params": params or {}})
         trace.add_step("tool_result", {"success": tool_result.get("success", False) if tool_result else False, "data": data_list})
         trace.add_step("response", {"text": response})
@@ -1458,7 +1766,8 @@ async def process_message_stream_async(text, session_id="default", memory_store=
             return None
 
         context_task = asyncio.create_task(asyncio.to_thread(load_context))
-        intent, context = await asyncio.gather(intent_task, context_task)
+        intent, context_result = await asyncio.gather(intent_task, context_task)
+        context_str, entities = context_result if isinstance(context_result, tuple) else (context_result or "", {})
         trace.add_step("intent", {"name": intent["name"], "confidence": intent["confidence"], "category": intent.get("category")})
         yield _evt({"type": "thinking", "intent": intent})
 
@@ -1552,6 +1861,7 @@ async def process_message_stream_async(text, session_id="default", memory_store=
 
 
 def harness_handle(text, session_id, intent, trace, memory_store):
+    context_str, entities = get_context(memory_store, session_id) if memory_store else ("", {})
     tool_name = INTENT_TOOL.get(intent["name"])
     tool_result = None
     missing_params = []
@@ -1560,7 +1870,7 @@ def harness_handle(text, session_id, intent, trace, memory_store):
         tool_result, missing_params = get_tool_response(intent["name"], text, session_id=session_id)
         
         if missing_params:
-            response = build_response(intent, text, None, missing_params)
+            response = build_response(intent, text, None, missing_params, context_str, entities)
             trace.add_step("clarify", {"missing_params": missing_params})
             trace.add_step("response", {"text": response})
             trace.save_to_file()
@@ -1572,7 +1882,7 @@ def harness_handle(text, session_id, intent, trace, memory_store):
         trace.add_step("tool_result", {"success": tool_result.get("success", False) if tool_result else False, "data": tool_result.get("data", []) if tool_result else []})
         
         if tool_result and tool_result.get("success"):
-            response = build_response(intent, text, tool_result, [])
+            response = build_response(intent, text, tool_result, [], context_str, entities)
             trace.add_step("response", {"text": response})
             trace.save_to_file()
             if memory_store:
@@ -1580,7 +1890,7 @@ def harness_handle(text, session_id, intent, trace, memory_store):
             return response, intent
         
         if intent["name"] == "query_menu":
-            response = build_response(intent, text, tool_result, [])
+            response = build_response(intent, text, tool_result, [], context_str, entities)
             trace.add_step("response", {"text": response})
             trace.save_to_file()
             if memory_store:
@@ -1622,7 +1932,7 @@ def harness_handle(text, session_id, intent, trace, memory_store):
         trace.add_step("tool_call", {"tool_name": "log_complaint", "intent_name": intent["name"], "params": {"complaint": text}})
         trace.add_step("tool_result", {"success": tool_result.get("success", False), "data": {"complaint_id": tool_result.get("complaint_id")}})
     
-    response = build_response(intent, text, tool_result, missing_params)
+    response = build_response(intent, text, tool_result, missing_params, context_str, entities)
     trace.add_step("response", {"text": response})
     trace.save_to_file()
     

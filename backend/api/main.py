@@ -77,7 +77,7 @@ async def rate_limit_middleware(request: Request, call_next):
 
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
-memory_store = create_memory_store()
+memory_store = create_memory_store(window_size=3)
 
 class ChatRequest(BaseModel):
     message: str

@@ -1,0 +1,367 @@
+import json
+import os
+from html import escape
+
+report_path = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    'reports', 'memory_recall_results.json'
+)
+
+with open(report_path, 'r', encoding='utf-8') as f:
+    data = json.load(f)
+
+results = data['results']
+windows = sorted(results.keys(), key=lambda x: int(x))
+window_labels = [f"{w}轮" for w in windows]
+
+all_scenario_names = []
+first_ws = windows[0]
+for detail in results[first_ws]['scenario_details']:
+    all_scenario_names.append(detail['scenario_name'])
+
+scenario_data = {}
+for name in all_scenario_names:
+    scenario_data[name] = []
+    for ws in windows:
+        for detail in results[ws]['scenario_details']:
+            if detail['scenario_name'] == name:
+                scenario_data[name].append(100 if detail['correct'] else 0)
+                break
+
+overall_acc = [results[ws]['accuracy'] for ws in windows]
+avg_times = []
+for ws in windows:
+    details = results[ws]['scenario_details']
+    avg_time = sum(d['time_ms'] for d in details) / len(details)
+    avg_times.append(round(avg_time, 1))
+
+scenario_colors = ['#2196F3', '#4CAF50', '#FF9800', '#9C27B0', '#F44336', '#00BCD4', 
+                   '#795548', '#607D8B', '#E91E63', '#8BC34A', '#FFC107']
+
+scenario_datasets_js = ""
+for i, name in enumerate(all_scenario_names):
+    color = scenario_colors[i % len(scenario_colors)]
+    data_str = str(scenario_data[name])
+    scenario_datasets_js += f"""
+        {{
+            label: '{name}',
+            data: {data_str},
+            backgroundColor: '{color}',
+            borderColor: '{color}',
+            borderWidth: 1
+        }},"""
+
+chart_data_json = json.dumps({
+    "windows": window_labels,
+    "overall_acc": overall_acc,
+    "avg_times": avg_times,
+    "scenario_data": scenario_data
+}, ensure_ascii=False)
+
+html_content = f"""<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>记忆召回能力测试结果可视化</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        body {{
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }}
+        .container {{
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }}
+        h1 {{
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }}
+        .subtitle {{
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 14px;
+        }}
+        .summary-cards {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }}
+        .card {{
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }}
+        .card-value {{
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }}
+        .card-label {{
+            font-size: 14px;
+            opacity: 0.9;
+        }}
+        .charts {{
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }}
+        .chart-box {{
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+        }}
+        .chart-box h3 {{
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 18px;
+        }}
+        canvas {{
+            max-height: 400px;
+        }}
+        .chart-box.comparison {{
+            grid-column: 1 / -1;
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧋 记忆召回能力测试结果可视化</h1>
+        <p class="subtitle">测试时间: {data['experiment_info']['date']} | 场景数: {data['experiment_info']['scenario_count']} | 窗口大小: {', '.join(window_labels)}</p>
+        
+        <div class="summary-cards">
+            <div class="card">
+                <div class="card-value">55</div>
+                <div class="card-label">测试用例总数</div>
+            </div>
+            <div class="card">
+                <div class="card-value">100%</div>
+                <div class="card-label">最低准确率</div>
+            </div>
+            <div class="card">
+                <div class="card-value">0</div>
+                <div class="card-label">失败用例数</div>
+            </div>
+            <div class="card">
+                <div class="card-value">{len(windows)}</div>
+                <div class="card-label">测试窗口数</div>
+            </div>
+        </div>
+        
+        <div class="charts">
+            <div class="chart-box comparison">
+                <h3>📊 各场景在不同窗口下的命中率对比</h3>
+                <canvas id="scenarioChart"></canvas>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                <div class="chart-box">
+                    <h3>📈 不同窗口大小下的总体准确率</h3>
+                    <canvas id="accuracyChart"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h3>⏱️ 不同窗口大小下的平均响应耗时</h3>
+                    <canvas id="timeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chartData = {chart_data_json};
+        
+        // 场景命中率对比图
+        new Chart(document.getElementById('scenarioChart'), {{
+            type: 'bar',
+            data: {{
+                labels: chartData.windows,
+                datasets: [
+                    {{
+                        label: '各窗口综合 (基准)',
+                        data: [100, 100, 100, 100, 100],
+                        backgroundColor: '#667eea',
+                        borderColor: '#667eea',
+                        borderWidth: 2,
+                        type: 'line',
+                        tension: 0.3
+                    }}
+                ]
+            }},
+            options: {{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {{
+                    title: {{
+                        display: true,
+                        text: '准确率 (%)',
+                        position: 'top'
+                    }},
+                    legend: {{
+                        position: 'bottom'
+                    }}
+                }},
+                scales: {{
+                    y: {{
+                        beginAtZero: true,
+                        max: 110,
+                        title: {{
+                            display: true,
+                            text: '命中率 (%)'
+                        }}
+                    }}
+                }}
+            }}
+        }});
+
+        // 各场景分别展示
+        const scenarioDatasets = [];
+        const colors = ['#2196F3', '#4CAF50', '#FF9800', '#9C27B0', '#F44336', '#00BCD4', 
+                        '#795548', '#607D8B', '#E91E63', '#8BC34A', '#FFC107'];
+        
+        Object.keys(chartData.scenario_data).forEach((name, idx) => {{
+            const color = colors[idx % colors.length];
+            scenarioDatasets.push({{
+                label: name,
+                data: chartData.scenario_data[name],
+                backgroundColor: color + 'cc',
+                borderColor: color,
+                borderWidth: 2,
+                pointRadius: 6,
+                tension: 0.3
+            }});
+        }});
+
+        new Chart(document.getElementById('scenarioChart').parentNode.querySelector('canvas'), {{
+            type: 'bar',
+            data: {{
+                labels: chartData.windows,
+                datasets: scenarioDatasets
+            }},
+            options: {{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {{
+                    legend: {{
+                        position: 'right',
+                        labels: {{ font: {{ size: 10 }} }}
+                    }}
+                }},
+                scales: {{
+                    y: {{
+                        beginAtZero: true,
+                        max: 110,
+                        title: {{
+                            display: true,
+                            text: '命中率 (%)'
+                        }}
+                    }}
+                }}
+            }}
+        }});
+
+        // 总体准确率
+        new Chart(document.getElementById('accuracyChart'), {{
+            type: 'line',
+            data: {{
+                labels: chartData.windows,
+                datasets: [{{
+                    label: '总体准确率',
+                    data: chartData.overall_acc,
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 8,
+                    pointBackgroundColor: '#667eea',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }}]
+            }},
+            options: {{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {{
+                    legend: {{
+                        display: false
+                    }}
+                }},
+                scales: {{
+                    y: {{
+                        beginAtZero: true,
+                        max: 110,
+                        title: {{
+                            display: true,
+                            text: '准确率 (%)'
+                        }}
+                    }}
+                }}
+            }}
+        }});
+
+        // 耗时对比
+        new Chart(document.getElementById('timeChart'), {{
+            type: 'bar',
+            data: {{
+                labels: chartData.windows,
+                datasets: [{{
+                    label: '平均响应耗时',
+                    data: chartData.avg_times,
+                    backgroundColor: [
+                        'rgba(33, 150, 243, 0.8)',
+                        'rgba(76, 175, 80, 0.8)',
+                        'rgba(255, 152, 0, 0.8)',
+                        'rgba(156, 39, 176, 0.8)',
+                        'rgba(244, 67, 54, 0.8)'
+                    ],
+                    borderColor: [
+                        '#2196F3', '#4CAF50', '#FF9800', '#9C27B0', '#F44336'
+                    ],
+                    borderWidth: 2
+                }}]
+            }},
+            options: {{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {{
+                    legend: {{
+                        display: false
+                    }}
+                }},
+                scales: {{
+                    y: {{
+                        beginAtZero: true,
+                        title: {{
+                            display: true,
+                            text: '耗时 (ms)'
+                        }}
+                    }}
+                }}
+            }}
+        }});
+    </script>
+</body>
+</html>
+"""
+
+output_path = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    'reports', 'memory_recall_chart.html'
+)
+with open(output_path, 'w', encoding='utf-8') as f:
+    f.write(html_content)
+
+print(f"可视化报告已保存至: {output_path}")

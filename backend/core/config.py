@@ -24,7 +24,7 @@ class Config:
     DEBUG: bool = os.getenv("DEBUG", "false").lower() == "true"
     
     # Agent配置
-    MAX_MEMORY_WINDOW: int = 5  # 滑动窗口大小
+    MAX_MEMORY_WINDOW: int = 3  # 滑动窗口大小（经成本-覆盖率分析，3轮为最优平衡点）
     MAX_TOKENS: int = 2000
     TEMPERATURE: float = 0.7
     

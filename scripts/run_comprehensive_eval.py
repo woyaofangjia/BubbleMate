@@ -194,7 +194,7 @@ def run_tool_eval():
         {'query': '', 'expected_tool': '', 'expected_clarify': True},
     ]
     
-    memory_store = create_memory_store(window_size=5)
+    memory_store = create_memory_store(window_size=3)
     passed = 0
     
     for case in test_cases:

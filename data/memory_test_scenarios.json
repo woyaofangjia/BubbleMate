@@ -1,0 +1,177 @@
+[
+  {
+    "scenario_name": "糖度记忆",
+    "scenario_id": 1,
+    "description": "测试Agent能否在多轮对话后记住用户指定的糖度",
+    "turns": [
+      {"turn": 1, "user": "我要一杯珍珠奶茶，三分糖", "agent_expected": "好的，已为您记录三分糖的珍珠奶茶"},
+      {"turn": 2, "user": "今天天气不错", "agent_expected": "是的，您还需要点什么吗？"},
+      {"turn": 3, "user": "帮我查下订单", "agent_expected": "您的订单详情..."},
+      {"turn": 4, "user": "给我推荐首歌", "agent_expected": "推荐几首好听的歌..."},
+      {"turn": 5, "user": "刚才那杯的糖度是多少？", "agent_expected": "您之前点的珍珠奶茶是三分糖"}
+    ],
+    "target_turn": 5,
+    "question": "刚才那杯的糖度是多少？",
+    "expected_key": "三分糖",
+    "memory_dependency": "需要记住5轮前的糖度指定"
+  },
+  {
+    "scenario_name": "冰量记忆",
+    "scenario_id": 2,
+    "description": "测试Agent能否在多轮对话后记住用户指定的冰量",
+    "turns": [
+      {"turn": 1, "user": "我要一杯去冰的柠檬茶", "agent_expected": "好的，已记录去冰柠檬茶"},
+      {"turn": 2, "user": "附近有什么好吃的？", "agent_expected": "推荐几家餐厅..."},
+      {"turn": 3, "user": "帮我算下总价", "agent_expected": "您的总价是..."},
+      {"turn": 4, "user": "明天会下雨吗", "agent_expected": "根据天气预报..."},
+      {"turn": 5, "user": "我刚才点的是什么？", "agent_expected": "您点的是去冰柠檬茶"},
+      {"turn": 6, "user": "那杯是少冰还是去冰？", "agent_expected": "您之前指定的是去冰"}
+    ],
+    "target_turn": 6,
+    "question": "那杯是少冰还是去冰？",
+    "expected_key": "去冰",
+    "memory_dependency": "需要记住6轮前的冰量选择"
+  },
+  {
+    "scenario_name": "订单号记忆",
+    "scenario_id": 3,
+    "description": "测试Agent能否在多轮对话后记住用户提到的订单号",
+    "turns": [
+      {"turn": 1, "user": "我订单号是12345", "agent_expected": "好的，已记录订单号12345"},
+      {"turn": 2, "user": "幽兰拿铁好喝吗", "agent_expected": "幽兰拿铁是本店热门..."},
+      {"turn": 3, "user": "给我讲个笑话", "agent_expected": "好的..."},
+      {"turn": 4, "user": "现在几点了", "agent_expected": "当前时间是..."},
+      {"turn": 5, "user": "查一下刚才那个订单", "agent_expected": "您的订单12345详情如下"}
+    ],
+    "target_turn": 5,
+    "question": "查一下刚才那个订单",
+    "expected_key": "12345",
+    "memory_dependency": "需要记住5轮前提到的订单号"
+  },
+  {
+    "scenario_name": "位置记忆",
+    "scenario_id": 4,
+    "description": "测试Agent能否在多轮对话后记住用户提到的位置",
+    "turns": [
+      {"turn": 1, "user": "我在光谷", "agent_expected": "好的，已记录您在光谷"},
+      {"turn": 2, "user": "推荐个奶茶", "agent_expected": "推荐幽兰拿铁..."},
+      {"turn": 3, "user": "今天星期几", "agent_expected": "今天是..."},
+      {"turn": 4, "user": "帮我预约一下", "agent_expected": "预约成功..."},
+      {"turn": 5, "user": "附近有店吗？", "agent_expected": "光谷附近的门店..."},
+      {"turn": 6, "user": "你知道我在哪吗", "agent_expected": "您之前提到在光谷"}
+    ],
+    "target_turn": 6,
+    "question": "你知道我在哪吗",
+    "expected_key": "光谷",
+    "memory_dependency": "需要记住6轮前提到的位置"
+  },
+  {
+    "scenario_name": "饮品偏好记忆",
+    "scenario_id": 5,
+    "description": "测试Agent能否在多轮对话后记住用户夸过的饮品",
+    "turns": [
+      {"turn": 1, "user": "幽兰拿铁真好喝", "agent_expected": "很高兴您喜欢幽兰拿铁"},
+      {"turn": 2, "user": "有没有优惠", "agent_expected": "当前优惠活动..."},
+      {"turn": 3, "user": "帮我取个号", "agent_expected": "您的号码..."},
+      {"turn": 4, "user": "介绍下新品", "agent_expected": "新品推荐..."},
+      {"turn": 5, "user": "怎么去机场", "agent_expected": "路线建议..."},
+      {"turn": 6, "user": "明天天气如何", "agent_expected": "天气预报..."},
+      {"turn": 7, "user": "推荐个类似的", "agent_expected": "类似幽兰拿铁风格的饮品..."}
+    ],
+    "target_turn": 7,
+    "question": "推荐个类似的",
+    "expected_key": "幽兰拿铁",
+    "memory_dependency": "需要记住7轮前用户夸赞的饮品"
+  },
+  {
+    "scenario_name": "投诉内容记忆",
+    "scenario_id": 6,
+    "description": "测试Agent能否在多轮对话后记住用户投诉的原因",
+    "turns": [
+      {"turn": 1, "user": "太甜了，我要退款", "agent_expected": "非常抱歉，已受理您的退款"},
+      {"turn": 2, "user": "处理要多久", "agent_expected": "预计24小时内处理"},
+      {"turn": 3, "user": "给我讲个故事", "agent_expected": "好的..."},
+      {"turn": 4, "user": "现在几点", "agent_expected": "当前时间..."},
+      {"turn": 5, "user": "查下订单状态", "agent_expected": "您的订单..."},
+      {"turn": 6, "user": "帮我订个位置", "agent_expected": "已为您订位..."},
+      {"turn": 7, "user": "介绍下菜单", "agent_expected": "菜单推荐..."},
+      {"turn": 8, "user": "我之前为什么投诉？", "agent_expected": "您之前反映饮品太甜"}
+    ],
+    "target_turn": 8,
+    "question": "我之前为什么投诉？",
+    "expected_key": "太甜",
+    "memory_dependency": "需要记住8轮前的投诉原因"
+  },
+  {
+    "scenario_name": "价格记忆",
+    "scenario_id": 7,
+    "description": "测试Agent能否在多轮对话后记住之前查询的价格",
+    "turns": [
+      {"turn": 1, "user": "幽兰拿铁多少钱", "agent_expected": "幽兰拿铁18元一杯"},
+      {"turn": 2, "user": "加珍珠呢", "agent_expected": "加珍珠另加2元"},
+      {"turn": 3, "user": "今天天气", "agent_expected": "今天..."},
+      {"turn": 4, "user": "帮我叫个车", "agent_expected": "已为您叫车..."},
+      {"turn": 5, "user": "附近有医院吗", "agent_expected": "最近的医院..."},
+      {"turn": 6, "user": "刚才说的那个价格是多少", "agent_expected": "幽兰拿铁是18元"}
+    ],
+    "target_turn": 6,
+    "question": "刚才说的那个价格是多少",
+    "expected_key": "18",
+    "memory_dependency": "需要记住6轮前查询的价格"
+  },
+  {
+    "scenario_name": "复合指代",
+    "scenario_id": 8,
+    "description": "测试Agent能否理解跨轮次的指代关系",
+    "turns": [
+      {"turn": 1, "user": "我要一杯幽兰拿铁", "agent_expected": "好的，已为您准备幽兰拿铁"},
+      {"turn": 2, "user": "有什么优惠吗", "agent_expected": "当前优惠..."},
+      {"turn": 3, "user": "帮我查下订单", "agent_expected": "您的订单..."},
+      {"turn": 4, "user": "把那个加份珍珠", "agent_expected": "好的，已为幽兰拿铁加珍珠"}
+    ],
+    "target_turn": 4,
+    "question": "把那个加份珍珠",
+    "expected_key": "幽兰拿铁",
+    "memory_dependency": "需要理解4轮中'那个'指代的是幽兰拿铁"
+  },
+  {
+    "scenario_id": "s9",
+    "scenario_name": "加料记忆",
+    "description": "测试Agent能否记住用户加了什么料",
+    "turns": [
+      {"turn": 1, "user": "我要一杯珍珠奶茶，加珍珠", "agent_expected": "好的，珍珠奶茶加珍珠"},
+      {"turn": 2, "user": "多少钱", "agent_expected": "珍珠奶茶..."},
+      {"turn": 3, "user": "刚才我加了什么料", "agent_expected": "您加了珍珠"}
+    ],
+    "target_turn": 3,
+    "question": "刚才我加了什么料",
+    "expected_key": "珍珠",
+    "memory_dependency": "需要记住用户在第1轮提到的加料信息"
+  },
+  {
+    "scenario_id": "s10",
+    "scenario_name": "温度记忆",
+    "description": "测试Agent能否记住用户选择的温度",
+    "turns": [
+      {"turn": 1, "user": "我要一杯热饮", "agent_expected": "好的，热饮"},
+      {"turn": 2, "user": "温度是什么", "agent_expected": "热"}
+    ],
+    "target_turn": 2,
+    "question": "温度是什么",
+    "expected_key": "热",
+    "memory_dependency": "需要记住用户在第1轮提到的温度选择"
+  },
+  {
+    "scenario_id": "s11",
+    "scenario_name": "杯型记忆",
+    "description": "测试Agent能否记住用户选择的杯型规格",
+    "turns": [
+      {"turn": 1, "user": "我要一杯大杯的杨枝甘露", "agent_expected": "好的，大杯杨枝甘露"},
+      {"turn": 2, "user": "我刚才选的什么规格", "agent_expected": "大杯"}
+    ],
+    "target_turn": 2,
+    "question": "我刚才选的什么规格",
+    "expected_key": "大杯",
+    "memory_dependency": "需要记住用户在第1轮提到的杯型"
+  }
+]

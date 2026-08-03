@@ -1,0 +1,68 @@
+name: Memory Recall CI
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/**'
+      - 'scripts/test_memory_recall.py'
+      - 'data/memory_test_scenarios.json'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/**'
+      - 'scripts/test_memory_recall.py'
+      - 'data/memory_test_scenarios.json'
+  schedule:
+    - cron: '0 2 * * *'  # Daily at 2:00 AM
+
+jobs:
+  memory-recall-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt || true
+
+      - name: Run memory recall tests
+        run: |
+          python scripts/test_memory_recall.py --ci --min-accuracy 100.0
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: reports/
+          retention-days: 30
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const results = JSON.parse(fs.readFileSync('reports/memory_recall_results.json'));
+            let summary = '## 记忆召回测试结果\n\n';
+            summary += '| 窗口大小 | 准确率 | 通过/总数 |\n';
+            summary += '|----------|--------|-----------|\n';
+            for (const [ws, data] of Object.entries(results.results)) {
+              summary += `| ${ws} 轮 | ${data.accuracy.toFixed(1)}% | ${data.correct}/${data.total} |\n`;
+            }
+            const minAcc = Math.min(...Object.values(results.results).map(r => r.accuracy));
+            summary += `\n**最低准确率: ${minAcc.toFixed(1)}%**\n`;
+            summary += minAcc >= 100 ? '✅ 所有窗口全部通过' : '⚠️ 部分窗口未达标';
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });
