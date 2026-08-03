@@ -758,6 +758,16 @@ def query_menu(store_name=None, keyword=None, category=None, data_dir=None):
                 all_items.append(item)
         if all_items:
             return {"success": True, "data": all_items[:5], "keyword": keyword}
+        try:
+            menu = _read_json(os.path.join(data_dir or os.path.join(os.path.dirname(__file__), "../data"), "menu_data.json"))
+            for store, items in menu.items():
+                for item in items:
+                    if keyword.lower() in item.get("name", "").lower() and item.get("available", True):
+                        all_items.append({**item, "store": store})
+            if all_items:
+                return {"success": True, "data": all_items[:5], "keyword": keyword}
+        except Exception:
+            pass
         return {"success": False, "data": [], "message": f"未找到与 {keyword} 相关的饮品"}
     
     if store_name:
@@ -1278,6 +1288,8 @@ def save_message(store, session_id, user_msg, agent_msg):
             if drink_in_agent in agent_msg and existing_entities.get("drink") and existing_entities["drink"] not in agent_msg:
                 agent_entities = {}
         for k, v in agent_entities.items():
+            if k in ("drink", "price") and k in existing_entities:
+                continue
             if k == "price" and k in new_entities:
                 continue
             if k == "drink" and k in new_entities:
@@ -1306,6 +1318,8 @@ def save_message(store, session_id, user_msg, agent_msg):
             if drink_in_agent in agent_msg and existing_entities.get("drink") and existing_entities["drink"] not in agent_msg:
                 agent_entities = {}
         for k, v in agent_entities.items():
+            if k in ("drink", "price") and k in existing_entities:
+                continue
             if k == "price" and k in new_entities:
                 continue
             if k == "drink" and k in new_entities:
@@ -1380,7 +1394,7 @@ def _resolve_reference(text, entities, context_str):
                 if drink and drink in line and "用户:" in line:
                     if i + 1 < len(context_lines):
                         next_line = context_lines[i + 1]
-                        m = re.search(r'[¥￥]?\s*(\d{1,3}(?:\.\d+)?)\s*元?', next_line)
+                        m = re.search(r'[¥￥]\s*(\d{1,3}(?:\.\d+)?)', next_line)
                         if m:
                             price = m.group(1)
                             break
@@ -1389,13 +1403,13 @@ def _resolve_reference(text, entities, context_str):
             if not price:
                 for i, line in enumerate(context_lines):
                     if drink and drink in line:
-                        m = re.search(r'[¥￥]?\s*(\d{1,3}(?:\.\d+)?)\s*元?', line)
+                        m = re.search(r'[¥￥]\s*(\d{1,3}(?:\.\d+)?)', line)
                         if m:
                             price = m.group(1)
                             break
             if not price:
                 for line in reversed(context_lines):
-                    m = re.search(r'[¥￥]?\s*(\d{1,3}(?:\.\d+)?)\s*元?', line)
+                    m = re.search(r'[¥￥]\s*(\d{1,3}(?:\.\d+)?)', line)
                     if m:
                         price = m.group(1)
                         break
