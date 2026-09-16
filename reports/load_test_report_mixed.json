@@ -1,0 +1,18 @@
+{
+  "url": "http://localhost:8000/chat",
+  "concurrency": 50,
+  "duration": 30,
+  "mode": "mixed_cache_miss",
+  "total_requests": 849,
+  "successful_requests": 849,
+  "success_rate": 100.0,
+  "throughput": 28.3,
+  "latency_ms": {
+    "avg": 1802.4447318100677,
+    "min": 1.516580581665039,
+    "max": 8485.81337928772,
+    "p50": 1575.4351615905762,
+    "p95": 5043.06173324585,
+    "p99": 7555.616855621338
+  }
+}

@@ -1,9 +1,15 @@
 {
   "total": 200,
-  "rule_matches": 107,
-  "kw_matches": 85,
-  "llm_calls": 8,
-  "llm_ratio": 4.0,
-  "direct_llm": 8,
-  "fallback_llm": 0
+  "unique_queries": 47,
+  "rule_matches": 136,
+  "kw_matches": 55,
+  "llm_calls": 9,
+  "llm_ratio": 4.5,
+  "unique_basis": {
+    "rule_or_composite": 33,
+    "keyword": 12,
+    "llm_fallback": 2
+  },
+  "with_intent_cache_llm_calls_over_200": 2,
+  "note": "LLM结果已桩除，仅统计recognize_intent真实路由分支；缓存口径=精确+相似度0.8+TTL300"
 }

@@ -16,29 +16,22 @@ except:
 try:
     from .storage.database import save_session, get_user_by_session, save_user_preference, get_user_preferences, save_complaint, save_complaint_with_candidate, get_knowledge_graph, save_knowledge as _save_knowledge, save_complaint_db as _save_complaint_db, get_complaint_stats
     from .storage.data_access import get_shops, get_menu_items, get_orders, get_shop_by_name, get_shop_by_id, get_hot_menu_items
-except Exception as e:
-    import sys as _sys
-    print(f"Warning: storage modules not fully available: {e}", file=_sys.stderr)
-    save_session = lambda s, u: None
-    get_user_by_session = lambda s: None
-    save_user_preference = lambda u, k, v: None
-    get_shops = lambda **kwargs: []
-    get_menu_items = lambda **kwargs: []
-    get_orders = lambda **kwargs: []
-    get_shop_by_name = lambda name: None
-    get_shop_by_id = lambda shop_id: None
-    get_user_preferences = lambda u: {}
-    save_complaint = lambda u, d: None
-    save_complaint_with_candidate = lambda u, ct, d: (None, None)
-    get_knowledge_graph = lambda: []
-    _save_knowledge = lambda ct, s, c: None
-    _save_complaint_db = lambda u, ct, d: None
-    get_complaint_stats = lambda: {"by_type": []}
+except ImportError:
+    from storage.database import save_session, get_user_by_session, save_user_preference, get_user_preferences, save_complaint, save_complaint_with_candidate, get_knowledge_graph, save_knowledge as _save_knowledge, save_complaint_db as _save_complaint_db, get_complaint_stats
+    from storage.data_access import get_shops, get_menu_items, get_orders, get_shop_by_name, get_shop_by_id, get_hot_menu_items
 
 try:
     from .core.cache import cache
-except Exception:
-    cache = None
+except ImportError:
+    from core.cache import cache
+
+try:
+    from .core import zhipu_client
+except ImportError:
+    try:
+        from core import zhipu_client
+    except Exception:
+        zhipu_client = None
 
 # ==================== Harness自我反思 ====================
 
@@ -275,6 +268,33 @@ def recover_state(trace):
     }
 
 # ==================== Harness执行轨迹 ====================
+
+def reflect_tool_failure(trace, intent_name, tool_name, params, tool_result, text, session_id):
+    reflection = reflect_on_result(tool_name, params, tool_result, intent_name, text)
+    trace.add_step("reflection", reflection)
+    if reflection["assessment"] == "reasonable":
+        return "continue", tool_result
+    recovery = recover_from_failure(reflection, intent_name, text, session_id)
+    trace.add_step("replan", {"action": recovery["action"], "reason": recovery["reason"]})
+    if recovery["action"] == "clarify":
+        reply = f"【思考】反思：{REFLECTION_ASSESSMENT[reflection['assessment']]}\n【回复】{recovery['clarification']}"
+        return "reply", reply
+    if recovery["action"] == "human_handover":
+        return "reply", "【思考】反思：方案不合理\n【回复】抱歉，系统暂时无法处理您的问题，已为您转接人工客服。"
+    if recovery["action"] == "switch_tool" and recovery.get("new_intent"):
+        names = recovery["new_intent"]
+        new_name = names[0] if isinstance(names, list) else names
+        new_tool = INTENT_TOOL.get(new_name)
+        if new_tool and new_tool in TOOLS:
+            new_intent = {"name": new_name, "confidence": 0.7, "category": CATEGORY_MAP.get(new_name, "通用")}
+            trace.add_step("intent", {"name": new_name, "confidence": 0.7, "category": new_intent["category"], "replanned": True})
+            new_result, _ = get_tool_response(new_name, text, TOOLS, session_id)
+            trace.add_step("tool_call", {"tool_name": new_tool, "intent_name": new_name,
+                                         "params": extract_params(text, new_name, session_id)[0], "replanned": True})
+            trace.add_step("tool_result", {"success": bool(new_result and new_result.get("success")),
+                                           "data": new_result.get("data", []) if new_result else []})
+            return "switch", (new_intent, new_result)
+    return "continue", tool_result
 
 class ExecutionTrace:
     def __init__(self):
@@ -528,7 +548,7 @@ def get_knowledge_response(intent_name):
     return None, None
 
 INTENT_TOOL = {
-    "query_location": "query_stores", "query_menu": "query_menu",
+    "query_location": "query_stores", "query_store": "query_stores", "query_menu": "query_menu",
     "query_order": "query_order", "query_promotion": "query_promotions",
     "query_customize": "query_customize", "query_history": "query_history",
     "query_recommend": "query_recommend", "query_refund": "query_order",
@@ -587,11 +607,10 @@ def _composite_match(text):
 
 def _get_llm_result(text):
     try:
-        from backend.core.zhipu_client import call_llm, is_available
-        if not is_available():
+        if not zhipu_client or not zhipu_client.is_available():
             return None
         prompt = f"判断用户意图：'{text}'\n可选：{', '.join(INTENT_KEYWORDS.keys())}\n只返回意图名称，不要其他内容。"
-        resp = call_llm([{"role": "user", "content": prompt}], max_tokens=20, temperature=0.1)
+        resp = zhipu_client.call_llm([{"role": "user", "content": prompt}], max_tokens=20, temperature=0.1)
         intent_name = resp.strip().strip("'\"")
         if intent_name in CATEGORY_MAP:
             return {"name": intent_name, "confidence": 0.6, "category": CATEGORY_MAP.get(intent_name, "通用")}
@@ -601,11 +620,10 @@ def _get_llm_result(text):
 
 async def _get_llm_result_async(text):
     try:
-        from backend.core.zhipu_client import call_llm_async, is_available
-        if not is_available():
+        if not zhipu_client or not zhipu_client.is_available():
             return None
         prompt = f"判断用户意图：'{text}'\n可选：{', '.join(INTENT_KEYWORDS.keys())}\n只返回意图名称，不要其他内容。"
-        resp = await call_llm_async([{"role": "user", "content": prompt}], max_tokens=20, temperature=0.1)
+        resp = await zhipu_client.call_llm_async([{"role": "user", "content": prompt}], max_tokens=20, temperature=0.1)
         intent_name = resp.strip().strip("'\"")
         if intent_name in CATEGORY_MAP:
             return {"name": intent_name, "confidence": 0.6, "category": CATEGORY_MAP.get(intent_name, "通用")}
@@ -616,20 +634,20 @@ async def _get_llm_result_async(text):
 LLM_FALLBACK_THRESHOLD = 0.55
 
 INTENT_CACHE_SIMILARITY_THRESHOLD = 0.8
+INTENT_CACHE_TTL = 300
 
 def _get_cached_intent(text):
     text = text.strip()
     if cache:
-        cached = cache.get("intent", text)
-        if cached:
-            return cached
-    
+        hit = cache.get_similar("intent", text, INTENT_CACHE_SIMILARITY_THRESHOLD)
+        if hit:
+            return hit["value"]
     return None
 
 def _cache_intent(text, intent):
     text = text.strip()
     if cache:
-        cache.set("intent", text, intent, ttl=3600)
+        cache.set("intent", text, intent, ttl=INTENT_CACHE_TTL)
 
 def clear_intent_cache():
     if cache:
@@ -987,10 +1005,9 @@ def query_recommend(query=None, preference=None, data_dir=None):
         if _menu_vectors_cache is None:
             vec_path = os.path.join(data_dir, "menu_vectors.json")
             _menu_vectors_cache = _read_json(vec_path) if os.path.exists(vec_path) else []
-        if _menu_vectors_cache:
+        if _menu_vectors_cache and zhipu_client:
             try:
-                from core.zhipu_client import embed_text
-                qv = embed_text(query)
+                qv = zhipu_client.embed_text(query)
                 scored = sorted(
                     ((_cosine(qv, v["vector"]), v) for v in _menu_vectors_cache),
                     key=lambda x: x[0], reverse=True,
@@ -1108,9 +1125,9 @@ def get_tool_response(intent_name, text, tools=TOOLS, session_id=None):
 
 try:
     from .storage.redis_store import session_store
-    REDIS_AVAILABLE = True
 except ImportError:
-    REDIS_AVAILABLE = False
+    from storage.redis_store import session_store
+REDIS_AVAILABLE = True
 
 class MemoryStore:
     def __init__(self, window_size=3):
@@ -1263,12 +1280,14 @@ def _compress_history(history, window_size):
     if len(history) <= window_size:
         return history
     to_compress = history[:-window_size + 1]
-    summary_parts = []
+    facts, seen = [], set()
     for msg in to_compress:
-        user_part = msg["user"][:30] + "..." if len(msg["user"]) > 30 else msg["user"]
-        agent_part = msg["agent"][:30] + "..." if len(msg["agent"]) > 30 else msg["agent"]
-        summary_parts.append(f"用户:{user_part} 客服:{agent_part}")
-    summary = f"[对话摘要] {'; '.join(summary_parts)}"
+        for ent in (_extract_entities(msg.get("user", "")), _extract_entities(msg.get("agent", ""))):
+            for k, v in ent.items():
+                if (k, str(v)) not in seen:
+                    seen.add((k, str(v)))
+                    facts.append(f"{k}={v}")
+    summary = f"[历史摘要|{len(to_compress)}轮|{'；'.join(facts) if facts else '无关键信息'}]"
     return [{"user": summary, "agent": "", "is_summary": True}] + history[-window_size + 1:]
 
 def save_message(store, session_id, user_msg, agent_msg):
@@ -1568,7 +1587,24 @@ def _format_tool_result(intent_name, result):
 async def process_message_async(text, session_id="default", memory_store=None, llm_client=None):
     trace = ExecutionTrace()
     trace.session_id = session_id
-    
+
+    def _finish(reply, current_intent):
+        trace.add_step("response", {"text": reply})
+        trace.save_to_file()
+        if memory_store:
+            save_message(memory_store, session_id, text, reply)
+        _cache_response(text, reply)
+        return reply, current_intent
+
+    async def _reflect_failure(intent_name, tool_label, params, tool_result):
+        action, payload = await asyncio.to_thread(
+            reflect_tool_failure, trace, intent_name, tool_label, params, tool_result, text, session_id)
+        if action == "reply":
+            return None, _finish(payload, intent)
+        if action == "switch":
+            return payload, None
+        return None, None
+
     if not text or not text.strip():
         response = "【思考】空输入\n【回复】您好，请问有什么可以帮助您的？"
         trace.add_step("clarify", {"missing_params": ["用户意图"]})
@@ -1621,9 +1657,15 @@ async def process_message_async(text, session_id="default", memory_store=None, l
                 tool_result = await asyncio.to_thread(query_recommend, query=text)
             except Exception as e:
                 tool_result = {"success": False, "data": [], "error": str(e)}
-            response = build_response(intent, text, tool_result, [], context_str, entities)
             trace.add_step("tool_call", {"tool_name": "query_recommend", "intent_name": intent["name"], "params": {}})
             trace.add_step("tool_result", {"success": tool_result.get("success", False), "data": tool_result.get("data", [])})
+            if not (tool_result and tool_result.get("success")):
+                switched, done = await _reflect_failure(intent["name"], "query_recommend", {}, tool_result)
+                if done:
+                    return done
+                if switched:
+                    intent, tool_result = switched
+            response = build_response(intent, text, tool_result, [], context_str, entities)
             trace.add_step("response", {"text": response})
             trace.save_to_file()
             if memory_store:
@@ -1635,9 +1677,15 @@ async def process_message_async(text, session_id="default", memory_store=None, l
             def _call_tool():
                 return get_tool_response(intent["name"], text, TOOLS, session_id)
             tool_result, _ = await asyncio.to_thread(_call_tool)
-            response = build_response(intent, text, tool_result, [], context_str, entities)
             trace.add_step("tool_call", {"tool_name": "query_menu", "intent_name": intent["name"], "params": {}})
             trace.add_step("tool_result", {"success": tool_result.get("success", False) if tool_result else False, "data": tool_result.get("data", []) if tool_result else []})
+            if not (tool_result and tool_result.get("success")):
+                switched, done = await _reflect_failure(intent["name"], "query_menu", {}, tool_result)
+                if done:
+                    return done
+                if switched:
+                    intent, tool_result = switched
+            response = build_response(intent, text, tool_result, [], context_str, entities)
             trace.add_step("response", {"text": response})
             trace.save_to_file()
             if memory_store:
@@ -1651,9 +1699,15 @@ async def process_message_async(text, session_id="default", memory_store=None, l
                 def _call_tool():
                     return get_tool_response(intent["name"], text, TOOLS, session_id)
                 tool_result, _ = await asyncio.to_thread(_call_tool)
-                response = build_response(intent, text, tool_result, [], context_str, entities)
                 trace.add_step("tool_call", {"tool_name": "query_order", "intent_name": intent["name"], "params": params})
                 trace.add_step("tool_result", {"success": tool_result.get("success", False), "data": tool_result.get("data", [])})
+                if not (tool_result and tool_result.get("success")):
+                    switched, done = await _reflect_failure(intent["name"], "query_order", params, tool_result)
+                    if done:
+                        return done
+                    if switched:
+                        intent, tool_result = switched
+                response = build_response(intent, text, tool_result, [], context_str, entities)
                 trace.add_step("response", {"text": response})
                 trace.save_to_file()
                 if memory_store:
@@ -1679,9 +1733,15 @@ async def process_message_async(text, session_id="default", memory_store=None, l
                 def _call_tool():
                     return get_tool_response(intent["name"], text, TOOLS, session_id)
                 tool_result, _ = await asyncio.to_thread(_call_tool)
-                response = build_response(intent, text, tool_result, [], context_str, entities)
                 trace.add_step("tool_call", {"tool_name": "query_stores", "intent_name": intent["name"], "params": params})
                 trace.add_step("tool_result", {"success": tool_result.get("success", False) if tool_result else False, "data": tool_result.get("data", []) if tool_result else []})
+                if not (tool_result and tool_result.get("success")):
+                    switched, done = await _reflect_failure(intent["name"], "query_stores", params, tool_result)
+                    if done:
+                        return done
+                    if switched:
+                        intent, tool_result = switched
+                response = build_response(intent, text, tool_result, [], context_str, entities)
                 trace.add_step("response", {"text": response})
                 trace.save_to_file()
                 if memory_store:
@@ -1707,6 +1767,12 @@ async def process_message_async(text, session_id="default", memory_store=None, l
                 tool_result = await asyncio.to_thread(log_complaint, get_user_id(session_id), text, category=INTENT_TO_CATEGORY.get(intent["name"], "口味"), intent_name=intent["name"])
                 trace.add_step("tool_call", {"tool_name": "log_complaint", "intent_name": intent["name"], "params": {"complaint": text}})
                 trace.add_step("tool_result", {"success": tool_result.get("success", False), "data": {"complaint_id": tool_result.get("complaint_id")}})
+                if not tool_result.get("success"):
+                    switched, done = await _reflect_failure(intent["name"], "log_complaint", {"complaint": text}, tool_result)
+                    if done:
+                        return done
+                    if switched:
+                        intent, tool_result = switched
             response = build_response(intent, text, tool_result, [], context_str, entities)
             trace.add_step("response", {"text": response})
             trace.save_to_file()
