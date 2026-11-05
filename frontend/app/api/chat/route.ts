@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { forwardAuth } from '@/lib/backend-proxy';
 
 /**
  * Next.js API Route - 代理到后端FastAPI
@@ -14,6 +15,7 @@ export async function POST(request: NextRequest) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...forwardAuth(request),
       },
       body: JSON.stringify(body),
     });

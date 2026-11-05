@@ -6,6 +6,7 @@ import useSWR from 'swr';
 import NavBar from '@/components/NavBar';
 import { useRole } from '@/context/RoleContext';
 import { fetcher } from '@/lib/swr';
+import { adminAuthHeaders } from '@/lib/identity';
 
 interface ContextMessage {
   user: string;
@@ -86,13 +87,13 @@ export default function AgentDashboardPage() {
 
   const handleTakeover = () => {
     if (!sessionId.trim()) return;
-    fetch(`/api/admin/takeover/${sessionId.trim()}`, { method: 'POST' })
+    fetch(`/api/admin/takeover/${sessionId.trim()}`, { method: 'POST', headers: adminAuthHeaders() })
       .then(() => mutateContext());
   };
 
   const handleRelease = () => {
     if (!sessionId.trim()) return;
-    fetch(`/api/admin/release/${sessionId.trim()}`, { method: 'POST' })
+    fetch(`/api/admin/release/${sessionId.trim()}`, { method: 'POST', headers: adminAuthHeaders() })
       .then(() => mutateContext());
   };
 
@@ -100,7 +101,7 @@ export default function AgentDashboardPage() {
     if (!sessionId.trim() || !reply.trim()) return;
     fetch(`/api/admin/reply/${sessionId.trim()}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...adminAuthHeaders() },
       body: JSON.stringify({ message: reply }),
     }).then(() => {
       setReply('');
@@ -109,7 +110,7 @@ export default function AgentDashboardPage() {
   };
 
   const handleResolveComplaint = (id: number) => {
-    fetch(`/api/admin/complaints/resolve/${id}`, { method: 'POST' })
+    fetch(`/api/admin/complaints/resolve/${id}`, { method: 'POST', headers: adminAuthHeaders() })
       .then(() => {
         setSelectedComplaint(null);
         mutateComplaints();

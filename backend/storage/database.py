@@ -821,6 +821,42 @@ def get_user_by_session(session_id):
     conn.close()
     return row["user_id"] if row else None
 
+def claim_session(session_id, user_id):
+    """把会话绑定到 user_id。
+
+    返回 (是否绑定成功, 是否由历史匿名身份迁移而来)。
+    已绑定其他用户时返回 (False, False)，用于阻断跨用户会话访问。
+    历史匿名身份（user_<session_id>）允许被签名身份一次性接管，接管后严格隔离。
+    """
+    conn = _connect()
+    c = conn.cursor()
+    c.execute(
+        "INSERT OR IGNORE INTO sessions (session_id, user_id, last_active) VALUES (?, ?, CURRENT_TIMESTAMP)",
+        (session_id, user_id),
+    )
+    c.execute("SELECT user_id FROM sessions WHERE session_id = ?", (session_id,))
+    row = c.fetchone()
+    existing = row["user_id"] if row else None
+
+    if existing != user_id:
+        if existing == f"user_{session_id}" and user_id != existing:
+            c.execute(
+                "UPDATE sessions SET user_id = ?, last_active = CURRENT_TIMESTAMP WHERE session_id = ?",
+                (user_id, session_id),
+            )
+            c.execute("INSERT OR IGNORE INTO users (user_id) VALUES (?)", (user_id,))
+            conn.commit()
+            conn.close()
+            return True, True
+        conn.commit()
+        conn.close()
+        return False, False
+
+    c.execute("UPDATE sessions SET last_active = CURRENT_TIMESTAMP WHERE session_id = ?", (session_id,))
+    conn.commit()
+    conn.close()
+    return True, False
+
 def save_feedback(user_id, message_id, feedback_type, user_query=None, agent_response=None, intent=None):
     conn = _connect()
     c = conn.cursor()

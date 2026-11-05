@@ -7,6 +7,7 @@ import useSWR from 'swr';
 import NavBar from '@/components/NavBar';
 import { useRole } from '@/context/RoleContext';
 import { fetcher } from '@/lib/swr';
+import { adminAuthHeaders } from '@/lib/identity';
 
 const KnowledgeGraphAggregated = dynamic(
   () => import('@/components/KnowledgeGraphAggregated'),
@@ -156,14 +157,14 @@ export default function AdminPage() {
   };
 
   const handleRunEval = () => {
-    fetch('/api/admin/run-eval', { method: 'POST' })
+    fetch('/api/admin/run-eval', { method: 'POST', headers: adminAuthHeaders() })
       .then(() => mutateEval());
   };
 
   const handleApproveCandidate = (id: number) => {
     fetch(`/api/admin/candidates/${id}/approve`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...adminAuthHeaders() },
     }).then(() => {
       setSelectedCandidate(null);
       refreshData();
@@ -173,7 +174,7 @@ export default function AdminPage() {
   const handleRejectCandidate = (id: number) => {
     fetch(`/api/admin/candidates/${id}/reject`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...adminAuthHeaders() },
     }).then(() => {
       setSelectedCandidate(null);
       refreshData();
@@ -181,7 +182,7 @@ export default function AdminPage() {
   };
 
   const handleDeleteNode = (id: number) => {
-    fetch(`/api/admin/knowledge/${id}`, { method: 'DELETE' })
+    fetch(`/api/admin/knowledge/${id}`, { method: 'DELETE', headers: adminAuthHeaders() })
       .then(() => {
         setSelectedNode(null);
         refreshData();

@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { forwardAuth } from '@/lib/backend-proxy';
 
 /**
  * 流式聊天代理 - 透传后端 SSE 响应。
@@ -15,7 +16,7 @@ export async function POST(request: NextRequest) {
 
     const backendRes = await fetch(`${BACKEND_URL}/chat/stream`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...forwardAuth(request) },
       body: JSON.stringify(body),
     });
 

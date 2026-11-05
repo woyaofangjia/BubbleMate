@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { setAdminToken } from '@/lib/identity';
 
 interface PasswordModalProps {
   isOpen: boolean;
@@ -9,7 +10,6 @@ interface PasswordModalProps {
   title: string;
 }
 
-const ADMIN_KEY = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'bubble2026';
 const MAX_ATTEMPTS = 3;
 
 export default function PasswordModal({ isOpen, onClose, onConfirm, title }: PasswordModalProps) {
@@ -18,6 +18,7 @@ export default function PasswordModal({ isOpen, onClose, onConfirm, title }: Pas
   const [attempts, setAttempts] = useState(0);
   const [locked, setLocked] = useState(false);
   const [lockTime, setLockTime] = useState(0);
+  const [verifying, setVerifying] = useState(false);
 
   useEffect(() => {
     if (locked && Date.now() - lockTime >= 60000) {
@@ -40,10 +41,12 @@ export default function PasswordModal({ isOpen, onClose, onConfirm, title }: Pas
     return null;
   };
 
-  const handleSubmit = () => {
-    if (locked) {
-      const remaining = Math.ceil((60000 - (Date.now() - lockTime)) / 1000);
-      setError(`账户已锁定，请${remaining}秒后再试`);
+  const handleSubmit = async () => {
+    if (locked || verifying) {
+      if (locked) {
+        const remaining = Math.ceil((60000 - (Date.now() - lockTime)) / 1000);
+        setError(`账户已锁定，请${remaining}秒后再试`);
+      }
       return;
     }
 
@@ -53,12 +56,24 @@ export default function PasswordModal({ isOpen, onClose, onConfirm, title }: Pas
       return;
     }
 
-    if (password === ADMIN_KEY) {
-      setError('');
-      setAttempts(0);
-      onConfirm(password);
-      setPassword('');
-    } else {
+    setVerifying(true);
+    try {
+      const response = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: password }),
+      });
+      const data = await response.json();
+
+      if (response.ok && data?.token) {
+        setAdminToken(data.token);
+        setError('');
+        setAttempts(0);
+        onConfirm(password);
+        setPassword('');
+        return;
+      }
+
       const newAttempts = attempts + 1;
       setAttempts(newAttempts);
       if (newAttempts >= MAX_ATTEMPTS) {
@@ -68,6 +83,10 @@ export default function PasswordModal({ isOpen, onClose, onConfirm, title }: Pas
       } else {
         setError(`密码错误，还剩${MAX_ATTEMPTS - newAttempts}次机会`);
       }
+    } catch {
+      setError('验证服务不可用，请稍后重试');
+    } finally {
+      setVerifying(false);
     }
   };
 
@@ -116,10 +135,10 @@ export default function PasswordModal({ isOpen, onClose, onConfirm, title }: Pas
             </button>
             <button
               onClick={handleSubmit}
-              disabled={locked || password.length < 6}
+              disabled={locked || verifying || password.length < 6}
               className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              确认
+              {verifying ? '验证中...' : '确认'}
             </button>
           </div>
         </div>

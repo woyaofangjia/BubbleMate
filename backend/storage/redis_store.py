@@ -11,7 +11,7 @@ except ImportError:
 REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
 REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
 REDIS_DB = int(os.getenv("REDIS_DB", 0))
-SESSION_TTL = int(os.getenv("SESSION_TTL", 3600))
+SESSION_TTL = int(os.getenv("SESSION_TTL", 604800))
 
 class SessionStore:
     _instance = None
@@ -38,52 +38,62 @@ class SessionStore:
                     cls._instance._use_redis = False
                     cls._instance._redis_client = None
         return cls._instance
-    
-    def get_session(self, session_id: str) -> Optional[Dict[str, Any]]:
+
+    @staticmethod
+    def _key(user_id: Optional[str], session_id: str) -> str:
+        """会话按用户命名空间存储，避免同 session_id 跨用户串数据。"""
+        if user_id:
+            return f"user:{user_id}:session:{session_id}"
+        return f"session:{session_id}"
+
+    def get_session(self, session_id: str, user_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
+        key = self._key(user_id, session_id)
         if self._use_redis and self._redis_client:
             try:
-                data = self._redis_client.get(f"session:{session_id}")
+                data = self._redis_client.get(key)
                 if data:
                     return json.loads(data)
                 return None
             except Exception:
-                return self._memory_store.get(session_id)
-        return self._memory_store.get(session_id)
+                return self._memory_store.get(key)
+        return self._memory_store.get(key)
     
-    def save_session(self, session_id: str, data: Dict[str, Any]):
+    def save_session(self, session_id: str, data: Dict[str, Any], user_id: Optional[str] = None):
+        key = self._key(user_id, session_id)
         if self._use_redis and self._redis_client:
             try:
-                self._redis_client.setex(
-                    f"session:{session_id}",
-                    SESSION_TTL,
-                    json.dumps(data)
-                )
+                self._redis_client.setex(key, SESSION_TTL, json.dumps(data))
                 return
             except Exception:
                 pass
         
-        self._memory_store[session_id] = data
+        self._memory_store[key] = data
     
-    def delete_session(self, session_id: str):
+    def delete_session(self, session_id: str, user_id: Optional[str] = None):
+        keys = [self._key(user_id, session_id)]
+        # 兼容升级前的旧键
+        if user_id:
+            keys.append(f"session:{session_id}")
         if self._use_redis and self._redis_client:
             try:
-                self._redis_client.delete(f"session:{session_id}")
+                self._redis_client.delete(*keys)
                 return
             except Exception:
                 pass
         
-        self._memory_store.pop(session_id, None)
+        for key in keys:
+            self._memory_store.pop(key, None)
     
-    def get_all_sessions(self) -> Dict[str, Dict[str, Any]]:
+    def get_all_sessions(self, user_id: Optional[str] = None) -> Dict[str, Dict[str, Any]]:
+        pattern = f"user:{user_id}:session:*" if user_id else "session:*"
         if self._use_redis and self._redis_client:
             try:
-                keys = self._redis_client.keys("session:*")
+                keys = self._redis_client.keys(pattern)
                 result = {}
                 for key in keys:
                     data = self._redis_client.get(key)
                     if data:
-                        session_id = key.replace("session:", "")
-                        result[session_id] = json.loads(data)
+                        result[key] = json.loads(data)
                 return result
             except Exception:
                 return dict(self._memory_store)

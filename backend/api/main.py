@@ -22,8 +22,9 @@ try:
 except ImportError:
     pass
 
-from bubble_agent import process_message, process_message_async, process_message_stream_async, recognize_intent, create_memory_store, get_context, TOOLS, get_user_id, query_menu, query_promotions, query_recommend, query_customize, MemoryStore, clear_intent_cache, clear_response_cache
-from storage.database import init_db, get_user_preferences, get_complaint_history, get_user_stats, get_knowledge_candidates, approve_candidate, reject_candidate, get_complaint_knowledge, get_knowledge_complaints, update_knowledge_parent, get_all_complaints, get_knowledge_list, get_knowledge_graph, get_knowledge_graph_aggregated, review_knowledge, delete_knowledge, get_complaint_stats, resolve_complaint, add_knowledge_node, save_feedback, get_feedback_analysis
+from bubble_agent import process_message, process_message_async, process_message_stream_async, recognize_intent, create_memory_store, get_context, TOOLS, get_user_id, bind_session_user, query_menu, query_promotions, query_recommend, query_customize, MemoryStore, clear_intent_cache, clear_response_cache
+from core.auth import extract_bearer, issue_admin_token, issue_user_token, new_user_id, verify_admin_token, verify_user_token
+from storage.database import init_db, get_user_by_session, get_user_preferences, get_complaint_history, get_user_stats, get_knowledge_candidates, approve_candidate, reject_candidate, get_complaint_knowledge, get_knowledge_complaints, update_knowledge_parent, get_all_complaints, get_knowledge_list, get_knowledge_graph, get_knowledge_graph_aggregated, review_knowledge, delete_knowledge, get_complaint_stats, resolve_complaint, add_knowledge_node, save_feedback, get_feedback_analysis
 from storage.data_access import get_shops, get_menu_items, get_orders, get_shop_by_name
 from storage.redis_store import session_store
 from core.cache import cache
@@ -77,7 +78,31 @@ async def rate_limit_middleware(request: Request, call_next):
 
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
+@app.middleware("http")
+async def admin_auth_middleware(request: Request, call_next):
+    """管理端接口统一校验管理令牌（登录接口除外）。"""
+    path = request.url.path
+    if path.startswith("/api/admin") and path != "/api/admin/login":
+        if not verify_admin_token(extract_bearer(request)):
+            return Response(status_code=401, content=json.dumps({"error": "需要管理员身份"}))
+    return await call_next(request)
+
 memory_store = create_memory_store(window_size=3)
+
+def _request_user_id(request: Request) -> Optional[str]:
+    token = extract_bearer(request)
+    return verify_user_token(token) if token else None
+
+def resolve_session_user(request: Request, session_id: str) -> str:
+    """确定请求所属用户并把会话绑定到该用户。
+
+    无签名身份的历史调用仍按 session 派生身份；但会话一旦被签名身份占用，
+    其他身份访问会被拒绝，避免通过猜测 session_id 越权读取会话记忆。
+    """
+    user_id = _request_user_id(request) or f"user_{session_id}"
+    if not bind_session_user(session_id, user_id):
+        raise HTTPException(status_code=403, detail="该会话不属于当前用户")
+    return user_id
 
 class ChatRequest(BaseModel):
     message: str
@@ -125,11 +150,25 @@ async def process_complaint_async(session_id: str, message: str, intent_name: st
     category = category_map.get(intent_name, "口味")
     log_complaint(user_id=user_id, complaint=message, severity="普通", category=category, intent_name=intent_name)
 
+@app.post("/api/auth/identity")
+async def create_identity():
+    """签发匿名但稳定的用户身份（服务端生成 user_id + 签名令牌）。"""
+    user_id = new_user_id()
+    return {"user_id": user_id, "token": issue_user_token(user_id)}
+
+@app.get("/api/auth/identity")
+async def read_identity(request: Request):
+    user_id = _request_user_id(request)
+    if not user_id:
+        raise HTTPException(status_code=401, detail="身份令牌无效或已过期")
+    return {"user_id": user_id}
+
 @app.post("/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
-    print(f"chat request: message='{request.message}', session_id='{request.session_id}'")
+async def chat(request: Request, body: ChatRequest, background_tasks: BackgroundTasks):
+    print(f"chat request: message='{body.message}', session_id='{body.session_id}'")
+    resolve_session_user(request, body.session_id)
     try:
-        response, intent = await process_message_async(request.message, request.session_id, memory_store)
+        response, intent = await process_message_async(body.message, body.session_id, memory_store)
         print(f"chat response: intent={intent}, response_len={len(response)}")
     except Exception as e:
         print(f"chat error: {e}")
@@ -138,16 +177,18 @@ async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
         raise
     
     if intent["name"].startswith("complaint"):
-        background_tasks.add_task(process_complaint_async, request.session_id, request.message, intent["name"])
+        background_tasks.add_task(process_complaint_async, body.session_id, body.message, intent["name"])
 
-    return ChatResponse(response=response, intent=intent, session_id=request.session_id)
+    return ChatResponse(response=response, intent=intent, session_id=body.session_id)
 
 
 @app.post("/chat/stream")
-async def chat_stream(request: ChatRequest):
+async def chat_stream(request: Request, body: ChatRequest):
     """流式聊天接口 - Server-Sent Events，分步推送思考/工具调用/回复事件。"""
+    resolve_session_user(request, body.session_id)
+
     async def event_generator():
-        async for chunk in process_message_stream_async(request.message, request.session_id, memory_store):
+        async for chunk in process_message_stream_async(body.message, body.session_id, memory_store):
             yield chunk
 
     return StreamingResponse(
@@ -224,14 +265,16 @@ async def get_intent(text: str):
     return {"text": text, "intent": intent}
 
 @app.get("/session/{session_id}")
-async def get_session_info(session_id: str):
+async def get_session_info(request: Request, session_id: str):
+    resolve_session_user(request, session_id)
     context = get_context(memory_store, session_id)
     return {"session_id": session_id, "context": context}
 
 @app.delete("/session/{session_id}")
-async def clear_session(session_id: str):
+async def clear_session(request: Request, session_id: str):
+    user_id = resolve_session_user(request, session_id)
     if isinstance(memory_store, MemoryStore):
-        session_store.delete_session(session_id)
+        session_store.delete_session(session_id, user_id)
     else:
         memory_store["sessions"].pop(session_id, None)
     return {"message": f"Session {session_id} cleared"}
@@ -266,8 +309,10 @@ async def get_eval_report():
     return {"message": "请运行评测脚本"}
 
 @app.get("/api/user/profile")
-async def get_user_profile(session_id: str):
-    user_id = get_user_id(session_id)
+async def get_user_profile(request: Request):
+    user_id = _request_user_id(request)
+    if not user_id:
+        raise HTTPException(status_code=401, detail="需要用户身份令牌")
     preferences = get_user_preferences(user_id)
     complaints = get_complaint_history(user_id)
     stats = get_user_stats(user_id)
@@ -298,7 +343,7 @@ async def get_user_profile(session_id: str):
 @app.post("/api/admin/login")
 async def admin_login(request: LoginRequest):
     if request.key == ADMIN_KEY:
-        return {"success": True, "token": "admin_token"}
+        return {"success": True, "token": issue_admin_token(), "expires_in": 12 * 3600}
     raise HTTPException(status_code=401, detail="密码错误")
 
 @app.get("/api/admin/complaints")
@@ -417,7 +462,8 @@ async def admin_get_knowledge_complaints_v2(knowledge_id: int):
 
 @app.get("/api/admin/context/{session_id}")
 async def admin_get_context(session_id: str):
-    user_id = get_user_id(session_id)
+    # 管理端只读查看，不创建/改写会话归属
+    user_id = get_user_by_session(session_id) or f"user_{session_id}"
     preferences = get_user_preferences(user_id)
     complaints = get_complaint_history(user_id)
     context = get_context(memory_store, session_id)
@@ -478,8 +524,10 @@ class FeedbackRequest(BaseModel):
     intent: Optional[str] = None
 
 @app.post("/api/feedback")
-async def submit_feedback(request: FeedbackRequest):
-    user_id = get_user_id(request.session_id)
+async def submit_feedback(http_request: Request, request: FeedbackRequest):
+    user_id = _request_user_id(http_request)
+    if not user_id:
+        raise HTTPException(status_code=401, detail="需要用户身份令牌")
     save_feedback(user_id, request.message_id, request.feedback_type,
                   user_query=request.user_query,
                   agent_response=request.agent_response,

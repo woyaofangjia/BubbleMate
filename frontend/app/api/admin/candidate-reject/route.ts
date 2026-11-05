@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { forwardAuth } from '@/lib/backend-proxy';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000';
 
@@ -7,7 +8,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const response = await fetch(`${BACKEND_URL}/api/admin/candidate-reject`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...forwardAuth(request) },
       body: JSON.stringify(body),
     });
     const data = await response.json();

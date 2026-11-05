@@ -5,6 +5,7 @@ import Link from 'next/link';
 import useSWR from 'swr';
 import Header from '@/components/Header';
 import { fetcher } from '@/lib/swr';
+import { ensureUserToken } from '@/lib/identity';
 
 interface Preferences {
   sugar?: string;
@@ -40,15 +41,6 @@ interface ProfileData {
   recent_orders: Order[];
 }
 
-const getSessionId = () => {
-  let sessionId = localStorage.getItem('bubblemate_session_id');
-  if (!sessionId) {
-    sessionId = 'default';
-    localStorage.setItem('bubblemate_session_id', sessionId);
-  }
-  return sessionId;
-};
-
 const defaultProfile: ProfileData = {
   user_id: '',
   preferences: {},
@@ -58,14 +50,15 @@ const defaultProfile: ProfileData = {
 };
 
 export default function ProfilePage() {
-  const [sessionId, setSessionId] = useState<string>('');
-  
+  // 用户画像由签名身份令牌决定，不再依赖 session_id，避免越权查看他人画像
+  const [identityReady, setIdentityReady] = useState(false);
+
   useEffect(() => {
-    setSessionId(getSessionId());
+    ensureUserToken().finally(() => setIdentityReady(true));
   }, []);
 
   const { data: profile, error, isLoading } = useSWR<ProfileData>(
-    sessionId ? `/api/user/profile?session_id=${sessionId}` : null,
+    identityReady ? '/api/user/profile' : null,
     fetcher,
     { refreshInterval: 60000, revalidateOnFocus: false }
   );

@@ -2,11 +2,15 @@
 
 import { useState, useRef, useEffect } from 'react';
 import VoiceRecorder from './VoiceRecorder';
+import { ensureUserToken, userAuthHeaders } from '@/lib/identity';
 
 const getSessionId = () => {
   let sessionId = localStorage.getItem('bubblemate_session_id');
   if (!sessionId) {
-    sessionId = `session_${Date.now()}`;
+    const random = typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID().replace(/-/g, '')
+      : Math.random().toString(36).slice(2) + Date.now().toString(36);
+    sessionId = `session_${random}`;
     localStorage.setItem('bubblemate_session_id', sessionId);
   }
   return sessionId;
@@ -71,9 +75,13 @@ export default function ChatInterface({
 
     try {
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+      const token = await ensureUserToken();
       const response = await fetch(`${backendUrl}/chat/stream`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({ message: userMessage, session_id: getSessionId() }),
       });
 
@@ -197,7 +205,7 @@ export default function ChatInterface({
         }
         fetch('/api/feedback', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', ...userAuthHeaders() },
           body: JSON.stringify({
             message_id: msg.messageId || `msg_${msgIdx}`,
             feedback_type: type,

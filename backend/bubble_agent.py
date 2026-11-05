@@ -14,10 +14,10 @@ except:
     requests = None
 
 try:
-    from .storage.database import save_session, get_user_by_session, save_user_preference, get_user_preferences, save_complaint, save_complaint_with_candidate, get_knowledge_graph, save_knowledge as _save_knowledge, save_complaint_db as _save_complaint_db, get_complaint_stats
+    from .storage.database import save_session, get_user_by_session, claim_session, save_user_preference, get_user_preferences, save_complaint, save_complaint_with_candidate, get_knowledge_graph, save_knowledge as _save_knowledge, save_complaint_db as _save_complaint_db, get_complaint_stats
     from .storage.data_access import get_shops, get_menu_items, get_orders, get_shop_by_name, get_shop_by_id, get_hot_menu_items
 except ImportError:
-    from storage.database import save_session, get_user_by_session, save_user_preference, get_user_preferences, save_complaint, save_complaint_with_candidate, get_knowledge_graph, save_knowledge as _save_knowledge, save_complaint_db as _save_complaint_db, get_complaint_stats
+    from storage.database import save_session, get_user_by_session, claim_session, save_user_preference, get_user_preferences, save_complaint, save_complaint_with_candidate, get_knowledge_graph, save_knowledge as _save_knowledge, save_complaint_db as _save_complaint_db, get_complaint_stats
     from storage.data_access import get_shops, get_menu_items, get_orders, get_shop_by_name, get_shop_by_id, get_hot_menu_items
 
 try:
@@ -370,6 +370,26 @@ def get_user_id(session_id: str) -> str:
     save_session(session_id, user_id)
     return user_id
 
+def bind_session_user(session_id: str, user_id: str) -> bool:
+    """绑定会话到签名身份；会话已属于其他用户时返回 False。
+
+    历史匿名身份（user_<session_id>）首次被签名身份接管时，
+    会把旧的会话记忆迁移到新身份的命名空间，保证跨会话记忆连续。
+    """
+    ok, migrated = claim_session(session_id, user_id)
+    if not ok:
+        SESSION_TO_USER.pop(session_id, None)
+        return False
+
+    SESSION_TO_USER[session_id] = user_id
+    if migrated:
+        legacy_user_id = f"user_{session_id}"
+        legacy_data = session_store.get_session(session_id, legacy_user_id)
+        if legacy_data:
+            session_store.save_session(session_id, legacy_data, user_id)
+            session_store.delete_session(session_id, legacy_user_id)
+    return True
+
 # ==================== 关键词 & 配置 ====================
 
 INTENT_KEYWORDS = {
@@ -653,18 +673,27 @@ def clear_intent_cache():
     if cache:
         cache.clear("intent")
 
-def _get_cached_response(text):
+def _response_cache_key(text, session_id):
+    """回复缓存必须带用户维度，否则同句话会命中其他用户的回复。"""
+    user_id = get_user_id(session_id) if session_id else "anonymous"
+    return f"{user_id}::{text}"
+
+def _get_cached_response(text, session_id=None):
+    if not session_id:
+        return None
     text = text.strip()
     if cache:
-        cached = cache.get("response", text)
+        cached = cache.get("response", _response_cache_key(text, session_id))
         if cached:
             return cached
     return None
 
-def _cache_response(text, response):
+def _cache_response(text, response, session_id=None):
+    if not session_id:
+        return
     text = text.strip()
     if cache:
-        cache.set("response", text, response, ttl=600)
+        cache.set("response", _response_cache_key(text, session_id), response, ttl=600)
 
 def clear_response_cache():
     if cache:
@@ -831,7 +860,8 @@ def query_order(user_id=None, order_id=None, data_dir=None):
     user_id = user_id or "default_user"
     
     if order_id:
-        matched = get_orders(order_id=order_id)
+        # 按订单号查询也必须校验归属，避免知道单号就能查他人订单
+        matched = [o for o in get_orders(order_id=order_id) if o.get("user_id") == user_id]
         result = []
         for order in matched:
             shop = get_shop_by_id(order.get('shop_id', '')) if order.get('shop_id') else None
@@ -1134,20 +1164,22 @@ class MemoryStore:
         self._window_size = window_size
         self._store = {"sessions": {}}
     
-    def _get_session(self, session_id):
+    def _get_session(self, session_id, user_id=None):
+        user_id = user_id or get_user_id(session_id)
         if REDIS_AVAILABLE:
-            return session_store.get_session(session_id)
-        return self._store["sessions"].get(session_id)
+            return session_store.get_session(session_id, user_id)
+        return self._store["sessions"].get(f"{user_id}:{session_id}")
     
-    def _save_session(self, session_id, data):
+    def _save_session(self, session_id, data, user_id=None):
+        user_id = user_id or get_user_id(session_id)
         if REDIS_AVAILABLE:
-            session_store.save_session(session_id, data)
+            session_store.save_session(session_id, data, user_id)
         else:
-            self._store["sessions"][session_id] = data
+            self._store["sessions"][f"{user_id}:{session_id}"] = data
     
-    def get_sessions(self):
+    def get_sessions(self, user_id=None):
         if REDIS_AVAILABLE:
-            return session_store.get_all_sessions()
+            return session_store.get_all_sessions(user_id)
         return dict(self._store["sessions"])
 
 def create_memory_store(window_size=3):
@@ -1593,7 +1625,7 @@ async def process_message_async(text, session_id="default", memory_store=None, l
         trace.save_to_file()
         if memory_store:
             save_message(memory_store, session_id, text, reply)
-        _cache_response(text, reply)
+        _cache_response(text, reply, session_id)
         return reply, current_intent
 
     async def _reflect_failure(intent_name, tool_label, params, tool_result):
@@ -1614,7 +1646,7 @@ async def process_message_async(text, session_id="default", memory_store=None, l
             save_message(memory_store, session_id, text or "", response)
         return response, {"name": "unclear", "confidence": 0.0, "category": "通用"}
     
-    cached_response = _get_cached_response(text)
+    cached_response = _get_cached_response(text, session_id)
     if cached_response:
         if memory_store:
             asyncio.create_task(asyncio.to_thread(save_message, memory_store, session_id, text, cached_response))
@@ -1670,7 +1702,7 @@ async def process_message_async(text, session_id="default", memory_store=None, l
             trace.save_to_file()
             if memory_store:
                 save_message(memory_store, session_id, text, response)
-            _cache_response(text, response)
+            _cache_response(text, response, session_id)
             return response, intent
         
         elif intent["name"] == "query_menu" or intent["name"] == "query_price":
@@ -1690,7 +1722,7 @@ async def process_message_async(text, session_id="default", memory_store=None, l
             trace.save_to_file()
             if memory_store:
                 save_message(memory_store, session_id, text, response)
-            _cache_response(text, response)
+            _cache_response(text, response, session_id)
             return response, intent
         
         elif intent["name"] == "query_order" or intent["name"] == "query_refund":
@@ -1712,7 +1744,7 @@ async def process_message_async(text, session_id="default", memory_store=None, l
                 trace.save_to_file()
                 if memory_store:
                     save_message(memory_store, session_id, text, response)
-                _cache_response(text, response)
+                _cache_response(text, response, session_id)
                 return response, intent
             else:
                 if entities and entities.get("order_id"):
@@ -1724,7 +1756,7 @@ async def process_message_async(text, session_id="default", memory_store=None, l
                 trace.save_to_file()
                 if memory_store:
                     save_message(memory_store, session_id, text, response)
-                _cache_response(text, response)
+                _cache_response(text, response, session_id)
                 return response, intent
         
         elif intent["name"] == "query_location" or intent["name"] == "query_store":
@@ -1746,7 +1778,7 @@ async def process_message_async(text, session_id="default", memory_store=None, l
                 trace.save_to_file()
                 if memory_store:
                     save_message(memory_store, session_id, text, response)
-                _cache_response(text, response)
+                _cache_response(text, response, session_id)
                 return response, intent
             else:
                 if entities and entities.get("location"):
@@ -1758,7 +1790,7 @@ async def process_message_async(text, session_id="default", memory_store=None, l
                 trace.save_to_file()
                 if memory_store:
                     save_message(memory_store, session_id, text, response)
-                _cache_response(text, response)
+                _cache_response(text, response, session_id)
                 return response, intent
         
         elif intent["name"].startswith("complaint"):
@@ -1778,7 +1810,7 @@ async def process_message_async(text, session_id="default", memory_store=None, l
             trace.save_to_file()
             if memory_store:
                 save_message(memory_store, session_id, text, response)
-            _cache_response(text, response)
+            _cache_response(text, response, session_id)
             return response, intent
     
     return await asyncio.to_thread(harness_handle, text, session_id, intent, trace, memory_store)
@@ -1809,7 +1841,7 @@ async def process_message_stream_async(text, session_id="default", memory_store=
         trace.save_to_file()
         if memory_store:
             save_message(memory_store, session_id, text, response)
-        _cache_response(text, response)
+        _cache_response(text, response, session_id)
         yield _evt({"type": "response", "content": response, "intent": intent})
         yield _evt({"type": "done", "intent": intent})
 
@@ -1834,7 +1866,7 @@ async def process_message_stream_async(text, session_id="default", memory_store=
             return
 
         # ---- 缓存命中 ----
-        cached_response = _get_cached_response(text)
+        cached_response = _get_cached_response(text, session_id)
         if cached_response:
             if memory_store:
                 asyncio.create_task(asyncio.to_thread(save_message, memory_store, session_id, text, cached_response))
@@ -1907,7 +1939,7 @@ async def process_message_stream_async(text, session_id="default", memory_store=
                     trace.save_to_file()
                     if memory_store:
                         save_message(memory_store, session_id, text, response)
-                    _cache_response(text, response)
+                    _cache_response(text, response, session_id)
                     yield _evt({"type": "response", "content": response, "intent": intent})
                     yield _evt({"type": "done", "intent": intent})
                 return
@@ -1926,7 +1958,7 @@ async def process_message_stream_async(text, session_id="default", memory_store=
                     trace.save_to_file()
                     if memory_store:
                         save_message(memory_store, session_id, text, response)
-                    _cache_response(text, response)
+                    _cache_response(text, response, session_id)
                     yield _evt({"type": "response", "content": response, "intent": intent})
                     yield _evt({"type": "done", "intent": intent})
                 return

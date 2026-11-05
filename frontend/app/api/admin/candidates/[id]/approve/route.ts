@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { forwardAuth } from '@/lib/backend-proxy';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000';
 
-export async function POST(_request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const response = await fetch(`${BACKEND_URL}/api/admin/candidates/${params.id}/approve`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...forwardAuth(request) },
     });
     const data = await response.json();
     return NextResponse.json(data);
