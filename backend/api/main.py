@@ -22,9 +22,9 @@ try:
 except ImportError:
     pass
 
-from bubble_agent import process_message, process_message_async, process_message_stream_async, recognize_intent, create_memory_store, get_context, TOOLS, get_user_id, bind_session_user, query_menu, query_promotions, query_recommend, query_customize, MemoryStore, clear_intent_cache, clear_response_cache
+from bubble_agent import process_message, process_message_async, process_message_stream_async, recognize_intent, create_memory_store, get_context, TOOLS, get_user_id, bind_session_user, forget_user_memory, query_menu, query_promotions, query_recommend, query_customize, MemoryStore, clear_intent_cache, clear_response_cache
 from core.auth import extract_bearer, issue_admin_token, issue_user_token, new_user_id, verify_admin_token, verify_user_token
-from storage.database import init_db, get_user_by_session, get_user_preferences, get_complaint_history, get_user_stats, get_knowledge_candidates, approve_candidate, reject_candidate, get_complaint_knowledge, get_knowledge_complaints, update_knowledge_parent, get_all_complaints, get_knowledge_list, get_knowledge_graph, get_knowledge_graph_aggregated, review_knowledge, delete_knowledge, get_complaint_stats, resolve_complaint, add_knowledge_node, save_feedback, get_feedback_analysis
+from storage.database import init_db, get_user_by_session, get_user_preferences, clear_user_preferences, get_complaint_history, get_user_stats, get_knowledge_candidates, approve_candidate, reject_candidate, get_complaint_knowledge, get_knowledge_complaints, update_knowledge_parent, get_all_complaints, get_knowledge_list, get_knowledge_graph, get_knowledge_graph_aggregated, review_knowledge, delete_knowledge, get_complaint_stats, resolve_complaint, add_knowledge_node, save_feedback, get_feedback_analysis
 from storage.data_access import get_shops, get_menu_items, get_orders, get_shop_by_name
 from storage.redis_store import session_store
 from core.cache import cache
@@ -277,7 +277,18 @@ async def clear_session(request: Request, session_id: str):
         session_store.delete_session(session_id, user_id)
     else:
         memory_store["sessions"].pop(session_id, None)
-    return {"message": f"Session {session_id} cleared"}
+    # 清会话同时失效长期偏好，避免“清了会话后偏好又被注入”
+    clear_user_preferences(user_id)
+    return {"message": f"Session {session_id} cleared", "preferences_cleared": True}
+
+@app.delete("/api/user/preferences")
+async def forget_my_preferences(request: Request):
+    """“忘记我”：清除长期偏好及该用户名下所有会话的实体记忆。"""
+    user_id = _request_user_id(request)
+    if not user_id:
+        raise HTTPException(status_code=401, detail="需要用户身份令牌")
+    forget_user_memory(user_id)
+    return {"success": True, "message": "偏好与记忆实体已清除"}
 
 @app.get("/menu")
 async def get_menu(category: Optional[str] = None):

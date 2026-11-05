@@ -14,10 +14,10 @@ except:
     requests = None
 
 try:
-    from .storage.database import save_session, get_user_by_session, claim_session, save_user_preference, get_user_preferences, save_complaint, save_complaint_with_candidate, get_knowledge_graph, save_knowledge as _save_knowledge, save_complaint_db as _save_complaint_db, get_complaint_stats
+    from .storage.database import save_session, get_user_by_session, claim_session, save_user_preference, get_user_preferences, delete_user_preference, clear_user_preferences, save_complaint, save_complaint_with_candidate, get_knowledge_graph, save_knowledge as _save_knowledge, save_complaint_db as _save_complaint_db, get_complaint_stats
     from .storage.data_access import get_shops, get_menu_items, get_orders, get_shop_by_name, get_shop_by_id, get_hot_menu_items
 except ImportError:
-    from storage.database import save_session, get_user_by_session, claim_session, save_user_preference, get_user_preferences, save_complaint, save_complaint_with_candidate, get_knowledge_graph, save_knowledge as _save_knowledge, save_complaint_db as _save_complaint_db, get_complaint_stats
+    from storage.database import save_session, get_user_by_session, claim_session, save_user_preference, get_user_preferences, delete_user_preference, clear_user_preferences, save_complaint, save_complaint_with_candidate, get_knowledge_graph, save_knowledge as _save_knowledge, save_complaint_db as _save_complaint_db, get_complaint_stats
     from storage.data_access import get_shops, get_menu_items, get_orders, get_shop_by_name, get_shop_by_id, get_hot_menu_items
 
 try:
@@ -389,6 +389,24 @@ def bind_session_user(session_id: str, user_id: str) -> bool:
             session_store.save_session(session_id, legacy_data, user_id)
             session_store.delete_session(session_id, legacy_user_id)
     return True
+
+def forget_user_memory(user_id: str):
+    """“忘记我”：清空长期偏好，并清掉该用户名下所有会话的实体与偏好。"""
+    clear_user_preferences(user_id)
+    sessions = session_store.get_all_sessions(user_id) if REDIS_AVAILABLE else {}
+    redis_prefix = f"user:{user_id}:session:"
+    memory_prefix = f"{user_id}:"
+    for key, data in sessions.items():
+        if key.startswith(redis_prefix):
+            session_id = key[len(redis_prefix):]
+        elif key.startswith(memory_prefix):
+            session_id = key[len(memory_prefix):]
+        else:
+            continue
+        data["entities"] = {}
+        data["entity_meta"] = {}
+        data["preferences"] = {}
+        session_store.save_session(session_id, data, user_id)
 
 # ==================== 关键词 & 配置 ====================
 
@@ -1185,19 +1203,91 @@ class MemoryStore:
 def create_memory_store(window_size=3):
     return MemoryStore(window_size)
 
+# 假设/回忆/第三人称标记：命中所在分句不参与记忆抽取
+HYPOTHETICAL_MARKERS = re.compile(r'(如果|要是|假如|假设|万一|我朋友|朋友想要|朋友要|帮我朋友|同事|他想要|她想要|上次|之前|以前|曾经)')
+# 否定词：出现在槽位值前的窗口内即视为“拒绝/删除”而非“选择”
+NEGATION_TOKENS = ("不要", "不用", "不加", "不放", "不想要", "不需要", "别加", "别放", "去掉", "删除", "取消", "无需", "戒掉", "别")
+
+# 短周期实体按轮次过期，避免旧订单号/旧位置被反复引用；sugar/ice 属长期偏好，不设 TTL
+ENTITY_TTL_TURNS = {
+    "order_id": 10,
+    "location": 10,
+    "price": 5,
+    "temperature": 10,
+    "size": 10,
+    "topping": 10,
+    "drink": 20,
+    "complimented_drink": 20,
+    "complaint_reason": 5,
+}
+
+def _strip_hypothetical(text):
+    """丢弃假设句/回忆句/第三人称分句，避免其被当作当前事实写入记忆。"""
+    clauses = re.split(r'[，。！？；,!?;\n]', text)
+    kept = [c.strip() for c in clauses if c.strip() and not HYPOTHETICAL_MARKERS.search(c)]
+    return "，".join(kept)
+
+def _value_negated(text, pos):
+    window = text[max(0, pos - 6):pos]
+    return any(token in window for token in NEGATION_TOKENS)
+
+def _match_slot(text, mapping, negatable=True):
+    """返回 (槽位值, 是否被否定)。
+
+    同一槽位有正向取值时以最后一个正向值为准，只有整句话都在拒绝时才返回否定，
+    例如“换成五分糖，不要三分糖”应取五分糖。
+    """
+    last_positive = None
+    last_negative = None
+    for value, patterns in mapping.items():
+        for pattern in patterns:
+            start = text.find(pattern)
+            while start != -1:
+                if negatable and _value_negated(text, start):
+                    if last_negative is None or start >= last_negative[0]:
+                        last_negative = (start, value)
+                elif last_positive is None or start >= last_positive[0]:
+                    last_positive = (start, value)
+                start = text.find(pattern, start + 1)
+    if last_positive:
+        return last_positive[1], False
+    if last_negative:
+        return last_negative[1], True
+    return None, False
+
+def _active_entities(sess):
+    """只返回仍在有效轮次内的实体，过滤过期记忆。"""
+    entities = sess.get("entities", {}) or {}
+    meta = sess.get("entity_meta", {}) or {}
+    current_turn = sess.get("turn", 0)
+    active = {}
+    for key, value in entities.items():
+        ttl = ENTITY_TTL_TURNS.get(key)
+        item_meta = meta.get(key, {})
+        if ttl is not None and current_turn - item_meta.get("turn", current_turn) > ttl:
+            continue
+        active[key] = value
+    return active
+
 def _extract_entities(text):
     entities = {}
+    text = _strip_hypothetical(text)
     
     sugar_map = {"无糖": ["无糖", "零糖"], "三分糖": ["三分糖", "少糖"], "五分糖": ["五分糖", "半糖"], "七分糖": ["七分糖"]}
-    for level, patterns in sugar_map.items():
-        if any(p in text for p in patterns): entities["sugar"] = level
+    level, negated = _match_slot(text, sugar_map)
+    if level:
+        entities["sugar"] = None if negated else level
     
     ice_map = {"热": ["热饮", "热的"], "去冰": ["去冰"], "少冰": ["少冰"], "温": ["温的", "温热"]}
-    for level, patterns in ice_map.items():
-        if any(p in text for p in patterns): entities["ice"] = level
+    level, _ = _match_slot(text, ice_map, negatable=False)
+    if level:
+        entities["ice"] = level
     
-    order_match = re.search(r'(?:ORD-)?(\d{5,})', text)
-    if order_match: entities["order_id"] = order_match.group(1)
+    order_match = re.search(r'ORD-\d{8}-\d{3}', text, re.I)
+    if not order_match:
+        order_match = re.search(r'(?:订单号|单号)[是为：:]?\s*(\d{5,})', text)
+    if order_match:
+        entities["order_id"] = order_match.group(1) if order_match.lastindex else order_match.group(0)
     
     location_patterns = [
         re.compile(r'(光谷|街道口|银泰|武大|华师|汉口|武昌|江夏|汉阳|江汉|硚口|洪山)'),
@@ -1208,14 +1298,17 @@ def _extract_entities(text):
         if m:
             loc = m.group(1) if m.lastindex == 1 else m.group(2)
             if loc not in ["附近", "周边", "这里"]:
-                entities["location"] = loc
+                entities["location"] = None if _value_negated(text, m.start()) else loc
                 break
     
     menu_items = _get_menu_names()
+    drink_pos, drink_name = -1, ""
     for name in menu_items:
-        if name in text:
-            entities["drink"] = name
-            break
+        idx = text.rfind(name)
+        if idx > drink_pos:
+            drink_pos, drink_name = idx, name
+    if drink_pos >= 0:
+        entities["drink"] = None if _value_negated(text, drink_pos) else drink_name
     
     price_matches = re.findall(r'[¥￥]\s*(\d{1,3}(?:\.\d+)?)\s*元?', text)
     if not price_matches:
@@ -1235,10 +1328,9 @@ def _extract_entities(text):
         "燕麦": ["燕麦", "加燕麦"],
         "水果": ["加水果", "水果"],
     }
-    for topping, patterns in topping_map.items():
-        if any(p in text for p in patterns):
-            entities["topping"] = topping
-            break
+    topping, negated = _match_slot(text, topping_map)
+    if topping:
+        entities["topping"] = None if negated else topping
     
     temp_map = {
         "热": ["热饮", "热的", "加热"],
@@ -1248,30 +1340,27 @@ def _extract_entities(text):
         "正常冰": ["正常冰", "标准冰"],
         "多冰": ["多冰", "加冰"],
     }
-    for temp, patterns in temp_map.items():
-        if any(p in text for p in patterns):
-            entities["temperature"] = temp
-            break
+    # 温度/冰量映射本身已包含“不要冰/去冰”等否定表达，故不再二次判否定
+    temp, _ = _match_slot(text, temp_map, negatable=False)
+    if temp:
+        entities["temperature"] = temp
     
     size_map = {
         "大杯": ["大杯", "大的", "L", "XL"],
         "中杯": ["中杯", "中的", "M"],
         "小杯": ["小杯", "小的", "S"],
     }
-    for size, patterns in size_map.items():
-        if any(p in text for p in patterns):
-            entities["size"] = size
-            break
+    size, negated = _match_slot(text, size_map)
+    if size:
+        entities["size"] = None if negated else size
     
-    if "太甜" in text:
-        entities["complaint_reason"] = "太甜"
-    elif "太咸" in text:
-        entities["complaint_reason"] = "太咸"
-    elif "太辣" in text:
-        entities["complaint_reason"] = "太辣"
-    elif "太淡" in text:
-        entities["complaint_reason"] = "太淡"
-    elif "变质" in text or "不新鲜" in text:
+    complaint_keywords = ["太甜", "太咸", "太辣", "太淡"]
+    for word in complaint_keywords:
+        idx = text.find(word)
+        if idx != -1 and not _value_negated(text, idx):
+            entities["complaint_reason"] = word
+            break
+    if "complaint_reason" not in entities and ("变质" in text or "不新鲜" in text):
         entities["complaint_reason"] = "变质/不新鲜"
     
     compliment_patterns = [
@@ -1279,7 +1368,7 @@ def _extract_entities(text):
     ]
     for pat in compliment_patterns:
         m = pat.search(text)
-        if m:
+        if m and not _value_negated(text, m.start()):
             drink = entities.get("drink", "")
             entities["complimented_drink"] = drink if drink else m.group(0)
             break
@@ -1312,76 +1401,99 @@ def _compress_history(history, window_size):
     if len(history) <= window_size:
         return history
     to_compress = history[:-window_size + 1]
-    facts, seen = [], set()
+    # 同一槽位只保留最后一次出现的值，避免摘要里同时存在冲突记忆
+    facts, order = {}, []
     for msg in to_compress:
         for ent in (_extract_entities(msg.get("user", "")), _extract_entities(msg.get("agent", ""))):
             for k, v in ent.items():
-                if (k, str(v)) not in seen:
-                    seen.add((k, str(v)))
-                    facts.append(f"{k}={v}")
-    summary = f"[历史摘要|{len(to_compress)}轮|{'；'.join(facts) if facts else '无关键信息'}]"
+                if v is None:
+                    facts.pop(k, None)
+                    continue
+                if k not in facts:
+                    order.append(k)
+                facts[k] = v
+    summary = f"[历史摘要|{len(to_compress)}轮|{'；'.join(f'{k}={facts[k]}' for k in order if k in facts) if facts else '无关键信息'}]"
     return [{"user": summary, "agent": "", "is_summary": True}] + history[-window_size + 1:]
+
+def _merge_entities(sess, user_id, user_msg, agent_msg, new_entities, agent_entities):
+    """写入记忆：否定值表示删除；每条记忆带 source/时间/轮次/置信度。"""
+    sess.setdefault("entities", {})
+    sess.setdefault("entity_meta", {})
+    sess.setdefault("preferences", {})
+    turn = sess.get("turn", 0) + 1
+    sess["turn"] = turn
+    existing_entities = sess["entities"]
+
+    if agent_entities.get("drink") and agent_entities.get("price"):
+        drink_in_agent = agent_entities["drink"]
+        if drink_in_agent in agent_msg and existing_entities.get("drink") and existing_entities["drink"] not in agent_msg:
+            agent_entities = {}
+
+    agent_added = {}
+    for k, v in agent_entities.items():
+        if v is None or k in new_entities:
+            continue
+        if k in ("drink", "price") and k in existing_entities:
+            continue
+        agent_added[k] = v
+
+    for k, v in new_entities.items():
+        if v is None:
+            existing_entities.pop(k, None)
+            sess["entity_meta"].pop(k, None)
+            if k in ("sugar", "ice"):
+                sess["preferences"].pop(k, None)
+                delete_user_preference(user_id, k)
+            continue
+        if k in ("sugar", "ice"):
+            save_user_preference(user_id, k, v)
+            sess["preferences"][k] = v
+        existing_entities[k] = v
+        sess["entity_meta"][k] = {
+            "value": v,
+            "source": "user",
+            "updated_at": time.time(),
+            "turn": turn,
+            "confidence": 1.0,
+        }
+
+    for k, v in agent_added.items():
+        existing_entities[k] = v
+        sess["entity_meta"][k] = {
+            "value": v,
+            "source": "agent",
+            "updated_at": time.time(),
+            "turn": turn,
+            "confidence": 0.6,
+        }
 
 def save_message(store, session_id, user_msg, agent_msg):
     if isinstance(store, MemoryStore):
         sess = store._get_session(session_id)
         if not sess:
-            sess = {"history": [], "preferences": {}, "entities": {}, "summary": ""}
+            sess = {"history": [], "preferences": {}, "entities": {}, "entity_meta": {}, "turn": 0, "summary": ""}
         sess["history"].append({"user": user_msg, "agent": agent_msg})
         if len(sess["history"]) > store._window_size:
             sess["history"] = _compress_history(sess["history"], store._window_size)
         user_id = get_user_id(session_id)
-        new_entities = _extract_entities(user_msg)
-        agent_entities = _extract_entities(agent_msg)
-        existing_entities = sess.get("entities", {})
-        if agent_entities.get("drink") and agent_entities.get("price"):
-            drink_in_agent = agent_entities["drink"]
-            if drink_in_agent in agent_msg and existing_entities.get("drink") and existing_entities["drink"] not in agent_msg:
-                agent_entities = {}
-        for k, v in agent_entities.items():
-            if k in ("drink", "price") and k in existing_entities:
-                continue
-            if k == "price" and k in new_entities:
-                continue
-            if k == "drink" and k in new_entities:
-                continue
-            if k not in new_entities:
-                new_entities[k] = v
-        for k, v in new_entities.items():
-            if k in ("sugar", "ice"):
-                save_user_preference(user_id, k, v)
-                sess["preferences"][k] = v
-            sess["entities"][k] = v
+        _merge_entities(
+            sess, user_id, user_msg, agent_msg,
+            _extract_entities(user_msg), _extract_entities(agent_msg),
+        )
         store._save_session(session_id, sess)
     else:
         if session_id not in store["sessions"]:
-            store["sessions"][session_id] = {"history": [], "preferences": {}, "entities": {}, "window_size": store["window_size"]}
-        store["sessions"][session_id]["history"].append({"user": user_msg, "agent": agent_msg})
-        window_size = store["sessions"][session_id]["window_size"]
-        if len(store["sessions"][session_id]["history"]) > window_size:
-            store["sessions"][session_id]["history"] = _compress_history(store["sessions"][session_id]["history"], window_size)
+            store["sessions"][session_id] = {"history": [], "preferences": {}, "entities": {}, "entity_meta": {}, "turn": 0, "window_size": store["window_size"]}
+        sess = store["sessions"][session_id]
+        sess["history"].append({"user": user_msg, "agent": agent_msg})
+        window_size = sess["window_size"]
+        if len(sess["history"]) > window_size:
+            sess["history"] = _compress_history(sess["history"], window_size)
         user_id = get_user_id(session_id)
-        new_entities = _extract_entities(user_msg)
-        agent_entities = _extract_entities(agent_msg)
-        existing_entities = store["sessions"][session_id].get("entities", {})
-        if agent_entities.get("drink") and agent_entities.get("price"):
-            drink_in_agent = agent_entities["drink"]
-            if drink_in_agent in agent_msg and existing_entities.get("drink") and existing_entities["drink"] not in agent_msg:
-                agent_entities = {}
-        for k, v in agent_entities.items():
-            if k in ("drink", "price") and k in existing_entities:
-                continue
-            if k == "price" and k in new_entities:
-                continue
-            if k == "drink" and k in new_entities:
-                continue
-            if k not in new_entities:
-                new_entities[k] = v
-        for k, v in new_entities.items():
-            if k in ("sugar", "ice"):
-                save_user_preference(user_id, k, v)
-                store["sessions"][session_id]["preferences"][k] = v
-            store["sessions"][session_id]["entities"][k] = v
+        _merge_entities(
+            sess, user_id, user_msg, agent_msg,
+            _extract_entities(user_msg), _extract_entities(agent_msg),
+        )
 
 def get_context(store, session_id):
     if isinstance(store, MemoryStore):
@@ -1392,7 +1504,7 @@ def get_context(store, session_id):
     user_id = get_user_id(session_id)
     db_prefs = get_user_preferences(user_id)
     prefs = {**db_prefs, **(sess.get("preferences", {}))}
-    entities = sess.get("entities", {})
+    entities = _active_entities(sess)
     parts = []
     if prefs:
         parts.append(f"偏好: {', '.join([f'{k}={v}' for k, v in prefs.items()])}")

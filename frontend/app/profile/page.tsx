@@ -5,7 +5,7 @@ import Link from 'next/link';
 import useSWR from 'swr';
 import Header from '@/components/Header';
 import { fetcher } from '@/lib/swr';
-import { ensureUserToken } from '@/lib/identity';
+import { ensureUserToken, userAuthHeaders } from '@/lib/identity';
 
 interface Preferences {
   sugar?: string;
@@ -52,18 +52,33 @@ const defaultProfile: ProfileData = {
 export default function ProfilePage() {
   // 用户画像由签名身份令牌决定，不再依赖 session_id，避免越权查看他人画像
   const [identityReady, setIdentityReady] = useState(false);
+  const [forgetting, setForgetting] = useState(false);
 
   useEffect(() => {
     ensureUserToken().finally(() => setIdentityReady(true));
   }, []);
 
-  const { data: profile, error, isLoading } = useSWR<ProfileData>(
+  const { data: profile, error, isLoading, mutate } = useSWR<ProfileData>(
     identityReady ? '/api/user/profile' : null,
     fetcher,
     { refreshInterval: 60000, revalidateOnFocus: false }
   );
 
   const displayProfile = profile || defaultProfile;
+
+  const handleForgetPreferences = async () => {
+    if (!window.confirm('确定要清除已记录的偏好和记忆吗？')) return;
+    setForgetting(true);
+    try {
+      await fetch('/api/user/preferences', {
+        method: 'DELETE',
+        headers: userAuthHeaders(),
+      });
+      await mutate();
+    } finally {
+      setForgetting(false);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     if (status.includes('已完成')) return 'bg-green-100 text-green-700';
@@ -97,6 +112,13 @@ export default function ProfilePage() {
             ← 返回聊天
           </Link>
           <h1 className="text-2xl font-bold text-gray-800">我的画像</h1>
+          <button
+            onClick={handleForgetPreferences}
+            disabled={forgetting}
+            className="ml-auto px-3 py-1.5 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+          >
+            {forgetting ? '清除中...' : '忘记我的偏好'}
+          </button>
         </div>
 
         {error && (

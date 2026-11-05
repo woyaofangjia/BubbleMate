@@ -341,6 +341,27 @@ def get_user_preferences(user_id):
     conn.close()
     return json.loads(row["preferences"]) if row else {}
 
+def delete_user_preference(user_id, key):
+    """删除单个偏好，用于否定句（如“不要三分糖”）纠正历史记忆。"""
+    _upsert_user(user_id)
+    conn = _connect()
+    c = conn.cursor()
+    c.execute("SELECT preferences FROM users WHERE user_id = ?", (user_id,))
+    row = c.fetchone()
+    prefs = json.loads(row["preferences"]) if row else {}
+    prefs.pop(key, None)
+    c.execute("UPDATE users SET preferences = ? WHERE user_id = ?", (json.dumps(prefs), user_id))
+    conn.commit()
+    conn.close()
+
+def clear_user_preferences(user_id):
+    """清空长期偏好，作为“忘记我”的入口。"""
+    conn = _connect()
+    c = conn.cursor()
+    c.execute("UPDATE users SET preferences = '{}' WHERE user_id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+
 def save_complaint(user_id, complaint_data):
     _upsert_user(user_id)
     conn = _connect()

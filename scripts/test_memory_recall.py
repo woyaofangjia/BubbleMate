@@ -6,7 +6,13 @@ import argparse
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from backend.bubble_agent import process_message, create_memory_store, clear_response_cache
+from backend.bubble_agent import (
+    process_message,
+    create_memory_store,
+    clear_response_cache,
+    get_user_id,
+    session_store,
+)
 
 def load_scenarios(path):
     with open(path, 'r', encoding='utf-8') as f:
@@ -15,6 +21,9 @@ def load_scenarios(path):
 def run_scenario(scenario, window_size):
     memory_store = create_memory_store(window_size=window_size)
     session_id = f"recall_{window_size}_{scenario['scenario_id']}"
+    # Redis 中的会话会跨进程保留，若不清空，上一轮运行累积的 turn 会让
+    # 短周期实体（如 price）被误判过期，导致测试结果随运行次数漂移
+    session_store.delete_session(session_id, get_user_id(session_id))
     
     results = []
     turns = scenario['turns']

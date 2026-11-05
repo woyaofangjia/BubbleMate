@@ -1,7 +1,7 @@
 {
   "experiment_info": {
     "name": "记忆召回能力测试",
-    "date": "2026-08-03 17:54:52",
+    "date": "2026-11-05 15:44:38",
     "window_sizes": [
       1,
       3,
@@ -23,7 +23,7 @@
           "correct": true,
           "expected_key": "三分糖",
           "response": "【思考】指代消解\n【回复】您之前选择的是三分糖",
-          "time_ms": 61.55753135681152
+          "time_ms": 7828.460931777954
         },
         {
           "scenario_id": 2,
@@ -31,7 +31,7 @@
           "correct": true,
           "expected_key": "去冰",
           "response": "【思考】记忆回复\n【回复】您之前选择的是去冰",
-          "time_ms": 97.46050834655762
+          "time_ms": 164.75367546081543
         },
         {
           "scenario_id": 3,
@@ -39,7 +39,7 @@
           "correct": true,
           "expected_key": "12345",
           "response": "【思考】记忆回复\n【回复】您之前提到的订单号是12345，请确认是否需要查询该订单。",
-          "time_ms": 40.95959663391113
+          "time_ms": 7336.196422576904
         },
         {
           "scenario_id": 4,
@@ -47,7 +47,7 @@
           "correct": true,
           "expected_key": "光谷",
           "response": "【思考】记忆回复\n【回复】您之前提到在光谷，附近门店信息需要实时查询，请确认网络连接。",
-          "time_ms": 41.3517951965332
+          "time_ms": 6243.050098419189
         },
         {
           "scenario_id": 5,
@@ -55,7 +55,7 @@
           "correct": true,
           "expected_key": "幽兰拿铁",
           "response": "【思考】记忆回复\n【回复】您之前喜欢幽兰拿铁，类似风格的饮品还有：芝芝莓莓、杨枝甘露",
-          "time_ms": 52.00314521789551
+          "time_ms": 20049.89457130432
         },
         {
           "scenario_id": 6,
@@ -63,7 +63,7 @@
           "correct": true,
           "expected_key": "太甜",
           "response": "【思考】指代消解\n【回复】您之前投诉的原因是：太甜",
-          "time_ms": 69.27776336669922
+          "time_ms": 220.015287399292
         },
         {
           "scenario_id": 7,
@@ -71,7 +71,7 @@
           "correct": true,
           "expected_key": "18",
           "response": "【思考】指代消解\n【回复】幽兰拿铁的价格是18元",
-          "time_ms": 118.25728416442871
+          "time_ms": 380.97405433654785
         },
         {
           "scenario_id": 8,
@@ -79,7 +79,7 @@
           "correct": true,
           "expected_key": "幽兰拿铁",
           "response": "【思考】指代消解\n【回复】您说的是幽兰拿铁",
-          "time_ms": 24.76048469543457
+          "time_ms": 70.9238052368164
         },
         {
           "scenario_id": "s9",
@@ -87,7 +87,7 @@
           "correct": true,
           "expected_key": "珍珠",
           "response": "【思考】指代消解\n【回复】您之前加的是珍珠",
-          "time_ms": 20.362138748168945
+          "time_ms": 51.26452445983887
         },
         {
           "scenario_id": "s10",
@@ -95,7 +95,7 @@
           "correct": true,
           "expected_key": "热",
           "response": "【思考】记忆回复\n【回复】您之前选择的是热",
-          "time_ms": 21.281003952026367
+          "time_ms": 52.79231071472168
         },
         {
           "scenario_id": "s11",
@@ -103,7 +103,7 @@
           "correct": true,
           "expected_key": "大杯",
           "response": "【思考】指代消解\n【回复】您之前选择的是大杯",
-          "time_ms": 17.380714416503906
+          "time_ms": 36.720991134643555
         }
       ]
     },
@@ -118,7 +118,7 @@
           "correct": true,
           "expected_key": "三分糖",
           "response": "【思考】指代消解\n【回复】您之前选择的是三分糖",
-          "time_ms": 38.99192810058594
+          "time_ms": 96.97079658508301
         },
         {
           "scenario_id": 2,
@@ -126,7 +126,7 @@
           "correct": true,
           "expected_key": "去冰",
           "response": "【思考】记忆回复\n【回复】您之前选择的是去冰",
-          "time_ms": 95.36027908325195
+          "time_ms": 138.17191123962402
         },
         {
           "scenario_id": 3,
@@ -134,7 +134,7 @@
           "correct": true,
           "expected_key": "12345",
           "response": "【思考】记忆回复\n【回复】您之前提到的订单号是12345，请确认是否需要查询该订单。",
-          "time_ms": 25.611162185668945
+          "time_ms": 106.90951347351074
         },
         {
           "scenario_id": 4,
@@ -142,7 +142,7 @@
           "correct": true,
           "expected_key": "光谷",
           "response": "【思考】记忆回复\n【回复】您之前提到在光谷，附近门店信息需要实时查询，请确认网络连接。",
-          "time_ms": 30.057907104492188
+          "time_ms": 101.2575626373291
         },
         {
           "scenario_id": 5,
@@ -150,7 +150,7 @@
           "correct": true,
           "expected_key": "幽兰拿铁",
           "response": "【思考】记忆回复\n【回复】您之前喜欢幽兰拿铁，类似风格的饮品还有：芝芝莓莓、杨枝甘露",
-          "time_ms": 38.73109817504883
+          "time_ms": 125.69642066955566
         },
         {
           "scenario_id": 6,
@@ -158,7 +158,7 @@
           "correct": true,
           "expected_key": "太甜",
           "response": "【思考】指代消解\n【回复】您之前投诉的原因是：太甜",
-          "time_ms": 49.09825325012207
+          "time_ms": 151.4887809753418
         },
         {
           "scenario_id": 7,
@@ -166,7 +166,7 @@
           "correct": true,
           "expected_key": "18",
           "response": "【思考】指代消解\n【回复】幽兰拿铁的价格是18元",
-          "time_ms": 24.103164672851562
+          "time_ms": 111.2210750579834
         },
         {
           "scenario_id": 8,
@@ -174,7 +174,7 @@
           "correct": true,
           "expected_key": "幽兰拿铁",
           "response": "【思考】指代消解\n【回复】您说的是幽兰拿铁",
-          "time_ms": 20.860671997070312
+          "time_ms": 65.8118724822998
         },
         {
           "scenario_id": "s9",
@@ -182,7 +182,7 @@
           "correct": true,
           "expected_key": "珍珠",
           "response": "【思考】指代消解\n【回复】您之前加的是珍珠",
-          "time_ms": 12.269258499145508
+          "time_ms": 48.749446868896484
         },
         {
           "scenario_id": "s10",
@@ -190,7 +190,7 @@
           "correct": true,
           "expected_key": "热",
           "response": "【思考】记忆回复\n【回复】您之前选择的是热",
-          "time_ms": 19.222021102905273
+          "time_ms": 49.39556121826172
         },
         {
           "scenario_id": "s11",
@@ -198,7 +198,7 @@
           "correct": true,
           "expected_key": "大杯",
           "response": "【思考】指代消解\n【回复】您之前选择的是大杯",
-          "time_ms": 16.514301300048828
+          "time_ms": 34.398794174194336
         }
       ]
     },
@@ -213,7 +213,7 @@
           "correct": true,
           "expected_key": "三分糖",
           "response": "【思考】指代消解\n【回复】您之前选择的是三分糖",
-          "time_ms": 39.30330276489258
+          "time_ms": 98.60682487487793
         },
         {
           "scenario_id": 2,
@@ -221,7 +221,7 @@
           "correct": true,
           "expected_key": "去冰",
           "response": "【思考】记忆回复\n【回复】您之前选择的是去冰",
-          "time_ms": 90.19875526428223
+          "time_ms": 150.8481502532959
         },
         {
           "scenario_id": 3,
@@ -229,7 +229,7 @@
           "correct": true,
           "expected_key": "12345",
           "response": "【思考】记忆回复\n【回复】您之前提到的订单号是12345，请确认是否需要查询该订单。",
-          "time_ms": 85.96968650817871
+          "time_ms": 96.80819511413574
         },
         {
           "scenario_id": 4,
@@ -237,7 +237,7 @@
           "correct": true,
           "expected_key": "光谷",
           "response": "【思考】记忆回复\n【回复】您之前提到在光谷，附近门店信息需要实时查询，请确认网络连接。",
-          "time_ms": 41.46623611450195
+          "time_ms": 99.71165657043457
         },
         {
           "scenario_id": 5,
@@ -245,7 +245,7 @@
           "correct": true,
           "expected_key": "幽兰拿铁",
           "response": "【思考】记忆回复\n【回复】您之前喜欢幽兰拿铁，类似风格的饮品还有：芝芝莓莓、杨枝甘露",
-          "time_ms": 41.04137420654297
+          "time_ms": 131.74700736999512
         },
         {
           "scenario_id": 6,
@@ -253,7 +253,7 @@
           "correct": true,
           "expected_key": "太甜",
           "response": "【思考】指代消解\n【回复】您之前投诉的原因是：太甜",
-          "time_ms": 43.10250282287598
+          "time_ms": 175.68111419677734
         },
         {
           "scenario_id": 7,
@@ -261,7 +261,7 @@
           "correct": true,
           "expected_key": "18",
           "response": "【思考】指代消解\n【回复】幽兰拿铁的价格是18元",
-          "time_ms": 23.740530014038086
+          "time_ms": 114.03727531433105
         },
         {
           "scenario_id": 8,
@@ -269,7 +269,7 @@
           "correct": true,
           "expected_key": "幽兰拿铁",
           "response": "【思考】指代消解\n【回复】您说的是幽兰拿铁",
-          "time_ms": 20.19500732421875
+          "time_ms": 64.69583511352539
         },
         {
           "scenario_id": "s9",
@@ -277,7 +277,7 @@
           "correct": true,
           "expected_key": "珍珠",
           "response": "【思考】指代消解\n【回复】您之前加的是珍珠",
-          "time_ms": 13.988256454467773
+          "time_ms": 51.12910270690918
         },
         {
           "scenario_id": "s10",
@@ -285,7 +285,7 @@
           "correct": true,
           "expected_key": "热",
           "response": "【思考】记忆回复\n【回复】您之前选择的是热",
-          "time_ms": 22.891759872436523
+          "time_ms": 52.51336097717285
         },
         {
           "scenario_id": "s11",
@@ -293,7 +293,7 @@
           "correct": true,
           "expected_key": "大杯",
           "response": "【思考】指代消解\n【回复】您之前选择的是大杯",
-          "time_ms": 16.292333602905273
+          "time_ms": 36.74960136413574
         }
       ]
     },
@@ -308,7 +308,7 @@
           "correct": true,
           "expected_key": "三分糖",
           "response": "【思考】指代消解\n【回复】您之前选择的是三分糖",
-          "time_ms": 38.2237434387207
+          "time_ms": 99.94649887084961
         },
         {
           "scenario_id": 2,
@@ -316,7 +316,7 @@
           "correct": true,
           "expected_key": "去冰",
           "response": "【思考】记忆回复\n【回复】您之前选择的是去冰",
-          "time_ms": 102.4942398071289
+          "time_ms": 144.5169448852539
         },
         {
           "scenario_id": 3,
@@ -324,7 +324,7 @@
           "correct": true,
           "expected_key": "12345",
           "response": "【思考】记忆回复\n【回复】您之前提到的订单号是12345，请确认是否需要查询该订单。",
-          "time_ms": 51.1627197265625
+          "time_ms": 98.47092628479004
         },
         {
           "scenario_id": 4,
@@ -332,7 +332,7 @@
           "correct": true,
           "expected_key": "光谷",
           "response": "【思考】记忆回复\n【回复】您之前提到在光谷，附近门店信息需要实时查询，请确认网络连接。",
-          "time_ms": 47.6841926574707
+          "time_ms": 106.64963722229004
         },
         {
           "scenario_id": 5,
@@ -340,7 +340,7 @@
           "correct": true,
           "expected_key": "幽兰拿铁",
           "response": "【思考】记忆回复\n【回复】您之前喜欢幽兰拿铁，类似风格的饮品还有：芝芝莓莓、杨枝甘露",
-          "time_ms": 62.82782554626465
+          "time_ms": 131.89387321472168
         },
         {
           "scenario_id": 6,
@@ -348,7 +348,7 @@
           "correct": true,
           "expected_key": "太甜",
           "response": "【思考】指代消解\n【回复】您之前投诉的原因是：太甜",
-          "time_ms": 51.519155502319336
+          "time_ms": 154.55079078674316
         },
         {
           "scenario_id": 7,
@@ -356,7 +356,7 @@
           "correct": true,
           "expected_key": "18",
           "response": "【思考】指代消解\n【回复】幽兰拿铁的价格是18元",
-          "time_ms": 25.049448013305664
+          "time_ms": 121.00744247436523
         },
         {
           "scenario_id": 8,
@@ -364,7 +364,7 @@
           "correct": true,
           "expected_key": "幽兰拿铁",
           "response": "【思考】指代消解\n【回复】您说的是幽兰拿铁",
-          "time_ms": 19.369840621948242
+          "time_ms": 64.15510177612305
         },
         {
           "scenario_id": "s9",
@@ -372,7 +372,7 @@
           "correct": true,
           "expected_key": "珍珠",
           "response": "【思考】指代消解\n【回复】您之前加的是珍珠",
-          "time_ms": 13.04936408996582
+          "time_ms": 48.609018325805664
         },
         {
           "scenario_id": "s10",
@@ -380,7 +380,7 @@
           "correct": true,
           "expected_key": "热",
           "response": "【思考】记忆回复\n【回复】您之前选择的是热",
-          "time_ms": 19.430875778198242
+          "time_ms": 49.86119270324707
         },
         {
           "scenario_id": "s11",
@@ -388,7 +388,7 @@
           "correct": true,
           "expected_key": "大杯",
           "response": "【思考】指代消解\n【回复】您之前选择的是大杯",
-          "time_ms": 21.06642723083496
+          "time_ms": 32.798051834106445
         }
       ]
     },
@@ -403,7 +403,7 @@
           "correct": true,
           "expected_key": "三分糖",
           "response": "【思考】指代消解\n【回复】您之前选择的是三分糖",
-          "time_ms": 76.65729522705078
+          "time_ms": 97.8999137878418
         },
         {
           "scenario_id": 2,
@@ -411,7 +411,7 @@
           "correct": true,
           "expected_key": "去冰",
           "response": "【思考】记忆回复\n【回复】您之前选择的是去冰",
-          "time_ms": 120.65982818603516
+          "time_ms": 139.6794319152832
         },
         {
           "scenario_id": 3,
@@ -419,7 +419,7 @@
           "correct": true,
           "expected_key": "12345",
           "response": "【思考】记忆回复\n【回复】您之前提到的订单号是12345，请确认是否需要查询该订单。",
-          "time_ms": 47.88041114807129
+          "time_ms": 91.43543243408203
         },
         {
           "scenario_id": 4,
@@ -427,7 +427,7 @@
           "correct": true,
           "expected_key": "光谷",
           "response": "【思考】记忆回复\n【回复】您之前提到在光谷，附近门店信息需要实时查询，请确认网络连接。",
-          "time_ms": 67.10052490234375
+          "time_ms": 95.34263610839844
         },
         {
           "scenario_id": 5,
@@ -435,7 +435,7 @@
           "correct": true,
           "expected_key": "幽兰拿铁",
           "response": "【思考】记忆回复\n【回复】您之前喜欢幽兰拿铁，类似风格的饮品还有：芝芝莓莓、杨枝甘露",
-          "time_ms": 73.03452491760254
+          "time_ms": 125.24700164794922
         },
         {
           "scenario_id": 6,
@@ -443,7 +443,7 @@
           "correct": true,
           "expected_key": "太甜",
           "response": "【思考】指代消解\n【回复】您之前投诉的原因是：太甜",
-          "time_ms": 49.5913028717041
+          "time_ms": 143.84818077087402
         },
         {
           "scenario_id": 7,
@@ -451,7 +451,7 @@
           "correct": true,
           "expected_key": "18",
           "response": "【思考】指代消解\n【回复】幽兰拿铁的价格是18元",
-          "time_ms": 24.60312843322754
+          "time_ms": 100.6615161895752
         },
         {
           "scenario_id": 8,
@@ -459,7 +459,7 @@
           "correct": true,
           "expected_key": "幽兰拿铁",
           "response": "【思考】指代消解\n【回复】您说的是幽兰拿铁",
-          "time_ms": 19.59681510925293
+          "time_ms": 61.849117279052734
         },
         {
           "scenario_id": "s9",
@@ -467,7 +467,7 @@
           "correct": true,
           "expected_key": "珍珠",
           "response": "【思考】指代消解\n【回复】您之前加的是珍珠",
-          "time_ms": 13.093709945678711
+          "time_ms": 49.62801933288574
         },
         {
           "scenario_id": "s10",
@@ -475,7 +475,7 @@
           "correct": true,
           "expected_key": "热",
           "response": "【思考】记忆回复\n【回复】您之前选择的是热",
-          "time_ms": 21.78049087524414
+          "time_ms": 50.22263526916504
         },
         {
           "scenario_id": "s11",
@@ -483,7 +483,7 @@
           "correct": true,
           "expected_key": "大杯",
           "response": "【思考】指代消解\n【回复】您之前选择的是大杯",
-          "time_ms": 16.857147216796875
+          "time_ms": 35.47549247741699
         }
       ]
     }
