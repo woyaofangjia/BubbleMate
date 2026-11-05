@@ -1208,6 +1208,11 @@ HYPOTHETICAL_MARKERS = re.compile(r'(如果|要是|假如|假设|万一|我朋�
 # 否定词：出现在槽位值前的窗口内即视为“拒绝/删除”而非“选择”
 NEGATION_TOKENS = ("不要", "不用", "不加", "不放", "不想要", "不需要", "别加", "别放", "去掉", "删除", "取消", "无需", "戒掉", "别")
 
+# 画像层字段：代表“用户是什么”，需要重复陈述或明确确认才更新
+PROFILE_LAYER_KEYS = ("sugar", "ice")
+PROFILE_CONFIRM_THRESHOLD = 2
+PROFILE_CONFIRM_MARKERS = ("确认", "以后都", "以后就", "记住", "一直", "每次", "固定")
+
 # 短周期实体按轮次过期，避免旧订单号/旧位置被反复引用；sugar/ice 属长期偏好，不设 TTL
 ENTITY_TTL_TURNS = {
     "order_id": 10,
@@ -1415,6 +1420,87 @@ def _compress_history(history, window_size):
     summary = f"[历史摘要|{len(to_compress)}轮|{'；'.join(f'{k}={facts[k]}' for k in order if k in facts) if facts else '无关键信息'}]"
     return [{"user": summary, "agent": "", "is_summary": True}] + history[-window_size + 1:]
 
+def _is_profile_confirmation(text):
+    return any(marker in text for marker in PROFILE_CONFIRM_MARKERS)
+
+def _merge_profile_fact(sess, user_id, key, value, user_msg, turn):
+    """画像层合并：区分“用户说了什么”与“用户是什么”。
+
+    本轮表达始终写入 entities（供当轮回复使用）；但长期画像（preferences/DB）
+    只有在重复陈述或明确确认后才更新。与画像矛盾的首次陈述不改结构，
+    只记录冲突并降低该字段置信度。
+    """
+    prefs = sess.setdefault("preferences", {})
+    if not prefs:
+        prefs.update(get_user_preferences(user_id) or {})
+    profile_value = prefs.get(key)
+    meta = sess["entity_meta"].get(key, {})
+
+    if profile_value is None:
+        prefs[key] = value
+        save_user_preference(user_id, key, value)
+        sess["entity_meta"][key] = {
+            "value": value,
+            "source": "user",
+            "updated_at": time.time(),
+            "turn": turn,
+            "confidence": 1.0,
+            "profile_value": value,
+        }
+        return
+
+    if value == profile_value:
+        meta.update({
+            "value": value,
+            "source": "user",
+            "updated_at": time.time(),
+            "turn": turn,
+            "confidence": 1.0,
+            "profile_value": value,
+        })
+        meta.pop("pending_value", None)
+        meta.pop("pending_count", None)
+        sess["entity_meta"][key] = meta
+        return
+
+    pending_value = meta.get("pending_value")
+    pending_count = meta.get("pending_count", 0) + 1 if pending_value == value else 1
+    conflicts = list(meta.get("conflicts", []))
+    if not conflicts or conflicts[-1].get("value") != value:
+        conflicts.append({
+            "value": value,
+            "turn": turn,
+            "at": time.time(),
+            "source": "user",
+            "utterance": user_msg,
+        })
+
+    confirmed = pending_count >= PROFILE_CONFIRM_THRESHOLD or _is_profile_confirmation(user_msg)
+    new_meta = {
+        **meta,
+        "value": profile_value,
+        "source": "user",
+        "turn": meta.get("turn", turn),
+        "confidence": max(0.4, round(meta.get("confidence", 1.0) - 0.3, 2)),
+        "profile_value": profile_value,
+        "pending_value": value,
+        "pending_count": pending_count,
+        "conflicts": conflicts[-5:],
+    }
+    if confirmed:
+        prefs[key] = value
+        save_user_preference(user_id, key, value)
+        new_meta.update({
+            "value": value,
+            "updated_at": time.time(),
+            "turn": turn,
+            "confidence": 1.0,
+            "profile_value": value,
+        })
+        new_meta.pop("pending_value", None)
+        new_meta.pop("pending_count", None)
+    sess["entity_meta"][key] = new_meta
+
 def _merge_entities(sess, user_id, user_msg, agent_msg, new_entities, agent_entities):
     """写入记忆：否定值表示删除；每条记忆带 source/时间/轮次/置信度。"""
     sess.setdefault("entities", {})
@@ -1433,6 +1519,9 @@ def _merge_entities(sess, user_id, user_msg, agent_msg, new_entities, agent_enti
     for k, v in agent_entities.items():
         if v is None or k in new_entities:
             continue
+        if k in PROFILE_LAYER_KEYS:
+            # 画像层只认用户陈述，Agent 转述不参与
+            continue
         if k in ("drink", "price") and k in existing_entities:
             continue
         agent_added[k] = v
@@ -1441,13 +1530,14 @@ def _merge_entities(sess, user_id, user_msg, agent_msg, new_entities, agent_enti
         if v is None:
             existing_entities.pop(k, None)
             sess["entity_meta"].pop(k, None)
-            if k in ("sugar", "ice"):
+            if k in PROFILE_LAYER_KEYS:
                 sess["preferences"].pop(k, None)
                 delete_user_preference(user_id, k)
             continue
-        if k in ("sugar", "ice"):
-            save_user_preference(user_id, k, v)
-            sess["preferences"][k] = v
+        if k in PROFILE_LAYER_KEYS:
+            _merge_profile_fact(sess, user_id, k, v, user_msg, turn)
+            existing_entities[k] = v
+            continue
         existing_entities[k] = v
         sess["entity_meta"][k] = {
             "value": v,
@@ -1507,9 +1597,9 @@ def get_context(store, session_id):
     entities = _active_entities(sess)
     parts = []
     if prefs:
-        parts.append(f"偏好: {', '.join([f'{k}={v}' for k, v in prefs.items()])}")
+        parts.append(f"长期画像: {', '.join([f'{k}={v}' for k, v in prefs.items()])}")
     if entities:
-        parts.append(f"记忆实体: {', '.join([f'{k}={v}' for k, v in entities.items()])}")
+        parts.append(f"本轮/近期实体: {', '.join([f'{k}={v}' for k, v in entities.items()])}")
     for msg in sess["history"]:
         parts.append(f"用户: {msg['user']}")
         parts.append(f"客服: {msg['agent']}")

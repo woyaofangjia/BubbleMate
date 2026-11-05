@@ -134,6 +134,41 @@ sess = store._get_session(SESSION)
 check("遗忘后偏好清空", get_user_preferences(get_user_id(SESSION)) == {})
 check("遗忘后实体清空", sess.get("entities") == {} and sess.get("preferences") == {})
 
+# 9. 画像层冲突保护：“用户说了什么” ≠ “用户是什么”
+conflict_session = SESSION + "_conflict"
+save_message(store, conflict_session, "我要三分糖", "")
+check("画像基线写入", get_user_preferences(get_user_id(conflict_session)).get("sugar") == "三分糖")
+
+save_message(store, conflict_session, "我开玩笑的，我要五分糖", "")
+prefs = get_user_preferences(get_user_id(conflict_session))
+_, entities = get_context(store, conflict_session)
+meta = store._get_session(conflict_session)["entity_meta"]["sugar"]
+check("单次矛盾不改结构化画像", prefs.get("sugar") == "三分糖", str(prefs))
+check("当轮尊重用户表达", entities.get("sugar") == "五分糖", str(entities))
+check("冲突已记录", any(c.get("value") == "五分糖" for c in meta.get("conflicts", [])), str(meta))
+check("冲突后置信度下降", meta.get("confidence", 1.0) < 1.0, str(meta))
+check(
+    "冲突值进入待确认状态",
+    meta.get("pending_value") == "五分糖" and meta.get("pending_count") == 1,
+    str(meta),
+)
+
+save_message(store, conflict_session, "确认，以后都要五分糖", "")
+check("明确确认后画像更新", get_user_preferences(get_user_id(conflict_session)).get("sugar") == "五分糖")
+meta = store._get_session(conflict_session)["entity_meta"]["sugar"]
+check(
+    "确认后置信度恢复",
+    meta.get("confidence") == 1.0 and "pending_value" not in meta,
+    str(meta),
+)
+
+repeat_session = SESSION + "_repeat"
+save_message(store, repeat_session, "我要三分糖", "")
+save_message(store, repeat_session, "五分糖", "")
+check("首次矛盾陈述不改画像", get_user_preferences(get_user_id(repeat_session)).get("sugar") == "三分糖")
+save_message(store, repeat_session, "我还是想要五分糖", "")
+check("重复陈述达阈值后更新画像", get_user_preferences(get_user_id(repeat_session)).get("sugar") == "五分糖")
+
 clean_test_rows()
 failed = [name for name, ok, _ in results if not ok]
 print(f"\nSUMMARY: {len(results) - len(failed)} passed, {len(failed)} failed")
