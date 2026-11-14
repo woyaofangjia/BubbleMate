@@ -6,6 +6,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from backend.core.zhipu_client import call_llm, is_available
+from backend.core.prompt_loader import load_prompt
 
 unseen_queries = [
     "我想点一杯少糖去冰加珍珠的奶茶",
@@ -40,20 +41,7 @@ unseen_queries = [
     "有什么适合夏天喝的",
 ]
 
-system_prompt = """你是一个奶茶店智能客服助手。请回答用户的问题，提供友好、专业的服务。
-
-可用工具：
-- query_menu: 查询菜单
-- query_stores: 查询门店
-- query_order: 查询订单
-- query_price: 查询价格
-- query_promotion: 查询优惠活动
-- query_delivery: 查询配送信息
-- query_customize: 查询定制选项
-- place_order: 下单
-- log_complaint: 记录投诉
-
-请根据用户的问题，直接提供回答或调用相应工具。"""
+system_prompt = load_prompt("pure_llm_baseline", "v1")
 
 if not is_available():
     print("LLM客户端不可用，请检查API Key配置")

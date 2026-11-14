@@ -55,9 +55,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # 安装前端生产依赖
 RUN cd frontend && npm ci --only=production
 
-# 复制数据和脚本
+# 复制数据、脚本和版本化prompt
 COPY data/ ./data/
 COPY scripts/ ./scripts/
+COPY prompts/ ./prompts/
 COPY docs/ ./docs/
 COPY README.md .
 

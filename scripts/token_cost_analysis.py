@@ -5,6 +5,7 @@ import time
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from backend.bubble_agent import recognize_intent, INTENT_KEYWORDS
+from backend.core.prompt_loader import render_prompt
 
 def count_tokens(text):
     import re
@@ -57,7 +58,7 @@ def run_pure_llm_eval(dataset_path):
         if not text or not expected:
             continue
         
-        prompt = f"判断用户意图：'{text}'\n可选：{', '.join(INTENT_KEYWORDS.keys())}\n只返回意图名称，不要其他内容。"
+        prompt = render_prompt("intent_classify", os.getenv("PROMPT_VERSION", "v1"), text=text, intent_list=", ".join(INTENT_KEYWORDS.keys()))
         result = call_llm_with_token_count([{"role": "user", "content": prompt}])
         
         if result["success"]:
@@ -117,7 +118,7 @@ def run_bubblemate_eval(dataset_path):
             rule_hits += 1
         else:
             llm_calls += 1
-            prompt = f"判断用户意图：'{text}'\n可选：{', '.join(INTENT_KEYWORDS.keys())}\n只返回意图名称，不要其他内容。"
+            prompt = render_prompt("intent_classify", os.getenv("PROMPT_VERSION", "v1"), text=text, intent_list=", ".join(INTENT_KEYWORDS.keys()))
             llm_result = call_llm_with_token_count([{"role": "user", "content": prompt}])
             if llm_result["success"]:
                 total_prompt_tokens += llm_result["prompt_tokens"]

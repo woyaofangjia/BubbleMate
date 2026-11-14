@@ -1,0 +1,5 @@
+version: v1
+author: BubbleMate maintainers
+date: 2026-11-14
+model: glm-4-9b
+change_reason: 等价迁移现有意图分类 prompt，建立可回滚基线

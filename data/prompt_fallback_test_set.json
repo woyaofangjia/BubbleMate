@@ -1,0 +1,25 @@
+{
+  "dataset_name": "BubbleMate_Prompt_Fallback_Test_Set",
+  "version": "1.0",
+  "description": "刻意绕开高置信度规则的意图兜底样本，用于验证prompt真实触发与分类效果",
+  "samples": [
+    {"text": "想了解下你们目前供应哪些选择", "intent": "query_menu"},
+    {"text": "第一次光顾，比较受欢迎的口味是什么", "intent": "query_recommend"},
+    {"text": "能否告诉我打烊时间", "intent": "query_hours"},
+    {"text": "我想知道此前那次消费包含哪些内容", "intent": "query_history"},
+    {"text": "麻烦看下我这笔消费目前到哪一步了", "intent": "query_order"},
+    {"text": "有学生专属福利么", "intent": "query_promotion"},
+    {"text": "常客计划包含哪些福利", "intent": "query_member"},
+    {"text": "需要一张消费凭证用于报销", "intent": "query_invoice"},
+    {"text": "能否依照我的偏好改动做法", "intent": "query_customize"},
+    {"text": "这杯喝起来跟水一样寡淡", "intent": "complaint_taste"},
+    {"text": "实际拿到手的容量与页面标注明显不一致", "intent": "complaint_quantity"},
+    {"text": "过了一个钟头，东西还在骑手那里", "intent": "complaint_delivery"},
+    {"text": "工作人员一直摆脸色，沟通很不舒服", "intent": "complaint_service"},
+    {"text": "这杯东西的定价和品质完全不匹配", "intent": "complaint_price"},
+    {"text": "希望把这笔费用原路返还", "intent": "complaint_refund"},
+    {"text": "你们这体验简直让人大开眼界", "intent": "complaint_sarcasm"},
+    {"text": "杯子里的东西全洒在袋子里了", "intent": "complaint_delivery"},
+    {"text": "嗯，我也不知道该怎么描述", "intent": "unclear"}
+  ]
+}

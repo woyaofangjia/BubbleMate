@@ -1,0 +1,91 @@
+{
+  "timestamp": "2026-11-14 18:59:52",
+  "provider": "zhipu",
+  "model": "glm-4-flash",
+  "prompt_name": "intent_classify",
+  "prompt_version": "v1",
+  "token_and_cost_note": "Token为字符估算，成本按每千Token 0.002元估算",
+  "results": {
+    "test_set_200": {
+      "sample_count": 200,
+      "prompt": {
+        "total": 200,
+        "correct": 136,
+        "llm_calls": 200,
+        "llm_failures": 0,
+        "errors": [],
+        "accuracy": 68.0,
+        "avg_latency_ms": 1155.67,
+        "p95_latency_ms": 2799.24,
+        "estimated_total_tokens": 23657,
+        "estimated_cost": 0.047314
+      },
+      "hybrid": {
+        "total": 200,
+        "correct": 172,
+        "llm_calls": 9,
+        "llm_failures": 0,
+        "errors": [],
+        "accuracy": 86.0,
+        "avg_latency_ms": 47.91,
+        "p95_latency_ms": 1.37,
+        "estimated_total_tokens": 1064,
+        "estimated_cost": 0.002128
+      }
+    },
+    "heldout_30": {
+      "sample_count": 30,
+      "prompt": {
+        "total": 30,
+        "correct": 22,
+        "llm_calls": 30,
+        "llm_failures": 0,
+        "errors": [],
+        "accuracy": 73.33,
+        "avg_latency_ms": 1360.15,
+        "p95_latency_ms": 5891.35,
+        "estimated_total_tokens": 3623,
+        "estimated_cost": 0.007246
+      },
+      "hybrid": {
+        "total": 30,
+        "correct": 28,
+        "llm_calls": 2,
+        "llm_failures": 0,
+        "errors": [],
+        "accuracy": 93.33,
+        "avg_latency_ms": 62.05,
+        "p95_latency_ms": 831.24,
+        "estimated_total_tokens": 245,
+        "estimated_cost": 0.00049
+      }
+    },
+    "fallback_18": {
+      "sample_count": 18,
+      "prompt": {
+        "total": 18,
+        "correct": 16,
+        "llm_calls": 18,
+        "llm_failures": 0,
+        "errors": [],
+        "accuracy": 88.89,
+        "avg_latency_ms": 832.63,
+        "p95_latency_ms": 2096.61,
+        "estimated_total_tokens": 2234,
+        "estimated_cost": 0.004468
+      },
+      "hybrid": {
+        "total": 18,
+        "correct": 16,
+        "llm_calls": 18,
+        "llm_failures": 0,
+        "errors": [],
+        "accuracy": 88.89,
+        "avg_latency_ms": 1060.35,
+        "p95_latency_ms": 3306.94,
+        "estimated_total_tokens": 2234,
+        "estimated_cost": 0.004468
+      }
+    }
+  }
+}

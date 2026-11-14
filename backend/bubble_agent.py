@@ -22,8 +22,10 @@ except ImportError:
 
 try:
     from .core.cache import cache
+    from .core.prompt_loader import render_prompt
 except ImportError:
     from core.cache import cache
+    from core.prompt_loader import render_prompt
 
 try:
     from .core import zhipu_client
@@ -643,11 +645,21 @@ def _composite_match(text):
             return {"name": "composite", "sub_intents": intent_names}
     return None
 
+INTENT_PROMPT_VERSION = os.getenv("PROMPT_VERSION", "v1")
+
+def _build_intent_prompt(text):
+    return render_prompt(
+        "intent_classify",
+        INTENT_PROMPT_VERSION,
+        text=text,
+        intent_list=", ".join(INTENT_KEYWORDS.keys())
+    )
+
 def _get_llm_result(text):
     try:
         if not zhipu_client or not zhipu_client.is_available():
             return None
-        prompt = f"判断用户意图：'{text}'\n可选：{', '.join(INTENT_KEYWORDS.keys())}\n只返回意图名称，不要其他内容。"
+        prompt = _build_intent_prompt(text)
         resp = zhipu_client.call_llm([{"role": "user", "content": prompt}], max_tokens=20, temperature=0.1)
         intent_name = resp.strip().strip("'\"")
         if intent_name in CATEGORY_MAP:
@@ -660,7 +672,7 @@ async def _get_llm_result_async(text):
     try:
         if not zhipu_client or not zhipu_client.is_available():
             return None
-        prompt = f"判断用户意图：'{text}'\n可选：{', '.join(INTENT_KEYWORDS.keys())}\n只返回意图名称，不要其他内容。"
+        prompt = _build_intent_prompt(text)
         resp = await zhipu_client.call_llm_async([{"role": "user", "content": prompt}], max_tokens=20, temperature=0.1)
         intent_name = resp.strip().strip("'\"")
         if intent_name in CATEGORY_MAP:
