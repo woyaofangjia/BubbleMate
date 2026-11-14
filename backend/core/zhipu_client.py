@@ -14,6 +14,7 @@ api_key = os.getenv("ZHIPUAI_API_KEY")
 client = None
 ollama_client = None
 aiohttp_session = None
+_llm_unavailable_reason = None
 
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "zhipu")
 DEFAULT_MODEL = os.getenv("LLM_MODEL", "glm-4-9b")
@@ -28,13 +29,16 @@ try:
         if api_key:
             client = ZhipuAI(api_key=api_key)
         else:
-            print("警告: ZHIPUAI_API_KEY 未设置，LLM功能不可用")
+            _llm_unavailable_reason = "ZHIPUAI_API_KEY 未设置"
+            print(f"警告: {_llm_unavailable_reason}，LLM功能不可用")
     elif LLM_PROVIDER == "ollama":
         import requests
         ollama_client = requests.Session()
         ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 except ImportError as e:
-    print(f"警告: 依赖库未安装，LLM功能不可用: {e}")
+    missing = str(e).split("'")[1] if "'" in str(e) else str(e)
+    _llm_unavailable_reason = f"依赖库未安装: {missing}（请执行 pip install {missing}）"
+    print(f"警告: {_llm_unavailable_reason}，LLM功能不可用")
 
 async def _get_aiohttp_session():
     global aiohttp_session
@@ -209,6 +213,17 @@ def is_available():
         except:
             return False
     return False
+
+
+def get_llm_unavailable_reason():
+    """返回 LLM 不可用的具体原因，用于区分缺依赖、缺密钥和不支持的提供商。"""
+    if _llm_unavailable_reason:
+        return _llm_unavailable_reason
+    if LLM_PROVIDER == "zhipu":
+        return "" if client is not None else "LLM客户端未初始化"
+    if LLM_PROVIDER == "ollama":
+        return "" if ollama_client else "Ollama客户端未初始化"
+    return f"不支持的 LLM_PROVIDER={LLM_PROVIDER}"
 
 
 def embed_text(text, model="embedding-3"):

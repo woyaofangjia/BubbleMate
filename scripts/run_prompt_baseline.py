@@ -12,7 +12,7 @@ sys.path.insert(0, str(ROOT))
 
 from backend import bubble_agent
 from backend.core.prompt_loader import render_prompt
-from backend.core.zhipu_client import DEFAULT_MODEL, LLM_PROVIDER, call_llm, is_available
+from backend.core.zhipu_client import DEFAULT_MODEL, LLM_PROVIDER, call_llm, is_available, get_llm_unavailable_reason
 from scripts.token_cost_analysis import count_tokens
 
 DATASETS = {
@@ -113,7 +113,7 @@ def main():
     parser.add_argument("--output", help="自定义报告路径")
     args = parser.parse_args()
     if not is_available():
-        raise SystemExit("LLM客户端不可用，请检查LLM_PROVIDER、LLM_MODEL和API Key")
+        raise SystemExit(f"LLM客户端不可用: {get_llm_unavailable_reason()}；请检查 LLM_PROVIDER/LLM_MODEL/API Key 和依赖安装")
 
     version = os.getenv("PROMPT_VERSION", "v1")
     results = {}

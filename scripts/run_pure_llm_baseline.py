@@ -5,7 +5,7 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from backend.core.zhipu_client import call_llm, is_available
+from backend.core.zhipu_client import call_llm, is_available, get_llm_unavailable_reason
 from backend.core.prompt_loader import load_prompt
 
 unseen_queries = [
@@ -44,7 +44,7 @@ unseen_queries = [
 system_prompt = load_prompt("pure_llm_baseline", "v1")
 
 if not is_available():
-    print("LLM客户端不可用，请检查API Key配置")
+    print(f"LLM客户端不可用: {get_llm_unavailable_reason()}")
     sys.exit(1)
 
 results = {
