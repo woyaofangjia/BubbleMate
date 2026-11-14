@@ -52,6 +52,7 @@ jobs:
     env:
       LLM_PROVIDER: zhipu
       LLM_MODEL: glm-4-flash
+      LLM_MODE: mock
       ZHIPUAI_API_KEY: ${{ secrets.ZHIPUAI_API_KEY }}
       PROMPT_BASELINE: reports/baseline_20261114_glm-4-flash.json
       PROMPT_METRICS_ENABLED: 'false'

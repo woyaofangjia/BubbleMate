@@ -22,6 +22,14 @@ DATASETS = {
 }
 PRICE_PER_1K_TOKENS = 0.002
 
+MOCK_MODE = os.getenv("LLM_MODE", "real").strip().lower() == "mock"
+# mock 模式返回一个固定的合法意图标签，只验证 prompt 加载和链路能跑完，不代表真实准确率。
+MOCK_INTENT = next(iter(bubble_agent.INTENT_KEYWORDS), "unknown")
+
+
+def mock_llm_response(messages):
+    return MOCK_INTENT
+
 
 def load_samples(path, max_samples=None):
     data = json.loads(path.read_text(encoding="utf-8"))
@@ -59,8 +67,11 @@ def evaluate_prompt(samples, version):
         start = time.perf_counter()
         response = ""
         try:
-            response = call_llm([{"role": "user", "content": prompt}], model=DEFAULT_MODEL,
-                                max_tokens=20, temperature=0.1)
+            if MOCK_MODE:
+                response = mock_llm_response([{"role": "user", "content": prompt}])
+            else:
+                response = call_llm([{"role": "user", "content": prompt}], model=DEFAULT_MODEL,
+                                    max_tokens=20, temperature=0.1)
             predicted = response.strip().strip("'\"")
             metrics["correct"] += predicted == sample["intent"]
         except Exception as exc:
@@ -77,11 +88,15 @@ def evaluate_prompt(samples, version):
 def evaluate_hybrid(samples):
     metrics = new_metrics()
     original_call = bubble_agent.zhipu_client.call_llm
+    original_can_call = bubble_agent._can_call_llm
 
     def measured_call(messages, model=None, max_tokens=500, temperature=0.7):
         response = ""
         try:
-            response = original_call(messages, model=model, max_tokens=max_tokens, temperature=temperature)
+            if MOCK_MODE:
+                response = mock_llm_response(messages)
+            else:
+                response = original_call(messages, model=model, max_tokens=max_tokens, temperature=temperature)
             return response
         except Exception as exc:
             metrics["llm_failures"] += 1
@@ -93,6 +108,8 @@ def evaluate_hybrid(samples):
             metrics["tokens"] += count_tokens("\n".join(m["content"] for m in messages)) + count_tokens(response)
 
     bubble_agent.zhipu_client.call_llm = measured_call
+    if MOCK_MODE:
+        bubble_agent._can_call_llm = lambda: True
     try:
         for sample in samples:
             bubble_agent.clear_intent_cache()
@@ -103,6 +120,7 @@ def evaluate_hybrid(samples):
             metrics["total"] += 1
     finally:
         bubble_agent.zhipu_client.call_llm = original_call
+        bubble_agent._can_call_llm = original_can_call
     return finalize(metrics)
 
 
@@ -112,8 +130,10 @@ def main():
     parser.add_argument("--max-samples", type=int, help="每个数据集最多运行的样本数，用于冒烟验证")
     parser.add_argument("--output", help="自定义报告路径")
     args = parser.parse_args()
-    if not is_available():
+    if not MOCK_MODE and not is_available():
         raise SystemExit(f"LLM客户端不可用: {get_llm_unavailable_reason()}；请检查 LLM_PROVIDER/LLM_MODEL/API Key 和依赖安装")
+    if MOCK_MODE:
+        print("LLM_MODE=mock：使用确定性 mock 响应，不调用真实 LLM，准确率不作为评测结论")
 
     version = os.getenv("PROMPT_VERSION", "v1")
     results = {}
@@ -131,6 +151,7 @@ def main():
 
     report = {"timestamp": time.strftime("%Y-%m-%d %H:%M:%S"), "provider": LLM_PROVIDER,
               "model": DEFAULT_MODEL, "prompt_name": "intent_classify", "prompt_version": version,
+              "mode": "mock" if MOCK_MODE else "real",
               "token_and_cost_note": "Token为字符估算，成本按每千Token 0.002元估算",
               "results": results}
     safe_model = re.sub(r"[^A-Za-z0-9_.-]+", "_", DEFAULT_MODEL)

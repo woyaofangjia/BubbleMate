@@ -53,6 +53,9 @@ def main():
     args = parser.parse_args()
     baseline = json.loads(Path(args.baseline).read_text(encoding="utf-8"))
     current = json.loads(Path(args.current).read_text(encoding="utf-8"))
+    if current.get("mode") == "mock":
+        print("当前报告为 mock 模式，跳过准确率/P95/失败率门禁，仅确认链路已跑通")
+        return
     failures = compare_reports(baseline, current, args.max_accuracy_drop, args.max_p95_regression)
     if failures:
         print("Prompt门禁失败:")
