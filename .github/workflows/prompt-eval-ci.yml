@@ -1,13 +1,17 @@
 name: Prompt Eval CI
 
 on:
+  workflow_dispatch:
   push:
     branches: [ main, develop ]
     paths:
       - 'prompts/**'
       - 'backend/bubble_agent.py'
       - 'backend/core/prompt_loader.py'
+      - 'backend/core/zhipu_client.py'
+      - 'backend/requirements.txt'
       - 'scripts/run_prompt_baseline.py'
+      - 'scripts/run_pure_llm_baseline.py'
       - 'scripts/check_prompt_baseline.py'
       - 'scripts/prompt_manager.py'
       - 'backend/core/prompt_monitor.py'
@@ -24,7 +28,10 @@ on:
       - 'prompts/**'
       - 'backend/bubble_agent.py'
       - 'backend/core/prompt_loader.py'
+      - 'backend/core/zhipu_client.py'
+      - 'backend/requirements.txt'
       - 'scripts/run_prompt_baseline.py'
+      - 'scripts/run_pure_llm_baseline.py'
       - 'scripts/check_prompt_baseline.py'
       - 'scripts/prompt_manager.py'
       - 'backend/core/prompt_monitor.py'
