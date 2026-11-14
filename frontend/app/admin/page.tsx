@@ -94,6 +94,34 @@ interface FeedbackAnalysis {
   recent_negative: { user_query: string; agent_response: string; intent: string; created_at: string }[];
 }
 
+interface PromptMetric {
+  llm_calls: number;
+  llm_failures: number;
+  failure_rate: number;
+  p95_latency_ms: number;
+  feedback_total: number;
+  feedback_positive: number;
+  feedback_accuracy: number | null;
+}
+
+interface PromptReleaseStatus {
+  release: {
+    stable_version: string;
+    previous_version: string;
+    canary_version: string;
+    canary_percent: number;
+    revision: number;
+  };
+  metrics: Record<string, PromptMetric>;
+  observed_version: string;
+  baseline_version: string;
+  alerts: { type: string; message: string; current: number; baseline: number }[];
+  alert: boolean;
+  can_rollback: boolean;
+  auto_rollback: boolean;
+  window_seconds: number;
+}
+
 export default function AdminPage() {
   const router = useRouter();
   const { role, adminVerified } = useRole();
@@ -106,6 +134,8 @@ export default function AdminPage() {
 
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
+  const [isRollingBack, setIsRollingBack] = useState(false);
+  const [rollbackMessage, setRollbackMessage] = useState<{ text: string; error: boolean } | null>(null);
 
   const { data: complaintsData, mutate: mutateComplaints } = useSWR<{ complaints: Complaint[] }>(
     '/api/admin/complaints',
@@ -148,17 +178,47 @@ export default function AdminPage() {
     { refreshInterval: 60000, revalidateOnFocus: false }
   );
 
+  const { data: promptStatus, mutate: mutatePromptStatus } = useSWR<PromptReleaseStatus>(
+    '/api/admin/prompt-release',
+    fetcher,
+    { refreshInterval: 30000, revalidateOnFocus: false }
+  );
+
   const refreshData = () => {
     mutateComplaints();
     mutateGraph();
     mutateCandidates();
     mutateStats();
     mutateEval();
+    mutatePromptStatus();
   };
 
   const handleRunEval = () => {
     fetch('/api/admin/run-eval', { method: 'POST', headers: adminAuthHeaders() })
       .then(() => mutateEval());
+  };
+
+  const handlePromptRollback = async () => {
+    if (!window.confirm('确认回滚当前 prompt 发布并清理意图与回复缓存？')) return;
+    setIsRollingBack(true);
+    setRollbackMessage(null);
+    try {
+      const response = await fetch('/api/admin/prompt-release', {
+        method: 'POST',
+        headers: adminAuthHeaders(),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.detail || result.error || '回滚失败');
+      setRollbackMessage({
+        text: `已从 ${result.rollback.from_version} 回滚到 ${result.rollback.to_version}，缓存已清理`,
+        error: false,
+      });
+      await mutatePromptStatus();
+    } catch (error: any) {
+      setRollbackMessage({ text: error.message || '回滚失败', error: true });
+    } finally {
+      setIsRollingBack(false);
+    }
   };
 
   const handleApproveCandidate = (id: number) => {
@@ -204,6 +264,7 @@ export default function AdminPage() {
   };
 
   const pendingCandidates = candidates.filter(c => c.status === 'pending');
+  const observedMetrics = promptStatus?.metrics[promptStatus.observed_version];
 
   return (
     <div className="min-h-screen bg-gray-100 pt-16">
@@ -286,6 +347,67 @@ export default function AdminPage() {
                 <div className="text-xl font-bold text-red-500">{evalReport.bad_cases.length}</div>
               </div>
             </div>
+          </div>
+        )}
+
+        {promptStatus && (
+          <div className={`bg-white rounded-xl p-4 border mb-6 ${promptStatus.alert ? 'border-red-300' : 'border-gray-200'}`}>
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-lg font-semibold">Prompt 发布与告警</h2>
+                <div className="text-xs text-gray-500 mt-1">用户反馈口径；当前仅告警，不自动回滚</div>
+              </div>
+              <button
+                onClick={handlePromptRollback}
+                disabled={isRollingBack || !promptStatus.can_rollback}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                {isRollingBack ? '回滚中...' : '一键回滚'}
+              </button>
+            </div>
+            <div className="grid grid-cols-4 gap-4 mb-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">{promptStatus.release.stable_version}</div>
+                <div className="text-xs text-gray-500 mt-1">稳定版（上一版 {promptStatus.release.previous_version || '无'}）</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">{promptStatus.release.canary_version || '无'}</div>
+                <div className="text-xs text-gray-500 mt-1">灰度版（{promptStatus.release.canary_percent}%）</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600">
+                  {observedMetrics?.feedback_accuracy == null ? '样本不足' : `${observedMetrics.feedback_accuracy.toFixed(1)}%`}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">反馈通过率（{observedMetrics?.feedback_total || 0} 条）</div>
+              </div>
+              <div className="text-center">
+                <div className={`text-2xl font-bold ${(observedMetrics?.failure_rate || 0) > 1 ? 'text-red-500' : 'text-gray-700'}`}>
+                  {(observedMetrics?.failure_rate || 0).toFixed(2)}%
+                </div>
+                <div className="text-xs text-gray-500 mt-1">LLM 失败率（{observedMetrics?.llm_calls || 0} 次）</div>
+              </div>
+            </div>
+            <div className="flex gap-4 text-xs text-gray-500 mb-3">
+              <span>观察版本：{promptStatus.observed_version}</span>
+              <span>对比版本：{promptStatus.baseline_version || '无'}</span>
+              <span>P95：{(observedMetrics?.p95_latency_ms || 0).toFixed(1)}ms</span>
+              <span>统计窗口：{Math.round(promptStatus.window_seconds / 60)} 分钟</span>
+              <span>发布修订：{promptStatus.release.revision}</span>
+            </div>
+            {promptStatus.alerts.length > 0 && (
+              <div className="rounded-lg bg-red-50 border border-red-200 p-3 mb-3">
+                {promptStatus.alerts.map((alert, index) => (
+                  <div key={index} className="text-sm text-red-700">
+                    {alert.message}：当前 {alert.current.toFixed(2)}，阈值/基线 {alert.baseline.toFixed(2)}
+                  </div>
+                ))}
+              </div>
+            )}
+            {rollbackMessage && (
+              <div className={`text-sm ${rollbackMessage.error ? 'text-red-600' : 'text-green-600'}`}>
+                {rollbackMessage.text}
+              </div>
+            )}
           </div>
         )}
 

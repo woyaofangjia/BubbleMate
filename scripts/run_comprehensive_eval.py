@@ -539,6 +539,7 @@ th {{ background: #f8f9fa; font-weight: 600; }}
     return html
 
 def main():
+    os.environ["PROMPT_METRICS_ENABLED"] = "false"
     print("=" * 70)
     print("BubbleMate 综合测试报告生成")
     print("=" * 70)

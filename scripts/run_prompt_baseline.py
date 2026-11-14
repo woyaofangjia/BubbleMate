@@ -107,6 +107,7 @@ def evaluate_hybrid(samples):
 
 
 def main():
+    os.environ["PROMPT_METRICS_ENABLED"] = "false"
     parser = argparse.ArgumentParser(description="当前模型prompt与混合链路基线")
     parser.add_argument("--max-samples", type=int, help="每个数据集最多运行的样本数，用于冒烟验证")
     parser.add_argument("--output", help="自定义报告路径")

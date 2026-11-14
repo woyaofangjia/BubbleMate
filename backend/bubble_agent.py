@@ -15,18 +15,18 @@ except:
     requests = None
 
 try:
-    from .storage.database import save_session, get_user_by_session, claim_session, save_user_preference, get_user_preferences, delete_user_preference, clear_user_preferences, save_complaint, save_complaint_with_candidate, get_knowledge_graph, save_knowledge as _save_knowledge, save_complaint_db as _save_complaint_db, get_complaint_stats
+    from .storage.database import save_session, get_user_by_session, claim_session, save_user_preference, get_user_preferences, delete_user_preference, clear_user_preferences, save_complaint, save_complaint_with_candidate, get_knowledge_graph, save_knowledge as _save_knowledge, save_complaint_db as _save_complaint_db, get_complaint_stats, record_prompt_call
     from .storage.data_access import get_shops, get_menu_items, get_orders, get_shop_by_name, get_shop_by_id, get_hot_menu_items
 except ImportError:
-    from storage.database import save_session, get_user_by_session, claim_session, save_user_preference, get_user_preferences, delete_user_preference, clear_user_preferences, save_complaint, save_complaint_with_candidate, get_knowledge_graph, save_knowledge as _save_knowledge, save_complaint_db as _save_complaint_db, get_complaint_stats
+    from storage.database import save_session, get_user_by_session, claim_session, save_user_preference, get_user_preferences, delete_user_preference, clear_user_preferences, save_complaint, save_complaint_with_candidate, get_knowledge_graph, save_knowledge as _save_knowledge, save_complaint_db as _save_complaint_db, get_complaint_stats, record_prompt_call
     from storage.data_access import get_shops, get_menu_items, get_orders, get_shop_by_name, get_shop_by_id, get_hot_menu_items
 
 try:
     from .core.cache import cache
-    from .core.prompt_loader import render_prompt, resolve_prompt_version
+    from .core.prompt_loader import get_prompt_cache_namespace, render_prompt, resolve_prompt_version
 except ImportError:
     from core.cache import cache
-    from core.prompt_loader import render_prompt, resolve_prompt_version
+    from core.prompt_loader import get_prompt_cache_namespace, render_prompt, resolve_prompt_version
 
 try:
     from .core import zhipu_client
@@ -656,53 +656,67 @@ def _build_intent_prompt(text, prompt_version=None):
         intent_list=", ".join(INTENT_KEYWORDS.keys())
     )
 
+def _can_call_llm():
+    return bool(zhipu_client and zhipu_client.is_available())
+
+def _parse_intent_response(response):
+    intent_name = response.strip().strip("'\"")
+    if intent_name in CATEGORY_MAP:
+        return {
+            "name": intent_name,
+            "confidence": 0.6,
+            "category": CATEGORY_MAP.get(intent_name, "通用"),
+        }
+    return None
+
 def _get_llm_result(text, prompt_version=None):
     try:
-        if not zhipu_client or not zhipu_client.is_available():
+        if not _can_call_llm():
             return None
         prompt = _build_intent_prompt(text, prompt_version)
-        resp = zhipu_client.call_llm([{"role": "user", "content": prompt}], max_tokens=20, temperature=0.1)
-        intent_name = resp.strip().strip("'\"")
-        if intent_name in CATEGORY_MAP:
-            return {"name": intent_name, "confidence": 0.6, "category": CATEGORY_MAP.get(intent_name, "通用")}
+        response = zhipu_client.call_llm(
+            [{"role": "user", "content": prompt}],
+            max_tokens=20,
+            temperature=0.1,
+        )
+        return _parse_intent_response(response)
     except Exception:
-        pass
-    return None
+        return None
 
 async def _get_llm_result_async(text, prompt_version=None):
     try:
-        if not zhipu_client or not zhipu_client.is_available():
+        if not _can_call_llm():
             return None
         prompt = _build_intent_prompt(text, prompt_version)
-        resp = await zhipu_client.call_llm_async([{"role": "user", "content": prompt}], max_tokens=20, temperature=0.1)
-        intent_name = resp.strip().strip("'\"")
-        if intent_name in CATEGORY_MAP:
-            return {"name": intent_name, "confidence": 0.6, "category": CATEGORY_MAP.get(intent_name, "通用")}
+        response = await zhipu_client.call_llm_async(
+            [{"role": "user", "content": prompt}],
+            max_tokens=20,
+            temperature=0.1,
+        )
+        return _parse_intent_response(response)
     except Exception:
-        pass
-    return None
+        return None
 
-def _llm_fallback_sync(text, prompt_version):
-    start = time.perf_counter()
-    result = _get_llm_result(text, prompt_version)
+def _finalize_fallback(prompt_version, start, result):
+    latency_ms = round((time.perf_counter() - start) * 1000, 2)
+    if os.getenv("PROMPT_METRICS_ENABLED", "true").lower() not in {"0", "false", "off"}:
+        record_prompt_call(prompt_version, result is not None, latency_ms)
     logger.info("prompt_intent %s", json.dumps({
         "prompt_version": prompt_version,
         "success": result is not None,
         "intent": result.get("name") if result else None,
-        "latency_ms": round((time.perf_counter() - start) * 1000, 2),
+        "latency_ms": latency_ms,
     }, ensure_ascii=False))
     return result
+
+def _llm_fallback_sync(text, prompt_version):
+    start = time.perf_counter()
+    return _finalize_fallback(prompt_version, start, _get_llm_result(text, prompt_version))
 
 async def _llm_fallback_async(text, prompt_version):
     start = time.perf_counter()
     result = await _get_llm_result_async(text, prompt_version)
-    logger.info("prompt_intent %s", json.dumps({
-        "prompt_version": prompt_version,
-        "success": result is not None,
-        "intent": result.get("name") if result else None,
-        "latency_ms": round((time.perf_counter() - start) * 1000, 2),
-    }, ensure_ascii=False))
-    return result
+    return _finalize_fallback(prompt_version, start, result)
 
 LLM_FALLBACK_THRESHOLD = 0.55
 
@@ -710,18 +724,20 @@ INTENT_CACHE_SIMILARITY_THRESHOLD = 0.8
 INTENT_CACHE_TTL = 300
 
 def _intent_cache_key(text, prompt_version):
-    return f"{prompt_version}:{text.strip()}"
+    return f"{get_prompt_cache_namespace(prompt_version)}:{text.strip()}"
 
 def _get_cached_intent(text, prompt_version):
     key = _intent_cache_key(text, prompt_version)
+    cache_namespace = get_prompt_cache_namespace(prompt_version)
     if cache:
         hit = cache.get_similar("intent", key, INTENT_CACHE_SIMILARITY_THRESHOLD)
-        if hit and hit["value"].get("prompt_version") == prompt_version:
+        if hit and hit["value"].get("cache_namespace") == cache_namespace:
             return hit["value"]
     return None
 
 def _cache_intent(text, intent, prompt_version):
     intent["prompt_version"] = prompt_version
+    intent["cache_namespace"] = get_prompt_cache_namespace(prompt_version)
     if cache:
         cache.set("intent", _intent_cache_key(text, prompt_version), intent, ttl=INTENT_CACHE_TTL)
 
@@ -730,9 +746,10 @@ def clear_intent_cache():
         cache.clear("intent")
 
 def _response_cache_key(text, session_id):
-    """回复缓存必须带用户维度，否则同句话会命中其他用户的回复。"""
+    """回复缓存按用户、prompt 版本和发布修订号隔离。"""
     user_id = get_user_id(session_id) if session_id else "anonymous"
-    return f"{user_id}::{resolve_prompt_version(user_id)}::{text}"
+    prompt_version = resolve_prompt_version(user_id)
+    return f"{user_id}::{get_prompt_cache_namespace(prompt_version)}::{text}"
 
 def _get_cached_response(text, session_id=None):
     if not session_id:

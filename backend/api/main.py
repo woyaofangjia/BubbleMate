@@ -28,6 +28,8 @@ from storage.database import init_db, get_user_by_session, get_user_preferences,
 from storage.data_access import get_shops, get_menu_items, get_orders, get_shop_by_name
 from storage.redis_store import session_store
 from core.cache import cache
+from core.prompt_loader import rollback_prompt
+from core.prompt_monitor import get_prompt_status
 
 init_db()
 
@@ -533,6 +535,7 @@ class FeedbackRequest(BaseModel):
     user_query: Optional[str] = None
     agent_response: Optional[str] = None
     intent: Optional[str] = None
+    prompt_version: Optional[str] = None
 
 @app.post("/api/feedback")
 async def submit_feedback(http_request: Request, request: FeedbackRequest):
@@ -542,8 +545,24 @@ async def submit_feedback(http_request: Request, request: FeedbackRequest):
     save_feedback(user_id, request.message_id, request.feedback_type,
                   user_query=request.user_query,
                   agent_response=request.agent_response,
-                  intent=request.intent)
+                  intent=request.intent,
+                  prompt_version=request.prompt_version)
     return {"success": True, "message": "反馈已记录"}
+
+
+@app.get("/api/admin/prompt-release")
+async def prompt_release_status():
+    return get_prompt_status()
+
+@app.post("/api/admin/prompt-release")
+async def rollback_prompt_release():
+    try:
+        result = rollback_prompt()
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    clear_intent_cache()
+    clear_response_cache()
+    return {"success": True, "rollback": result, "status": get_prompt_status()}
 
 
 @app.get("/api/admin/feedback-analysis")

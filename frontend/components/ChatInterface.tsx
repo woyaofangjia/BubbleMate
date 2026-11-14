@@ -24,6 +24,7 @@ interface Message {
   messageId?: string;
   feedback?: 'positive' | 'negative';
   intent?: string;
+  promptVersion?: string;
 }
 
 interface ChatInterfaceProps {
@@ -94,6 +95,7 @@ export default function ChatInterface({
       let buffer = '';
       let finalContent = '';
       let finalIntent = '';
+      let finalPromptVersion = '';
 
       while (true) {
         const { done, value } = await reader.read();
@@ -131,6 +133,7 @@ export default function ChatInterface({
               break;
             case 'done':
               finalIntent = data.intent?.name || '';
+              finalPromptVersion = data.intent?.prompt_version || '';
               break;
             case 'error':
               throw new Error(data.message || '服务异常');
@@ -156,6 +159,7 @@ export default function ChatInterface({
           toolCalls: tools,
           messageId: `msg_${Date.now()}`,
           intent: finalIntent,
+          promptVersion: finalPromptVersion,
         }]);
       }
     } catch (error: any) {
@@ -213,6 +217,7 @@ export default function ChatInterface({
             user_query: userQuery,
             agent_response: msg.content,
             intent: msg.intent || '',
+            prompt_version: msg.promptVersion || '',
           }),
         }).catch(() => {});
       }

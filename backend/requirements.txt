@@ -21,3 +21,4 @@ aiohttp>=3.8.0
 
 # 开发工具
 python-dotenv>=1.0.0
+PyYAML>=6.0

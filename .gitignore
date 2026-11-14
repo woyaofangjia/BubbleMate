@@ -80,6 +80,7 @@ coverage/
 # yarn.lock
 # pnpm-lock.yaml
 data/chromadb/
+data/prompt_release.json
 
 # 执行轨迹（调试用，不应提交）
 data/traces/

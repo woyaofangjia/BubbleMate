@@ -9,6 +9,10 @@ on:
       - 'backend/core/prompt_loader.py'
       - 'scripts/run_prompt_baseline.py'
       - 'scripts/check_prompt_baseline.py'
+      - 'scripts/prompt_manager.py'
+      - 'backend/core/prompt_monitor.py'
+      - 'backend/storage/database.py'
+      - 'backend/api/main.py'
       - 'data/test_set_200.json'
       - 'data/heldout_test_set_v4.json'
       - 'data/prompt_fallback_test_set.json'
@@ -22,6 +26,10 @@ on:
       - 'backend/core/prompt_loader.py'
       - 'scripts/run_prompt_baseline.py'
       - 'scripts/check_prompt_baseline.py'
+      - 'scripts/prompt_manager.py'
+      - 'backend/core/prompt_monitor.py'
+      - 'backend/storage/database.py'
+      - 'backend/api/main.py'
       - 'data/test_set_200.json'
       - 'data/heldout_test_set_v4.json'
       - 'data/prompt_fallback_test_set.json'
@@ -39,6 +47,7 @@ jobs:
       LLM_MODEL: glm-4-flash
       ZHIPUAI_API_KEY: ${{ secrets.ZHIPUAI_API_KEY }}
       PROMPT_BASELINE: reports/baseline_20261114_glm-4-flash.json
+      PROMPT_METRICS_ENABLED: 'false'
     steps:
       - uses: actions/checkout@v4
 
@@ -50,6 +59,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
+
+      - name: Check generated prompt changelog
+        run: python scripts/prompt_manager.py changelog --check
 
       - name: Read prompt version from manifest
         run: |

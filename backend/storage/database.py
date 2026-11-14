@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import math
 import json
 import time
 import threading
@@ -129,9 +130,22 @@ def init_db():
     """)
     # migration: 补充反馈分析字段（兼容已存在的表）
     _fb_cols = {row[1] for row in c.execute("PRAGMA table_info(feedback)").fetchall()}
-    for _col in ('user_query', 'agent_response', 'intent'):
+    for _col in ('user_query', 'agent_response', 'intent', 'prompt_version'):
         if _col not in _fb_cols:
             c.execute(f"ALTER TABLE feedback ADD COLUMN {_col} TEXT")
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS prompt_calls (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            prompt_version TEXT NOT NULL,
+            success INTEGER NOT NULL,
+            latency_ms REAL NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    c.execute("""
+        CREATE INDEX IF NOT EXISTS idx_prompt_calls_version_time
+        ON prompt_calls(prompt_version, created_at)
+    """)
     c.execute("""
         CREATE TABLE IF NOT EXISTS complaints (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -878,15 +892,57 @@ def claim_session(session_id, user_id):
     conn.close()
     return True, False
 
-def save_feedback(user_id, message_id, feedback_type, user_query=None, agent_response=None, intent=None):
+def save_feedback(user_id, message_id, feedback_type, user_query=None, agent_response=None, intent=None, prompt_version=None):
     conn = _connect()
     c = conn.cursor()
     c.execute("""
-        INSERT INTO feedback (user_id, message_id, feedback_type, user_query, agent_response, intent)
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, (user_id, message_id, feedback_type, user_query, agent_response, intent))
+        INSERT INTO feedback (user_id, message_id, feedback_type, user_query, agent_response, intent, prompt_version)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (user_id, message_id, feedback_type, user_query, agent_response, intent, prompt_version))
     conn.commit()
     conn.close()
+
+
+def record_prompt_call(prompt_version, success, latency_ms):
+    """指标写入失败时不得影响线上意图识别。"""
+    try:
+        conn = _connect()
+        conn.execute(
+            "INSERT INTO prompt_calls (prompt_version, success, latency_ms) VALUES (?, ?, ?)",
+            (prompt_version, int(bool(success)), float(latency_ms)),
+        )
+        conn.commit()
+    except sqlite3.Error:
+        pass
+
+
+def get_prompt_metrics(prompt_version, window_seconds=3600):
+    conn = _connect()
+    cutoff = f"-{int(window_seconds)} seconds"
+    rows = conn.execute("""
+        SELECT success, latency_ms FROM prompt_calls
+        WHERE prompt_version = ? AND created_at >= datetime('now', ?)
+    """, (prompt_version, cutoff)).fetchall()
+    latencies = sorted(float(row[1]) for row in rows)
+    failures = sum(1 for row in rows if not row[0])
+    p95 = latencies[max(0, math.ceil(len(latencies) * 0.95) - 1)] if latencies else 0.0
+    feedback_rows = conn.execute("""
+        SELECT feedback_type, COUNT(*) FROM feedback
+        WHERE prompt_version = ? AND created_at >= datetime('now', ?)
+        GROUP BY feedback_type
+    """, (prompt_version, cutoff)).fetchall()
+    feedback = {row[0]: row[1] for row in feedback_rows}
+    positive = feedback.get("positive", 0)
+    total = positive + feedback.get("negative", 0)
+    return {
+        "llm_calls": len(rows),
+        "llm_failures": failures,
+        "failure_rate": round(failures / len(rows) * 100, 2) if rows else 0.0,
+        "p95_latency_ms": round(p95, 2),
+        "feedback_total": total,
+        "feedback_positive": positive,
+        "feedback_accuracy": round(positive / total * 100, 2) if total else None,
+    }
 
 
 def get_feedback_analysis(top_n=10):
