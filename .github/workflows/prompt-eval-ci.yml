@@ -1,0 +1,72 @@
+name: Prompt Eval CI
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'prompts/**'
+      - 'backend/bubble_agent.py'
+      - 'backend/core/prompt_loader.py'
+      - 'scripts/run_prompt_baseline.py'
+      - 'scripts/check_prompt_baseline.py'
+      - 'data/test_set_200.json'
+      - 'data/heldout_test_set_v4.json'
+      - 'data/prompt_fallback_test_set.json'
+      - 'reports/baseline_*.json'
+      - '.github/workflows/prompt-eval-ci.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'prompts/**'
+      - 'backend/bubble_agent.py'
+      - 'backend/core/prompt_loader.py'
+      - 'scripts/run_prompt_baseline.py'
+      - 'scripts/check_prompt_baseline.py'
+      - 'data/test_set_200.json'
+      - 'data/heldout_test_set_v4.json'
+      - 'data/prompt_fallback_test_set.json'
+      - 'reports/baseline_*.json'
+      - '.github/workflows/prompt-eval-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  prompt-eval:
+    runs-on: ubuntu-latest
+    env:
+      LLM_PROVIDER: zhipu
+      LLM_MODEL: glm-4-flash
+      ZHIPUAI_API_KEY: ${{ secrets.ZHIPUAI_API_KEY }}
+      PROMPT_BASELINE: reports/baseline_20261114_glm-4-flash.json
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Read prompt version from manifest
+        run: |
+          version=$(python -c "from pathlib import Path; print(next(line.split(':', 1)[1].strip() for line in Path('prompts/intent_classify/manifest.yaml').read_text(encoding='utf-8').splitlines() if line.startswith('version:')))")
+          echo "PROMPT_VERSION=$version" >> "$GITHUB_ENV"
+
+      - name: Run prompt evaluation
+        run: python scripts/run_prompt_baseline.py --output reports/current_prompt_eval.json
+
+      - name: Enforce baseline gates
+        run: python scripts/check_prompt_baseline.py --baseline "$PROMPT_BASELINE" --current reports/current_prompt_eval.json --max-accuracy-drop 2 --max-p95-regression 20
+
+      - name: Upload prompt evaluation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prompt-eval-report
+          path: reports/current_prompt_eval.json
+          if-no-files-found: warn
+          retention-days: 30

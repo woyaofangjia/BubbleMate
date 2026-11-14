@@ -43,6 +43,24 @@ python scripts/run_prompt_baseline.py
 
 报告中的 `model` 会记录实际模型。免费模型结果不能作为其他模型的等价评测结果；恢复生产评测前关闭该窗口或执行 `Remove-Item Env:LLM_MODEL`。
 
+## 灰度发布与回退
+
+先确保稳定版和灰度版模板都已包含在部署镜像中，再配置：
+
+```bash
+PROMPT_VERSION=v1
+PROMPT_CANARY_VERSION=v2
+PROMPT_CANARY_USERS=user_001,user_002
+PROMPT_CANARY_PERCENT=10
+```
+
+- `PROMPT_CANARY_USERS` 中的用户始终使用灰度版，不受比例影响。
+- 比例灰度按灰度版本和用户 ID 做稳定哈希；同一用户固定进入同一版本，匿名调用未提供用户 ID 时使用稳定版。
+- 验证后可逐步提高比例。回退时设置 `PROMPT_CANARY_PERCENT=0`，清空 `PROMPT_CANARY_USERS` 和 `PROMPT_CANARY_VERSION`，稳定版保持为已验证版本。
+- 意图和回复缓存均按 prompt 版本隔离；环境变量变更后仍需重启全部 worker，完整回退继续执行上方缓存清理步骤。
+
+LLM 兜底会输出 `prompt_intent` 结构化日志，包含 `prompt_version`、`success`、`intent` 和 `latency_ms`。该日志只覆盖真实 LLM 兜底调用，不代表规则命中或缓存命中的全部请求。
+
 ## 缓存注意事项
 
 意图缓存 TTL 为 300 秒，响应缓存 TTL 为 600 秒。脚本可以清理 Redis 和执行脚本进程的内存缓存，但无法清理其他进程的内存缓存，因此**重启全部后端 worker 是完整回滚的必要步骤**，不能只等待 TTL 或只运行清理脚本。

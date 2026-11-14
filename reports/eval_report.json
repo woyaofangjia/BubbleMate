@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-07-11 18:32:29",
+  "timestamp": "2026-11-14 19:22:22",
   "level1_offline": {
     "intent_accuracy_200": {
       "accuracy": 86.0,
@@ -7,8 +7,8 @@
       "total": 200
     },
     "tool_accuracy": {
-      "accuracy": 100.0,
-      "passed": 9,
+      "accuracy": 77.78,
+      "passed": 7,
       "total": 9
     },
     "confidence_calibration": [
@@ -917,40 +917,40 @@
       "fold_results": [
         {
           "fold": 1,
-          "accuracy": 77.5,
-          "correct": 31,
+          "accuracy": 85.0,
+          "correct": 34,
           "total": 40
         },
         {
           "fold": 2,
-          "accuracy": 90.0,
-          "correct": 36,
+          "accuracy": 87.5,
+          "correct": 35,
           "total": 40
         },
         {
           "fold": 3,
-          "accuracy": 90.0,
-          "correct": 36,
+          "accuracy": 92.5,
+          "correct": 37,
           "total": 40
         },
         {
           "fold": 4,
-          "accuracy": 90.0,
-          "correct": 36,
+          "accuracy": 80.0,
+          "correct": 32,
           "total": 40
         },
         {
           "fold": 5,
-          "accuracy": 82.5,
-          "correct": 33,
+          "accuracy": 85.0,
+          "correct": 34,
           "total": 40
         }
       ],
       "avg_accuracy": 86.0
     },
     "adversarial_eval": {
-      "accuracy": 91.67,
-      "correct": 11,
+      "accuracy": 83.33,
+      "correct": 10,
       "total": 12
     }
   },

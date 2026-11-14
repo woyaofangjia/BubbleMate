@@ -5,6 +5,7 @@ import time
 import sqlite3
 import asyncio
 import difflib
+import logging
 from collections import deque
 from functools import lru_cache
 
@@ -22,10 +23,10 @@ except ImportError:
 
 try:
     from .core.cache import cache
-    from .core.prompt_loader import render_prompt
+    from .core.prompt_loader import render_prompt, resolve_prompt_version
 except ImportError:
     from core.cache import cache
-    from core.prompt_loader import render_prompt
+    from core.prompt_loader import render_prompt, resolve_prompt_version
 
 try:
     from .core import zhipu_client
@@ -645,59 +646,84 @@ def _composite_match(text):
             return {"name": "composite", "sub_intents": intent_names}
     return None
 
-INTENT_PROMPT_VERSION = os.getenv("PROMPT_VERSION", "v1")
+logger = logging.getLogger(__name__)
 
-def _build_intent_prompt(text):
+def _build_intent_prompt(text, prompt_version=None):
     return render_prompt(
         "intent_classify",
-        INTENT_PROMPT_VERSION,
+        prompt_version or resolve_prompt_version(),
         text=text,
         intent_list=", ".join(INTENT_KEYWORDS.keys())
     )
 
-def _get_llm_result(text):
+def _get_llm_result(text, prompt_version=None):
     try:
         if not zhipu_client or not zhipu_client.is_available():
             return None
-        prompt = _build_intent_prompt(text)
+        prompt = _build_intent_prompt(text, prompt_version)
         resp = zhipu_client.call_llm([{"role": "user", "content": prompt}], max_tokens=20, temperature=0.1)
         intent_name = resp.strip().strip("'\"")
         if intent_name in CATEGORY_MAP:
             return {"name": intent_name, "confidence": 0.6, "category": CATEGORY_MAP.get(intent_name, "通用")}
-    except Exception as e:
+    except Exception:
         pass
     return None
 
-async def _get_llm_result_async(text):
+async def _get_llm_result_async(text, prompt_version=None):
     try:
         if not zhipu_client or not zhipu_client.is_available():
             return None
-        prompt = _build_intent_prompt(text)
+        prompt = _build_intent_prompt(text, prompt_version)
         resp = await zhipu_client.call_llm_async([{"role": "user", "content": prompt}], max_tokens=20, temperature=0.1)
         intent_name = resp.strip().strip("'\"")
         if intent_name in CATEGORY_MAP:
             return {"name": intent_name, "confidence": 0.6, "category": CATEGORY_MAP.get(intent_name, "通用")}
-    except Exception as e:
+    except Exception:
         pass
     return None
+
+def _llm_fallback_sync(text, prompt_version):
+    start = time.perf_counter()
+    result = _get_llm_result(text, prompt_version)
+    logger.info("prompt_intent %s", json.dumps({
+        "prompt_version": prompt_version,
+        "success": result is not None,
+        "intent": result.get("name") if result else None,
+        "latency_ms": round((time.perf_counter() - start) * 1000, 2),
+    }, ensure_ascii=False))
+    return result
+
+async def _llm_fallback_async(text, prompt_version):
+    start = time.perf_counter()
+    result = await _get_llm_result_async(text, prompt_version)
+    logger.info("prompt_intent %s", json.dumps({
+        "prompt_version": prompt_version,
+        "success": result is not None,
+        "intent": result.get("name") if result else None,
+        "latency_ms": round((time.perf_counter() - start) * 1000, 2),
+    }, ensure_ascii=False))
+    return result
 
 LLM_FALLBACK_THRESHOLD = 0.55
 
 INTENT_CACHE_SIMILARITY_THRESHOLD = 0.8
 INTENT_CACHE_TTL = 300
 
-def _get_cached_intent(text):
-    text = text.strip()
+def _intent_cache_key(text, prompt_version):
+    return f"{prompt_version}:{text.strip()}"
+
+def _get_cached_intent(text, prompt_version):
+    key = _intent_cache_key(text, prompt_version)
     if cache:
-        hit = cache.get_similar("intent", text, INTENT_CACHE_SIMILARITY_THRESHOLD)
-        if hit:
+        hit = cache.get_similar("intent", key, INTENT_CACHE_SIMILARITY_THRESHOLD)
+        if hit and hit["value"].get("prompt_version") == prompt_version:
             return hit["value"]
     return None
 
-def _cache_intent(text, intent):
-    text = text.strip()
+def _cache_intent(text, intent, prompt_version):
+    intent["prompt_version"] = prompt_version
     if cache:
-        cache.set("intent", text, intent, ttl=INTENT_CACHE_TTL)
+        cache.set("intent", _intent_cache_key(text, prompt_version), intent, ttl=INTENT_CACHE_TTL)
 
 def clear_intent_cache():
     if cache:
@@ -706,7 +732,7 @@ def clear_intent_cache():
 def _response_cache_key(text, session_id):
     """回复缓存必须带用户维度，否则同句话会命中其他用户的回复。"""
     user_id = get_user_id(session_id) if session_id else "anonymous"
-    return f"{user_id}::{text}"
+    return f"{user_id}::{resolve_prompt_version(user_id)}::{text}"
 
 def _get_cached_response(text, session_id=None):
     if not session_id:
@@ -729,11 +755,11 @@ def clear_response_cache():
     if cache:
         cache.clear("response")
 
-def recognize_intent(text, llm_client=None):
+def recognize_intent(text, llm_client=None, user_id=None):
     if not text or text.strip() == "":
         return {"name": "unknown", "confidence": 0.9, "category": "未知"}
-    
-    cached_intent = _get_cached_intent(text)
+    prompt_version = resolve_prompt_version(user_id)
+    cached_intent = _get_cached_intent(text, prompt_version)
     if cached_intent:
         return cached_intent
     
@@ -741,43 +767,43 @@ def recognize_intent(text, llm_client=None):
     composite = _composite_match(text)
     if composite:
         result = {"name": "composite", "confidence": 0.85, "category": "复合意图", "sub_intents": composite["sub_intents"]}
-        _cache_intent(text, result)
+        _cache_intent(text, result, prompt_version)
         return result
     if rule:
         name, kw, conf = rule
         if conf < LLM_FALLBACK_THRESHOLD:
-            llm_result = _get_llm_result(text)
+            llm_result = _llm_fallback_sync(text, prompt_version)
             if llm_result:
-                _cache_intent(text, llm_result)
+                _cache_intent(text, llm_result, prompt_version)
                 return llm_result
         result = {"name": name, "confidence": conf, "category": CATEGORY_MAP.get(name, "通用"), "keywords": [kw]}
-        _cache_intent(text, result)
+        _cache_intent(text, result, prompt_version)
         return result
     kw_match = _multi_keyword_match(text)
     if kw_match:
         name, score = kw_match
         conf = min(score + 0.2, 0.9)
         if conf < LLM_FALLBACK_THRESHOLD:
-            llm_result = _get_llm_result(text)
+            llm_result = _llm_fallback_sync(text, prompt_version)
             if llm_result:
-                _cache_intent(text, llm_result)
+                _cache_intent(text, llm_result, prompt_version)
                 return llm_result
         result = {"name": name, "confidence": conf, "category": CATEGORY_MAP.get(name, "通用")}
-        _cache_intent(text, result)
+        _cache_intent(text, result, prompt_version)
         return result
-    llm_result = _get_llm_result(text)
+    llm_result = _llm_fallback_sync(text, prompt_version)
     if llm_result:
-        _cache_intent(text, llm_result)
+        _cache_intent(text, llm_result, prompt_version)
         return llm_result
     result = {"name": "general", "confidence": 0.2, "category": "通用"}
-    _cache_intent(text, result)
+    _cache_intent(text, result, prompt_version)
     return result
 
-async def recognize_intent_async(text, llm_client=None):
+async def recognize_intent_async(text, llm_client=None, user_id=None):
     if not text or text.strip() == "":
         return {"name": "unknown", "confidence": 0.9, "category": "未知"}
-    
-    cached_intent = _get_cached_intent(text)
+    prompt_version = resolve_prompt_version(user_id)
+    cached_intent = _get_cached_intent(text, prompt_version)
     if cached_intent:
         return cached_intent
     
@@ -785,36 +811,36 @@ async def recognize_intent_async(text, llm_client=None):
     composite = _composite_match(text)
     if composite:
         result = {"name": "composite", "confidence": 0.85, "category": "复合意图", "sub_intents": composite["sub_intents"]}
-        _cache_intent(text, result)
+        _cache_intent(text, result, prompt_version)
         return result
     if rule:
         name, kw, conf = rule
         if conf < LLM_FALLBACK_THRESHOLD:
-            llm_result = await _get_llm_result_async(text)
+            llm_result = await _llm_fallback_async(text, prompt_version)
             if llm_result:
-                _cache_intent(text, llm_result)
+                _cache_intent(text, llm_result, prompt_version)
                 return llm_result
         result = {"name": name, "confidence": conf, "category": CATEGORY_MAP.get(name, "通用"), "keywords": [kw]}
-        _cache_intent(text, result)
+        _cache_intent(text, result, prompt_version)
         return result
     kw_match = _multi_keyword_match(text)
     if kw_match:
         name, score = kw_match
         conf = min(score + 0.2, 0.9)
         if conf < LLM_FALLBACK_THRESHOLD:
-            llm_result = await _get_llm_result_async(text)
+            llm_result = await _llm_fallback_async(text, prompt_version)
             if llm_result:
-                _cache_intent(text, llm_result)
+                _cache_intent(text, llm_result, prompt_version)
                 return llm_result
         result = {"name": name, "confidence": conf, "category": CATEGORY_MAP.get(name, "通用")}
-        _cache_intent(text, result)
+        _cache_intent(text, result, prompt_version)
         return result
-    llm_result = await _get_llm_result_async(text)
+    llm_result = await _llm_fallback_async(text, prompt_version)
     if llm_result:
-        _cache_intent(text, llm_result)
+        _cache_intent(text, llm_result, prompt_version)
         return llm_result
     result = {"name": "general", "confidence": 0.2, "category": "通用"}
-    _cache_intent(text, result)
+    _cache_intent(text, result, prompt_version)
     return result
 
 # ==================== 工具函数 ====================
@@ -1876,7 +1902,7 @@ async def process_message_async(text, session_id="default", memory_store=None, l
             save_message(memory_store, session_id, text, reply)
         return reply, {"name": "terminated", "confidence": 1.0, "category": "终止"}
     
-    intent_task = asyncio.create_task(recognize_intent_async(text, llm_client))
+    intent_task = asyncio.create_task(recognize_intent_async(text, llm_client, get_user_id(session_id)))
     
     def load_context():
         if memory_store:
@@ -2105,7 +2131,7 @@ async def process_message_stream_async(text, session_id="default", memory_store=
             return
 
         # ---- 意图识别 + 上下文（并行）----
-        intent_task = asyncio.create_task(recognize_intent_async(text, llm_client))
+        intent_task = asyncio.create_task(recognize_intent_async(text, llm_client, get_user_id(session_id)))
 
         def load_context():
             if memory_store:
