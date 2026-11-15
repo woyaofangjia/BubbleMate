@@ -13,6 +13,7 @@ on:
       - 'scripts/run_prompt_baseline.py'
       - 'scripts/run_pure_llm_baseline.py'
       - 'scripts/check_prompt_baseline.py'
+      - 'scripts/test_composite_intent.py'
       - 'scripts/prompt_manager.py'
       - 'backend/core/prompt_monitor.py'
       - 'backend/storage/database.py'
@@ -33,6 +34,7 @@ on:
       - 'scripts/run_prompt_baseline.py'
       - 'scripts/run_pure_llm_baseline.py'
       - 'scripts/check_prompt_baseline.py'
+      - 'scripts/test_composite_intent.py'
       - 'scripts/prompt_manager.py'
       - 'backend/core/prompt_monitor.py'
       - 'backend/storage/database.py'
@@ -88,5 +90,31 @@ jobs:
         with:
           name: prompt-eval-report
           path: reports/current_prompt_eval.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  composite-intent-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Run composite intent tests
+        run: python scripts/test_composite_intent.py
+
+      - name: Upload composite intent report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: composite-intent-report
+          path: reports/composite_intent_results.json
           if-no-files-found: warn
           retention-days: 30

@@ -1,0 +1,329 @@
+{
+  "name": "composite_intent_test",
+  "date": "2026-11-15 20:08:26",
+  "passed": 26,
+  "total": 26,
+  "results": [
+    {
+      "id": "registry_consistency",
+      "text": "INTENT_KEYWORDS / CATEGORY_MAP / INTENT_TO_CATEGORY 一致性",
+      "expected_intent": "consistent",
+      "actual_intent": "consistent",
+      "sub_intents": null,
+      "response": "",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "taste_price_1",
+      "text": "太甜了还这么贵",
+      "expected_intent": "complaint_taste_price",
+      "actual_intent": "complaint_taste_price",
+      "sub_intents": [
+        "complaint_taste",
+        "complaint_price"
+      ],
+      "response": "【思考】complaint_taste_price\n【回复】非常抱歉您对口味和价格都不满意，我们会核实处理。 补偿方案：退款或折扣",
+      "elapsed_ms": 208.96,
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "taste_price_2",
+      "text": "太甜了又这么贵",
+      "expected_intent": "complaint_taste_price",
+      "actual_intent": "complaint_taste_price",
+      "sub_intents": [
+        "complaint_taste",
+        "complaint_price"
+      ],
+      "response": "【思考】complaint_taste_price\n【回复】非常抱歉您对口味和价格都不满意，我们会核实处理。 补偿方案：退款或折扣",
+      "elapsed_ms": 141.28,
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "taste_price_3",
+      "text": "太甜了而且还这么贵",
+      "expected_intent": "complaint_taste_price",
+      "actual_intent": "complaint_taste_price",
+      "sub_intents": [
+        "complaint_taste",
+        "complaint_price"
+      ],
+      "response": "【思考】complaint_taste_price\n【回复】非常抱歉您对口味和价格都不满意，我们会核实处理。 补偿方案：退款或折扣",
+      "elapsed_ms": 136.91,
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "quantity_taste_1",
+      "text": "料太少了还这么甜",
+      "expected_intent": "complaint_quantity_taste",
+      "actual_intent": "complaint_quantity_taste",
+      "sub_intents": [
+        "complaint_quantity",
+        "complaint_taste"
+      ],
+      "response": "【思考】complaint_quantity_taste\n【回复】非常抱歉份量不足且口味不合，我们会为您免费重做并补发配料。 补偿方案：免费重做+补发配料",
+      "elapsed_ms": 136.07,
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "quantity_taste_2",
+      "text": "这料太少又这么甜",
+      "expected_intent": "complaint_quantity_taste",
+      "actual_intent": "complaint_quantity_taste",
+      "sub_intents": [
+        "complaint_quantity",
+        "complaint_taste"
+      ],
+      "response": "【思考】complaint_quantity_taste\n【回复】非常抱歉份量不足且口味不合，我们会为您免费重做并补发配料。 补偿方案：免费重做+补发配料",
+      "elapsed_ms": 137.23,
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "quantity_taste_3",
+      "text": "料太少了还甜得发腻",
+      "expected_intent": "complaint_quantity_taste",
+      "actual_intent": "complaint_quantity_taste",
+      "sub_intents": [
+        "complaint_quantity",
+        "complaint_taste"
+      ],
+      "response": "【思考】complaint_quantity_taste\n【回复】非常抱歉份量不足且口味不合，我们会为您免费重做并补发配料。 补偿方案：免费重做+补发配料",
+      "elapsed_ms": 139.42,
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "recommend_price_1",
+      "text": "好喝吗多少钱",
+      "expected_intent": "query_recommend_price",
+      "actual_intent": "query_recommend_price",
+      "sub_intents": [
+        "query_recommend",
+        "query_price"
+      ],
+      "response": "【思考】query_recommend_price\n【回复】招牌饮品：芝芝莓莓、杨枝甘露、茉莉绿茶，价格8-20元。您想喝哪款？",
+      "elapsed_ms": 134.1,
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "recommend_price_2",
+      "text": "这个好喝吗价格多少",
+      "expected_intent": "query_recommend_price",
+      "actual_intent": "query_recommend_price",
+      "sub_intents": [
+        "query_recommend",
+        "query_price"
+      ],
+      "response": "【思考】query_recommend_price\n【回复】招牌饮品：芝芝莓莓、杨枝甘露、茉莉绿茶，价格8-20元。您想喝哪款？",
+      "elapsed_ms": 143.92,
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "recommend_price_3",
+      "text": "这个好喝吗多少钱一杯",
+      "expected_intent": "query_recommend_price",
+      "actual_intent": "query_recommend_price",
+      "sub_intents": [
+        "query_recommend",
+        "query_price"
+      ],
+      "response": "【思考】query_recommend_price\n【回复】招牌饮品：芝芝莓莓、杨枝甘露、茉莉绿茶，价格8-20元。您想喝哪款？",
+      "elapsed_ms": 140.03,
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "order_promotion_1",
+      "text": "点一杯有什么优惠",
+      "expected_intent": "place_order_promotion",
+      "actual_intent": "place_order_promotion",
+      "sub_intents": [
+        "place_order",
+        "query_promotion"
+      ],
+      "response": "【思考】place_order_promotion\n【回复】好的，您想点哪一款？今日优惠：新品第二杯半价，会员9折，可以一起为您下单。",
+      "elapsed_ms": 143.72,
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "order_promotion_2",
+      "text": "下单有活动吗",
+      "expected_intent": "place_order_promotion",
+      "actual_intent": "place_order_promotion",
+      "sub_intents": [
+        "place_order",
+        "query_promotion"
+      ],
+      "response": "【思考】place_order_promotion\n【回复】好的，您想点哪一款？今日优惠：新品第二杯半价，会员9折，可以一起为您下单。",
+      "elapsed_ms": 146.98,
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "order_promotion_3",
+      "text": "我想点一杯，现在有什么优惠活动吗",
+      "expected_intent": "place_order_promotion",
+      "actual_intent": "place_order_promotion",
+      "sub_intents": [
+        "place_order",
+        "query_promotion"
+      ],
+      "response": "【思考】place_order_promotion\n【回复】好的，您想点哪一款？今日优惠：新品第二杯半价，会员9折，可以一起为您下单。",
+      "elapsed_ms": 138.08,
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "predefined_taste_price",
+      "text": "又苦又贵不值这个价",
+      "expected_intent": "complaint_taste_price",
+      "actual_intent": "complaint_taste_price",
+      "sub_intents": null,
+      "response": "【思考】complaint_taste_price\n【回复】非常抱歉您对口味和价格都不满意，我们会核实处理。 补偿方案：退款或折扣",
+      "elapsed_ms": 151.45,
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "outside_refund_order",
+      "text": "我要退款，顺便帮我查订单",
+      "expected_intent": "single:complaint_refund/query_order",
+      "actual_intent": "complaint_refund",
+      "sub_intents": null,
+      "response": "",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "outside_service_menu",
+      "text": "服务太差了，你们菜单有什么",
+      "expected_intent": "single:complaint_service/query_menu",
+      "actual_intent": "complaint_service",
+      "sub_intents": null,
+      "response": "",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "single_taste",
+      "text": "太甜了",
+      "expected_intent": "single:complaint_taste",
+      "actual_intent": "complaint_taste",
+      "sub_intents": null,
+      "response": "",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "single_quantity",
+      "text": "料太少了",
+      "expected_intent": "single:complaint_quantity",
+      "actual_intent": "complaint_quantity",
+      "sub_intents": null,
+      "response": "",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "single_recommend",
+      "text": "好喝吗",
+      "expected_intent": "single:query_recommend",
+      "actual_intent": "query_recommend",
+      "sub_intents": null,
+      "response": "",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "single_promotion",
+      "text": "有优惠吗",
+      "expected_intent": "single:query_promotion",
+      "actual_intent": "query_promotion",
+      "sub_intents": null,
+      "response": "",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "single_price",
+      "text": "多少钱",
+      "expected_intent": "single:query_price",
+      "actual_intent": "query_price",
+      "sub_intents": null,
+      "response": "",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "single_order",
+      "text": "点一杯",
+      "expected_intent": "single:place_order",
+      "actual_intent": "place_order",
+      "sub_intents": null,
+      "response": "",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "legacy_taste_price",
+      "text": "太甜了还这么贵",
+      "expected_intent": "complaint_taste_price",
+      "actual_intent": "complaint_taste_price",
+      "sub_intents": [
+        "complaint_taste",
+        "complaint_price"
+      ],
+      "response": "【思考】complaint_taste_price\n【回复】非常抱歉您对口味和价格都不满意，我们会核实处理。 补偿方案：退款或折扣",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "legacy_quantity_taste",
+      "text": "料太少了还这么甜",
+      "expected_intent": "complaint_quantity_taste",
+      "actual_intent": "complaint_quantity_taste",
+      "sub_intents": [
+        "complaint_quantity",
+        "complaint_taste"
+      ],
+      "response": "【思考】complaint_quantity_taste\n【回复】非常抱歉份量不足且口味不合，我们会为您免费重做并补发配料。 补偿方案：免费重做+补发配料",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "legacy_recommend_price",
+      "text": "好喝吗多少钱",
+      "expected_intent": "query_recommend_price",
+      "actual_intent": "query_recommend_price",
+      "sub_intents": [
+        "query_recommend",
+        "query_price"
+      ],
+      "response": "【思考】query_recommend_price\n【回复】招牌饮品：芝芝莓莓、杨枝甘露、茉莉绿茶，价格8-20元。您想喝哪款？",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "legacy_order_promotion",
+      "text": "点一杯有优惠",
+      "expected_intent": "place_order_promotion",
+      "actual_intent": "place_order_promotion",
+      "sub_intents": [
+        "place_order",
+        "query_promotion"
+      ],
+      "response": "【思考】place_order_promotion\n【回复】好的，您想点哪一款？今日优惠：新品第二杯半价，会员9折，可以一起为您下单。",
+      "passed": true,
+      "problems": []
+    }
+  ]
+}

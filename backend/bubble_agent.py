@@ -424,7 +424,9 @@ INTENT_KEYWORDS = {
     "complaint_accessory": ["吸管", "冰沙", "细吸管"],
     "complaint_vague": ["那个", "你们懂的", "就是那个", "懂的都懂"],
     "complaint_compare_history": ["上次那个", "跟这次不一样", "之前那次", "换配方", "不一样"],
+    "complaint_quantity_taste": ["料太少还甜", "份量少还甜", "又少又甜"],
     "query_recommend": ["推荐", "招牌", "热门", "特色", "好喝", "有什么好喝"],
+    "query_recommend_price": ["好喝吗多少钱", "好喝吗价格", "好喝吗多少钱一杯"],
     "query_menu": ["菜单", "饮品", "有什么", "菜单发一下", "没了", "下架", "不卖了", "没有了", "停售"],
     "query_order": ["订单", "单号", "配送", "送到", "查订单", "我的单"],
     "query_refund": ["退款", "退钱", "售后", "怎么退款"],
@@ -440,6 +442,7 @@ INTENT_KEYWORDS = {
     "query_customize": ["加料", "配料", "珍珠", "椰果", "仙草", "芋圆", "定制", "加", "添加"],
     "query_history": ["历史订单", "之前的订单", "买过", "订单记录"],
     "place_order": ["点", "买", "下单", "来一杯", "我要"],
+    "place_order_promotion": ["点一杯有优惠", "下单有活动", "点一杯优惠"],
     "unclear": ["那个", "跟之前一样", "上次那个", "还行吧"],
     "general": ["随便", "都行", "没什么事", "没事了", "不用了", "算了"],
 }
@@ -451,7 +454,9 @@ CATEGORY_MAP = {
     "complaint_sarcasm": "讽刺投诉", "complaint_accessory": "配件投诉",
     "complaint_vague": "指代不明", "complaint_compare_history": "对比投诉",
     "complaint_taste_service": "口感+服务", "complaint_taste_price": "口感+价格",
-    "query_recommend": "推荐查询", "query_menu": "菜单查询",
+    "complaint_quantity_taste": "份量+口味",
+    "query_recommend": "推荐查询", "query_recommend_price": "推荐+价格",
+    "place_order_promotion": "下单+优惠", "query_menu": "菜单查询",
     "query_order": "订单查询", "query_refund": "退款查询",
     "query_hours": "营业时间查询", "query_location": "门店查询",
     "query_store": "门店查询", "query_price": "价格查询",
@@ -503,12 +508,20 @@ PRIORITY_ORDER = [
     "place_order", "unclear", "general", "unknown",
 ]
 
+# 复合模板直接映射到有答案的合并意图，不再产出无工具、无回复的 composite 孤儿意图
 COMPOSITE_PATTERNS = [
-    (re.compile(r"(太甜).*?(还.*?贵|又.*?贵)", re.I), ["complaint_taste", "complaint_price"]),
-    (re.compile(r"(料.*?少).*?(还.*?甜|又.*?甜)", re.I), ["complaint_quantity", "complaint_taste"]),
-    (re.compile(r"(好喝吗).*?(多少钱|价格)", re.I), ["query_recommend", "query_price"]),
-    (re.compile(r"(点.*?一杯|下单).*?(优惠|活动)", re.I), ["place_order", "query_promotion"]),
+    (re.compile(r"(太甜).*?(还.*?贵|又.*?贵)", re.I), "complaint_taste_price", ["complaint_taste", "complaint_price"]),
+    (re.compile(r"(料.*?少).*?(还.*?甜|又.*?甜)", re.I), "complaint_quantity_taste", ["complaint_quantity", "complaint_taste"]),
+    (re.compile(r"(好喝吗).*?(多少钱|价格)", re.I), "query_recommend_price", ["query_recommend", "query_price"]),
+    (re.compile(r"(点.*?一杯|下单).*?(优惠|活动)", re.I), "place_order_promotion", ["place_order", "query_promotion"]),
 ]
+
+# 兼容升级前缓存的 composite 结果，统一映射到合并意图。
+# 意图缓存 TTL 300s、响应缓存 TTL 600s；建议观察 1-2 天、确认无旧缓存后删除本映射。
+COMPOSITE_TO_MERGED = {
+    tuple(sub_intents): intent_name
+    for _, intent_name, sub_intents in COMPOSITE_PATTERNS
+}
 
 DIRECT_RESPONSES = {
     "query_recommend": "招牌饮品：芝芝莓莓、杨枝甘露、茉莉绿茶。您喜欢什么口味？",
@@ -522,6 +535,8 @@ DIRECT_RESPONSES = {
     "query_member": "会员卡免费办理，首单立减5元。",
     "query_invoice": "支持电子发票，小程序申请。",
     "query_order": "抱歉，订单查询暂时有点小问题，请您稍后再试，或者拨打客服电话咨询。",
+    "query_recommend_price": "招牌饮品：芝芝莓莓、杨枝甘露、茉莉绿茶，价格8-20元。您想喝哪款？",
+    "place_order_promotion": "好的，您想点哪一款？今日优惠：新品第二杯半价，会员9折，可以一起为您下单。",
 }
 
 INTENT_TO_CATEGORY = {
@@ -537,6 +552,7 @@ INTENT_TO_CATEGORY = {
     "complaint_compare_history": "对比",
     "complaint_taste_service": "口感+服务",
     "complaint_taste_price": "口感+价格",
+    "complaint_quantity_taste": "份量+口味",
     "unknown": "未知",
 }
 
@@ -553,6 +569,7 @@ DEFAULT_SOLUTIONS = {
     "对比": "非常抱歉给您带来不一致的体验，请问您说的是哪次消费呢？",
     "口感+服务": "非常抱歉您对口味和服务都不满意，我们会全面整改。",
     "口感+价格": "非常抱歉您对口味和价格都不满意，我们会核实处理。",
+    "份量+口味": "非常抱歉份量不足且口味不合，我们会为您免费重做并补发配料。",
     "未知": "您好，请问您有什么需要帮助的？",
 }
 
@@ -569,6 +586,7 @@ DEFAULT_COMPENSATIONS = {
     "对比": "优惠券或免费饮品",
     "口感+服务": "免费重做+优惠券",
     "口感+价格": "退款或折扣",
+    "份量+口味": "免费重做+补发配料",
 }
 
 def get_knowledge_response(intent_name):
@@ -641,9 +659,10 @@ def _multi_keyword_match(text):
     return (best, score) if best and score >= 0.1 else None
 
 def _composite_match(text):
-    for pattern, intent_names in COMPOSITE_PATTERNS:
+    """复合模板命中后直接返回具体合并意图，保证后续有工具路由或模板答案。"""
+    for pattern, intent_name, sub_intents in COMPOSITE_PATTERNS:
         if pattern.search(text):
-            return {"name": "composite", "sub_intents": intent_names}
+            return {"name": intent_name, "sub_intents": sub_intents}
     return None
 
 logger = logging.getLogger(__name__)
@@ -720,7 +739,6 @@ async def _llm_fallback_async(text, prompt_version):
 
 LLM_FALLBACK_THRESHOLD = 0.55
 
-INTENT_CACHE_SIMILARITY_THRESHOLD = 0.8
 INTENT_CACHE_TTL = 300
 
 def _intent_cache_key(text, prompt_version):
@@ -730,9 +748,9 @@ def _get_cached_intent(text, prompt_version):
     key = _intent_cache_key(text, prompt_version)
     cache_namespace = get_prompt_cache_namespace(prompt_version)
     if cache:
-        hit = cache.get_similar("intent", key, INTENT_CACHE_SIMILARITY_THRESHOLD)
-        if hit and hit["value"].get("cache_namespace") == cache_namespace:
-            return hit["value"]
+        hit = cache.get("intent", key)
+        if hit and hit.get("cache_namespace") == cache_namespace:
+            return hit
     return None
 
 def _cache_intent(text, intent, prompt_version):
@@ -783,7 +801,13 @@ def recognize_intent(text, llm_client=None, user_id=None):
     rule = _rule_match(text)
     composite = _composite_match(text)
     if composite:
-        result = {"name": "composite", "confidence": 0.85, "category": "复合意图", "sub_intents": composite["sub_intents"]}
+        merged_name = composite["name"]
+        result = {
+            "name": merged_name,
+            "confidence": 0.85,
+            "category": CATEGORY_MAP.get(merged_name, "复合意图"),
+            "sub_intents": composite["sub_intents"],
+        }
         _cache_intent(text, result, prompt_version)
         return result
     if rule:
@@ -827,7 +851,13 @@ async def recognize_intent_async(text, llm_client=None, user_id=None):
     rule = _rule_match(text)
     composite = _composite_match(text)
     if composite:
-        result = {"name": "composite", "confidence": 0.85, "category": "复合意图", "sub_intents": composite["sub_intents"]}
+        merged_name = composite["name"]
+        result = {
+            "name": merged_name,
+            "confidence": 0.85,
+            "category": CATEGORY_MAP.get(merged_name, "复合意图"),
+            "sub_intents": composite["sub_intents"],
+        }
         _cache_intent(text, result, prompt_version)
         return result
     if rule:
@@ -1755,6 +1785,12 @@ def _resolve_reference(text, entities, context_str):
 # ==================== Agent核心 ====================
 
 def build_response(intent, text, tool_result=None, missing_params=None, context_str=None, entities=None):
+    # 兼容升级前缓存中的 composite 结果，避免落到通用兜底
+    if intent.get("name") == "composite":
+        merged_name = COMPOSITE_TO_MERGED.get(tuple(intent.get("sub_intents") or []))
+        if merged_name:
+            intent = {**intent, "name": merged_name}
+
     if missing_params:
         params_text = "、".join(missing_params)
         return f"【思考】{intent['name']}\n【回复】请问您能提供一下{params_text}吗？这样我可以更好地帮助您。"
