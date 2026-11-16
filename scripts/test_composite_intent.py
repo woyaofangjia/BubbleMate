@@ -71,10 +71,23 @@ CASES = [
      "sub_intents": [], "keywords": ["口味", "价格", "补偿"]},
 ]
 
+# 模板外的通用拆解：多意图应产出 composite + 子意图列表，回复覆盖每个诉求
+GENERAL_CASES = [
+    {"id": "general_service_menu", "text": "服务太差了，你们菜单有什么", "intent": "composite",
+     "sub_intents": ["complaint_service", "query_menu"], "keywords": ["服务", "菜单"]},
+    {"id": "general_refund_order", "text": "我要退款，顺便帮我查订单", "intent": "composite",
+     "sub_intents": ["complaint_refund", "query_order"], "keywords": ["退款", "订单"]},
+    {"id": "general_taste_price", "text": "太甜了，多少钱一杯", "intent": "composite",
+     "sub_intents": ["complaint_taste", "query_price"], "keywords": ["口味", "价格"]},
+    {"id": "general_location_menu", "text": "附近有门店吗，菜单发我一下", "intent": "composite",
+     "sub_intents": ["query_location", "query_menu"], "keywords": ["门店", "菜单"]},
+    # 模板组合 + 额外诉求：模板命中的两个子诉求不能被新的拆解丢掉
+    {"id": "general_template_plus_extra", "text": "太甜了还这么贵，顺便帮我查下订单", "intent": "composite",
+     "sub_intents": ["complaint_taste", "complaint_price", "query_order"], "keywords": ["口味", "订单", "价格"]},
+]
+
 # 模板外组合：明确按单意图处理，不报错、不假装复合
 SINGLE_INTENT_CASES = [
-    {"id": "outside_refund_order", "text": "我要退款，顺便帮我查订单", "allowed": ["complaint_refund", "query_order"]},
-    {"id": "outside_service_menu", "text": "服务太差了，你们菜单有什么", "allowed": ["complaint_service", "query_menu"]},
     # 只命中单个诉求时，不能被误判为合并意图
     {"id": "single_taste", "text": "太甜了", "allowed": ["complaint_taste"]},
     {"id": "single_quantity", "text": "料太少了", "allowed": ["complaint_quantity"]},
@@ -230,6 +243,7 @@ def main():
 
     results = [check_registry_consistency()]
     results += [run_case(case, store) for case in CASES]
+    results += [run_case(case, store) for case in GENERAL_CASES]
     results += [run_single_intent_case(case) for case in SINGLE_INTENT_CASES]
     results += [run_legacy_case(case) for case in LEGACY_CASES]
 

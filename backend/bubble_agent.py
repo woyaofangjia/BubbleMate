@@ -465,6 +465,7 @@ CATEGORY_MAP = {
     "query_invoice": "发票查询", "query_customize": "加料定制",
     "query_history": "历史订单", "place_order": "下单",
     "general": "通用", "unclear": "不明确", "unknown": "未知",
+    "composite": "复合意图",
 }
 
 RULE_PATTERNS = {
@@ -520,6 +521,12 @@ COMPOSITE_PATTERNS = [
 # 意图缓存 TTL 300s、响应缓存 TTL 600s；建议观察 1-2 天、确认无旧缓存后删除本映射。
 COMPOSITE_TO_MERGED = {
     tuple(sub_intents): intent_name
+    for _, intent_name, sub_intents in COMPOSITE_PATTERNS
+}
+
+# 合并意图 → 子意图，拆解时把已合并的子句展开，避免和模板子诉求重复计数
+MERGED_TO_SUB = {
+    intent_name: sub_intents
     for _, intent_name, sub_intents in COMPOSITE_PATTERNS
 }
 
@@ -665,6 +672,46 @@ def _composite_match(text):
             return {"name": intent_name, "sub_intents": sub_intents}
     return None
 
+# 通用拆解：按标点与连接词切分子句，模板覆盖不到的复合表达由这里兜住
+COMPOSITE_CLAUSE_SPLIT = re.compile(r"[，。；、！？,;!?\n]+|顺便|另外|同时|还有|以及|并且|而且|然后")
+
+_CLAUSE_EXCLUDED_INTENTS = {"unknown", "general", "unclear"}
+
+
+def _split_clauses(text):
+    return [clause.strip() for clause in COMPOSITE_CLAUSE_SPLIT.split(text) if clause and clause.strip()]
+
+
+def _classify_clause(clause):
+    """单个子句的轻量识别：模板优先，其次规则，最后关键词，不触发 LLM。"""
+    clause_template = _composite_match(clause)
+    if clause_template:
+        return clause_template["name"]
+    rule = _rule_match(clause)
+    if rule:
+        name, _, conf = rule
+        if name not in _CLAUSE_EXCLUDED_INTENTS and conf >= 0.45:
+            return name
+    kw_match = _multi_keyword_match(clause)
+    if kw_match:
+        name, score = kw_match
+        hits = [kw for kw in INTENT_KEYWORDS.get(name, []) if kw in clause]
+        # 单字关键词（如“加”“点”“吗”）噪声大，要求至少命中一个多字关键词
+        enough_hits = score >= 0.3 or (len(hits) >= 2 and any(len(kw) >= 2 for kw in hits))
+        if name not in _CLAUSE_EXCLUDED_INTENTS and enough_hits:
+            return name
+    return None
+
+
+def _decompose_intents(text):
+    """通用多意图拆解：返回去重后的子意图列表，不足 2 个视为单意图。"""
+    sub_intents = []
+    for clause in _split_clauses(text):
+        name = _classify_clause(clause)
+        if name and name not in sub_intents:
+            sub_intents.append(name)
+    return sub_intents if len(sub_intents) >= 2 else []
+
 logger = logging.getLogger(__name__)
 
 def _build_intent_prompt(text, prompt_version=None):
@@ -798,8 +845,31 @@ def recognize_intent(text, llm_client=None, user_id=None):
     if cached_intent:
         return cached_intent
     
-    rule = _rule_match(text)
     composite = _composite_match(text)
+    sub_intents = _decompose_intents(text)
+    if composite and sub_intents:
+        expanded = []
+        for sub in sub_intents:
+            for item in MERGED_TO_SUB.get(sub, [sub]):
+                if item not in expanded:
+                    expanded.append(item)
+        sub_intents = expanded
+        if set(sub_intents) == set(composite["sub_intents"]):
+            sub_intents = []
+        else:
+            # 模板命中的子诉求也要保留，避免只拆出部分诉求后丢掉另一半
+            for sub in composite["sub_intents"]:
+                if sub not in sub_intents:
+                    sub_intents.append(sub)
+    if sub_intents:
+        result = {
+            "name": "composite",
+            "confidence": 0.8,
+            "category": CATEGORY_MAP.get("composite", "复合意图"),
+            "sub_intents": sub_intents,
+        }
+        _cache_intent(text, result, prompt_version)
+        return result
     if composite:
         merged_name = composite["name"]
         result = {
@@ -810,6 +880,7 @@ def recognize_intent(text, llm_client=None, user_id=None):
         }
         _cache_intent(text, result, prompt_version)
         return result
+    rule = _rule_match(text)
     if rule:
         name, kw, conf = rule
         if conf < LLM_FALLBACK_THRESHOLD:
@@ -848,8 +919,31 @@ async def recognize_intent_async(text, llm_client=None, user_id=None):
     if cached_intent:
         return cached_intent
     
-    rule = _rule_match(text)
     composite = _composite_match(text)
+    sub_intents = _decompose_intents(text)
+    if composite and sub_intents:
+        expanded = []
+        for sub in sub_intents:
+            for item in MERGED_TO_SUB.get(sub, [sub]):
+                if item not in expanded:
+                    expanded.append(item)
+        sub_intents = expanded
+        if set(sub_intents) == set(composite["sub_intents"]):
+            sub_intents = []
+        else:
+            # 模板命中的子诉求也要保留，避免只拆出部分诉求后丢掉另一半
+            for sub in composite["sub_intents"]:
+                if sub not in sub_intents:
+                    sub_intents.append(sub)
+    if sub_intents:
+        result = {
+            "name": "composite",
+            "confidence": 0.8,
+            "category": CATEGORY_MAP.get("composite", "复合意图"),
+            "sub_intents": sub_intents,
+        }
+        _cache_intent(text, result, prompt_version)
+        return result
     if composite:
         merged_name = composite["name"]
         result = {
@@ -860,6 +954,7 @@ async def recognize_intent_async(text, llm_client=None, user_id=None):
         }
         _cache_intent(text, result, prompt_version)
         return result
+    rule = _rule_match(text)
     if rule:
         name, kw, conf = rule
         if conf < LLM_FALLBACK_THRESHOLD:
@@ -1784,12 +1879,45 @@ def _resolve_reference(text, entities, context_str):
 
 # ==================== Agent核心 ====================
 
+def collect_composite_tool_results(intent, text, session_id=None):
+    """按子意图逐个执行工具；缺参数时不调用工具，交给回复层追问。"""
+    results = []
+    for sub in intent.get("sub_intents") or []:
+        tool_name = INTENT_TOOL.get(sub)
+        if not tool_name or tool_name == "log_complaint":
+            results.append((sub, None, []))
+            continue
+        _, missing = extract_params(text, sub, session_id)
+        if missing:
+            results.append((sub, None, missing))
+            continue
+        tool_result, missing = get_tool_response(sub, text, TOOLS, session_id)
+        results.append((sub, tool_result, missing))
+    return results
+
+
+def build_composite_response(intent, text, tool_results=None, context_str=None, entities=None):
+    """把各子意图的回复按分类标签拼成一条完整回复，保证每个诉求都有答案。"""
+    subs = list(intent.get("sub_intents") or [])
+    if tool_results is None:
+        tool_results = [(sub, None, []) for sub in subs]
+    lines = []
+    for sub, tool_result, missing in tool_results:
+        sub_intent = {"name": sub, "confidence": 0.8, "category": CATEGORY_MAP.get(sub, "通用")}
+        raw = build_response(sub_intent, text, tool_result, missing or [], context_str, entities)
+        reply = raw.split("【回复】", 1)[1] if "【回复】" in raw else raw
+        lines.append(f"{CATEGORY_MAP.get(sub, sub)}：{reply}")
+    return "【思考】复合意图（{}）\n【回复】{}".format(" + ".join(subs), "\n".join(lines))
+
+
 def build_response(intent, text, tool_result=None, missing_params=None, context_str=None, entities=None):
     # 兼容升级前缓存中的 composite 结果，避免落到通用兜底
     if intent.get("name") == "composite":
         merged_name = COMPOSITE_TO_MERGED.get(tuple(intent.get("sub_intents") or []))
         if merged_name:
             intent = {**intent, "name": merged_name}
+        elif intent.get("sub_intents"):
+            return build_composite_response(intent, text, None, context_str, entities)
 
     if missing_params:
         params_text = "、".join(missing_params)
@@ -1968,7 +2096,19 @@ async def process_message_async(text, session_id="default", memory_store=None, l
     context_str, entities = context_result if isinstance(context_result, tuple) else (context_result or "", {})
     
     trace.add_step("intent", {"name": intent["name"], "confidence": intent["confidence"], "category": intent.get("category")})
-    
+
+    if intent["name"] == "composite":
+        tool_results = await asyncio.to_thread(collect_composite_tool_results, intent, text, session_id)
+        for sub, tool_result, _ in tool_results:
+            tool_name = INTENT_TOOL.get(sub)
+            if tool_name and tool_result is not None:
+                trace.add_step("tool_call", {"tool_name": tool_name, "intent_name": sub,
+                                             "params": extract_params(text, sub, session_id)[0]})
+                trace.add_step("tool_result", {"success": tool_result.get("success", False),
+                                               "data": tool_result.get("data", [])})
+        response = build_composite_response(intent, text, tool_results, context_str, entities)
+        return _finish(response, intent)
+
     if intent["confidence"] >= 0.6:
         tool_name = INTENT_TOOL.get(intent["name"])
         
@@ -2196,6 +2336,31 @@ async def process_message_stream_async(text, session_id="default", memory_store=
         context_str, entities = context_result if isinstance(context_result, tuple) else (context_result or "", {})
         trace.add_step("intent", {"name": intent["name"], "confidence": intent["confidence"], "category": intent.get("category")})
         yield _evt({"type": "thinking", "intent": intent})
+
+        # ---- 复合意图：逐子意图执行工具并拼装回复 ----
+        if intent["name"] == "composite":
+            tool_results = await asyncio.to_thread(collect_composite_tool_results, intent, text, session_id)
+            for sub, tool_result, _ in tool_results:
+                tool_name = INTENT_TOOL.get(sub)
+                if not tool_name or tool_result is None:
+                    continue
+                params = extract_params(text, sub, session_id)[0]
+                yield _evt({"type": "tool_call", "tool": tool_name, "params": params})
+                data_list = tool_result.get("data", []) or []
+                yield _evt({"type": "tool_result",
+                            "success": bool(tool_result.get("success", False)),
+                            "data": data_list[:5], "count": len(data_list)})
+                trace.add_step("tool_call", {"tool_name": tool_name, "intent_name": sub, "params": params})
+                trace.add_step("tool_result", {"success": tool_result.get("success", False), "data": data_list})
+            response = build_composite_response(intent, text, tool_results, context_str, entities)
+            trace.add_step("response", {"text": response})
+            trace.save_to_file()
+            if memory_store:
+                save_message(memory_store, session_id, text, response)
+            _cache_response(text, response, session_id)
+            yield _evt({"type": "response", "content": response, "intent": intent})
+            yield _evt({"type": "done", "intent": intent})
+            return
 
         # ---- 工具调用分支 ----
         if intent["confidence"] >= 0.6:

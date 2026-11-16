@@ -1,8 +1,8 @@
 {
   "name": "composite_intent_test",
-  "date": "2026-11-15 20:08:26",
-  "passed": 26,
-  "total": 26,
+  "date": "2026-11-16 21:30:15",
+  "passed": 29,
+  "total": 29,
   "results": [
     {
       "id": "registry_consistency",
@@ -24,7 +24,7 @@
         "complaint_price"
       ],
       "response": "【思考】complaint_taste_price\n【回复】非常抱歉您对口味和价格都不满意，我们会核实处理。 补偿方案：退款或折扣",
-      "elapsed_ms": 208.96,
+      "elapsed_ms": 75.37,
       "passed": true,
       "problems": []
     },
@@ -38,7 +38,7 @@
         "complaint_price"
       ],
       "response": "【思考】complaint_taste_price\n【回复】非常抱歉您对口味和价格都不满意，我们会核实处理。 补偿方案：退款或折扣",
-      "elapsed_ms": 141.28,
+      "elapsed_ms": 44.0,
       "passed": true,
       "problems": []
     },
@@ -52,7 +52,7 @@
         "complaint_price"
       ],
       "response": "【思考】complaint_taste_price\n【回复】非常抱歉您对口味和价格都不满意，我们会核实处理。 补偿方案：退款或折扣",
-      "elapsed_ms": 136.91,
+      "elapsed_ms": 45.16,
       "passed": true,
       "problems": []
     },
@@ -66,7 +66,7 @@
         "complaint_taste"
       ],
       "response": "【思考】complaint_quantity_taste\n【回复】非常抱歉份量不足且口味不合，我们会为您免费重做并补发配料。 补偿方案：免费重做+补发配料",
-      "elapsed_ms": 136.07,
+      "elapsed_ms": 45.8,
       "passed": true,
       "problems": []
     },
@@ -80,7 +80,7 @@
         "complaint_taste"
       ],
       "response": "【思考】complaint_quantity_taste\n【回复】非常抱歉份量不足且口味不合，我们会为您免费重做并补发配料。 补偿方案：免费重做+补发配料",
-      "elapsed_ms": 137.23,
+      "elapsed_ms": 44.01,
       "passed": true,
       "problems": []
     },
@@ -94,7 +94,7 @@
         "complaint_taste"
       ],
       "response": "【思考】complaint_quantity_taste\n【回复】非常抱歉份量不足且口味不合，我们会为您免费重做并补发配料。 补偿方案：免费重做+补发配料",
-      "elapsed_ms": 139.42,
+      "elapsed_ms": 45.5,
       "passed": true,
       "problems": []
     },
@@ -108,7 +108,7 @@
         "query_price"
       ],
       "response": "【思考】query_recommend_price\n【回复】招牌饮品：芝芝莓莓、杨枝甘露、茉莉绿茶，价格8-20元。您想喝哪款？",
-      "elapsed_ms": 134.1,
+      "elapsed_ms": 41.99,
       "passed": true,
       "problems": []
     },
@@ -122,7 +122,7 @@
         "query_price"
       ],
       "response": "【思考】query_recommend_price\n【回复】招牌饮品：芝芝莓莓、杨枝甘露、茉莉绿茶，价格8-20元。您想喝哪款？",
-      "elapsed_ms": 143.92,
+      "elapsed_ms": 42.62,
       "passed": true,
       "problems": []
     },
@@ -136,7 +136,7 @@
         "query_price"
       ],
       "response": "【思考】query_recommend_price\n【回复】招牌饮品：芝芝莓莓、杨枝甘露、茉莉绿茶，价格8-20元。您想喝哪款？",
-      "elapsed_ms": 140.03,
+      "elapsed_ms": 40.33,
       "passed": true,
       "problems": []
     },
@@ -150,7 +150,7 @@
         "query_promotion"
       ],
       "response": "【思考】place_order_promotion\n【回复】好的，您想点哪一款？今日优惠：新品第二杯半价，会员9折，可以一起为您下单。",
-      "elapsed_ms": 143.72,
+      "elapsed_ms": 43.5,
       "passed": true,
       "problems": []
     },
@@ -164,7 +164,7 @@
         "query_promotion"
       ],
       "response": "【思考】place_order_promotion\n【回复】好的，您想点哪一款？今日优惠：新品第二杯半价，会员9折，可以一起为您下单。",
-      "elapsed_ms": 146.98,
+      "elapsed_ms": 44.68,
       "passed": true,
       "problems": []
     },
@@ -178,7 +178,7 @@
         "query_promotion"
       ],
       "response": "【思考】place_order_promotion\n【回复】好的，您想点哪一款？今日优惠：新品第二杯半价，会员9折，可以一起为您下单。",
-      "elapsed_ms": 138.08,
+      "elapsed_ms": 43.46,
       "passed": true,
       "problems": []
     },
@@ -189,27 +189,78 @@
       "actual_intent": "complaint_taste_price",
       "sub_intents": null,
       "response": "【思考】complaint_taste_price\n【回复】非常抱歉您对口味和价格都不满意，我们会核实处理。 补偿方案：退款或折扣",
-      "elapsed_ms": 151.45,
+      "elapsed_ms": 51.89,
       "passed": true,
       "problems": []
     },
     {
-      "id": "outside_refund_order",
-      "text": "我要退款，顺便帮我查订单",
-      "expected_intent": "single:complaint_refund/query_order",
-      "actual_intent": "complaint_refund",
-      "sub_intents": null,
-      "response": "",
-      "passed": true,
-      "problems": []
-    },
-    {
-      "id": "outside_service_menu",
+      "id": "general_service_menu",
       "text": "服务太差了，你们菜单有什么",
-      "expected_intent": "single:complaint_service/query_menu",
-      "actual_intent": "complaint_service",
-      "sub_intents": null,
-      "response": "",
+      "expected_intent": "composite",
+      "actual_intent": "composite",
+      "sub_intents": [
+        "complaint_service",
+        "query_menu"
+      ],
+      "response": "【思考】复合意图（complaint_service + query_menu）\n【回复】服务投诉：非常抱歉服务态度不佳，我们已通知门店整改。 补偿方案：赠送饮品券\n菜单查询：饮品：珍珠奶茶, 柠檬水, 多肉葡萄。",
+      "elapsed_ms": 96.75,
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "general_refund_order",
+      "text": "我要退款，顺便帮我查订单",
+      "expected_intent": "composite",
+      "actual_intent": "composite",
+      "sub_intents": [
+        "complaint_refund",
+        "query_order"
+      ],
+      "response": "【思考】复合意图（complaint_refund + query_order）\n【回复】退款投诉：非常抱歉，我们会为您办理退款。 补偿方案：全额退款\n订单查询：请问您能提供一下订单号吗？这样我可以更好地帮助您。",
+      "elapsed_ms": 42.86,
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "general_taste_price",
+      "text": "太甜了，多少钱一杯",
+      "expected_intent": "composite",
+      "actual_intent": "composite",
+      "sub_intents": [
+        "complaint_taste",
+        "query_price"
+      ],
+      "response": "【思考】复合意图（complaint_taste + query_price）\n【回复】口感投诉：非常抱歉您对口味不满意，我们会尽快为您处理。 补偿方案：免费重做或退款\n价格查询：饮品：珍珠奶茶, 柠檬水, 多肉葡萄。",
+      "elapsed_ms": 43.09,
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "general_location_menu",
+      "text": "附近有门店吗，菜单发我一下",
+      "expected_intent": "composite",
+      "actual_intent": "composite",
+      "sub_intents": [
+        "query_location",
+        "query_menu"
+      ],
+      "response": "【思考】复合意图（query_location + query_menu）\n【回复】门店查询：请问您能提供一下位置信息吗？这样我可以更好地帮助您。\n菜单查询：饮品：珍珠奶茶, 柠檬水, 多肉葡萄。",
+      "elapsed_ms": 62.5,
+      "passed": true,
+      "problems": []
+    },
+    {
+      "id": "general_template_plus_extra",
+      "text": "太甜了还这么贵，顺便帮我查下订单",
+      "expected_intent": "composite",
+      "actual_intent": "composite",
+      "sub_intents": [
+        "complaint_taste",
+        "complaint_price",
+        "query_order"
+      ],
+      "response": "【思考】复合意图（complaint_taste + complaint_price + query_order）\n【回复】口感投诉：非常抱歉您对口味不满意，我们会尽快为您处理。 补偿方案：免费重做或退款\n价格投诉：非常抱歉价格问题，核实后提供优惠券补偿。 补偿方案：优惠券补偿\n订单查询：请问您能提供一下订单号吗？这样我可以更好地帮助您。",
+      "elapsed_ms": 55.16,
       "passed": true,
       "problems": []
     },
